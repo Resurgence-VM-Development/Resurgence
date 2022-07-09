@@ -26,6 +26,7 @@ WARNINGS 	:= 	-Werror						\
 CXX_FLAGS   := -std=c++20 -static -static-libgcc -static-libstdc++ -DFMT_HEADER_ONLY
 
 BIN         := bin
+LIB			:= bin/lib
 INCLUDE     := -Iinclude
 
 SRC         := src/RendorInterpreter
@@ -44,7 +45,7 @@ run: clean all
 
 $(BIN)/$(EXECUTABLE): $(OBJECTS)
 	@echo 
-	$(CXX) $(CXX_FLAGS) $(INCLUDE) $^ -o $@ -Llib -lbinary_io
+	$(CXX) $(CXX_FLAGS) $(INCLUDE) $^ -o $@
 	@echo 
 
 $(OBJDIR)/%.o: $(SRC)/%.cpp 
