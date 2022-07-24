@@ -1,1 +1,3 @@
-ressurgence-vm-backend/target
+
+/target
+/Cargo.lock
