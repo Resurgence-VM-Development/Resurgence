@@ -2,7 +2,7 @@
 name = "resurgence"
 version = "0.1.0"
 edition = "2021"
-description = "A library that does all the backend related stuff for you. All you need to do is compile to bytecode"
+description = "A VM backend library that makes developing interpreters easy. Can be used either as an entire backend, or to create a backend"
 license = "GPL-3.0-only"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
