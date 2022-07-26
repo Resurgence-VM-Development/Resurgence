@@ -1,5 +1,12 @@
 use smartstring::alias::String;
 
+/// `Constant`: Represents a constant in the backend
+/// 
+/// Possible Values:
+/// * Int: holds an `i64`
+/// * Double: holds an `f64`
+/// * String: holds a `SmartString`
+/// * Boolean: holds a `bool`
 #[derive(PartialEq)]
 #[derive(Debug)]
 #[derive(Clone)]
@@ -11,8 +18,21 @@ pub enum Constant {
 }
 
 impl Constant {
+    /// Adds 2 numerical Constants together
+    /// 
+    /// `constant` (`&Constant::Int` or `&Constant::Double`): Constant you want to add to self
+    /// 
+    /// # Examples
+    /// ```
+    /// use resurgence::objects::constant::create_constant_int;
+    /// use resurgence::objects::constant::Constant;
+    /// 
+    /// let int_const = create_constant_int(&5);
+    /// let res = int_const.add(&create_constant_int(&5));
+    /// assert_eq!(res, Constant::Int(10));
+    /// ```
     pub fn add(&self, constant: &Constant) -> Constant {
-        match ((*self).clone(), (*constant).clone()) {
+        match (self.clone(), (*constant).clone()) {
             (Constant::Int(val_1), Constant::Int(val_2)) => {
                 Constant::Int(val_1 + val_2)
             },
@@ -27,8 +47,21 @@ impl Constant {
             }
         }
     }
+
+    /// Subtracts 2 numerical Constants together
+    /// 
+    /// `constant` (`&Constant::Int` or `&Constant::Double`): Constant you want to subtract from self
+    /// # Examples
+    /// ```
+    /// use resurgence::objects::constant::create_constant_int;
+    /// use resurgence::objects::constant::Constant;
+    /// 
+    /// let int_const = create_constant_int(&5);
+    /// let res = int_const.sub(&create_constant_int(&5));
+    /// assert_eq!(res, Constant::Int(0));
+    /// ```
     pub fn sub(&self, constant: &Constant) -> Constant {
-        match ((*self).clone(), (*constant).clone()) {
+        match (self.clone(), (*constant).clone()) {
             (Constant::Int(val_1), Constant::Int(val_2)) => {
                 Constant::Int(val_1 - val_2)
             },
@@ -43,8 +76,22 @@ impl Constant {
             }
         }
     }
+
+    /// Multiplies 2 numerical Constants together
+    /// 
+    /// `constant` (`&Constant::Int` or `&Constant::Double`): Constant you want to multiply self by
+    /// 
+    /// # Examples
+    /// ```
+    /// use resurgence::objects::constant::create_constant_int;
+    /// use resurgence::objects::constant::Constant;
+    /// 
+    /// let int_const = create_constant_int(&5);
+    /// let res = int_const.mul(&create_constant_int(&5));
+    /// assert_eq!(res, Constant::Int(25));
+    /// ```
     pub fn mul(&self, constant: &Constant) -> Constant {
-        match ((*self).clone(), (*constant).clone()) {
+        match (self.clone(), (*constant).clone()) {
             (Constant::Int(val_1), Constant::Int(val_2)) => {
                 Constant::Int(val_1 * val_2)
             },
@@ -59,8 +106,22 @@ impl Constant {
             }
         }
     }
+
+    /// Divides 2 numerical Constants together
+    /// 
+    /// `constant` (`&Constant::Int` or `&Constant::Double`): Constant you want to divide self by
+    /// 
+    /// # Examples
+    /// ```
+    /// use resurgence::objects::constant::create_constant_int;
+    /// use resurgence::objects::constant::Constant;
+    /// 
+    /// let int_const = create_constant_int(&5);
+    /// let res = int_const.div(&create_constant_int(&5));
+    /// assert_eq!(res, Constant::Int(1));
+    /// ```
     pub fn div(&self, constant: &Constant) -> Constant {
-        match ((*self).clone(), (*constant).clone()) {
+        match (self.clone(), (*constant).clone()) {
             (Constant::Int(val_1), Constant::Int(val_2)) => {
                 Constant::Int(val_1 / val_2)
             },
@@ -75,8 +136,23 @@ impl Constant {
             }
         }
     }
+
+    /// Combines 2 `Constant::String`s together
+    /// 
+    /// `constant` (`&Constant::String`): String you want to combine with the self
+    /// 
+    /// # Examples
+    /// ```
+    /// use resurgence::objects::constant::create_constant_string;
+    /// use resurgence::objects::constant::Constant;
+    /// use smartstring::alias::String;
+    /// 
+    /// let (hello, world) = (create_constant_string("Hello "), create_constant_string("World!"));
+    /// let hello_world = hello.concat(&world);
+    /// assert_eq!(hello_world, create_constant_string("Hello World!"));
+    /// ```
     pub fn concat(&self, constant: &Constant) -> Constant {
-        if let (Constant::String(str_1), Constant::String(str_2)) = ((*self).clone(), (*constant).clone()) {
+        if let (Constant::String(str_1), Constant::String(str_2)) = (self.clone(), &*constant) {
             Constant::String(str_1 + str_2)
         } 
         else {
@@ -85,15 +161,30 @@ impl Constant {
     }
 }
 
+/// Creates a `Constant::Int`
+/// 
+/// `init_val` (`&i64`): The value you want to create a Constant with
 pub fn create_constant_int(init_val: &i64) -> Constant {
     Constant::Int(*init_val)
 }
+
+/// Creates a `Constant::Double`
+/// 
+/// `init_val` (`&f64`): The value you want to create a Constant with
 pub fn create_constant_double(init_val: &f64) -> Constant {
     Constant::Double(*init_val)
 }
+
+/// Creates a `Constant::String`
+/// 
+/// `init_val` (`&str`): The value you want to create a Constant with
 pub fn create_constant_string(init_val: &str) -> Constant {
     Constant::String(String::from(init_val))
 }
+
+/// Creates a `Constant::Bool`
+/// 
+/// `init_val` (`&bool`): The value you want to create a Constant with
 pub fn create_constant_bool(init_val: &bool) -> Constant {
     Constant::Boolean(*init_val)
 }
@@ -135,7 +226,6 @@ mod constant_init_tests {
 #[cfg(test)]
 mod const_impl_tests {
     use super::*;
-    use smartstring::alias::String;
 
     #[test]
     fn math_test() {
@@ -165,6 +255,6 @@ mod const_impl_tests {
     fn concat_test() {
         let (hello, world) = (create_constant_string("Hello "), create_constant_string("World!"));
         let hello_world = hello.concat(&world);
-        assert_eq!(hello_world, Constant::String(String::from("Hello World!")));
+        assert_eq!(hello_world, create_constant_string("Hello World!"));
     }
 }

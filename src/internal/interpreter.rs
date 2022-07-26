@@ -1,5 +1,8 @@
 use smartstring::alias::String;
 
+/// `Interpreter`: Built-in Register Virtual Machine\
+/// 
+/// `args` (`Vec<String>`): Arguments used by the instance
 #[allow(non_snake_case)]
 pub struct Interpreter {
     pub args: Vec<String>,
@@ -10,6 +13,7 @@ pub struct Interpreter {
 }
 
 impl Interpreter {
+    /// Creates a new `Interpreter` instance
     pub fn new() -> Interpreter {
         Interpreter {
             args: Vec::new()
@@ -24,6 +28,9 @@ impl Default for Interpreter {
 }
 
 impl From<Vec<String>> for Interpreter {
+    /// Creates a new `Interpreter` using the passed args
+    /// 
+    /// `passed_args` (`Vec<String>`): Arguments you want to pass to the Interpreter instance
     fn from(passed_args: Vec<String>) -> Self {
         Interpreter {
             args: passed_args
