@@ -5,3 +5,4 @@ A VM backend library that makes developing interpreters easy. Can be used either
 */
 
 pub mod objects;
+pub use objects::constant;
