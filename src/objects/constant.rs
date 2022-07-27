@@ -1,12 +1,13 @@
+use super::register::Register;
 use smartstring::alias::String;
 
 /// `Constant`: Represents a constant in the backend
 /// 
 /// Possible Values:
-/// * Int: holds an `i64`
-/// * Double: holds an `f64`
-/// * String: holds a `SmartString`
-/// * Boolean: holds a `bool`
+/// * `Int(i64)`
+/// * `Double(f64)`
+/// * `String(String)`
+/// * `Boolean(bool)`
 #[derive(PartialEq)]
 #[derive(Debug)]
 #[derive(Clone)]
@@ -15,6 +16,7 @@ pub enum Constant {
     Double(f64),
     String(String),
     Boolean(bool),
+    Address(Register)
 }
 
 impl Constant {
