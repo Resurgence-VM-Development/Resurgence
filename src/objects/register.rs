@@ -5,9 +5,7 @@
 /// * `SpecialRegister`: Register referenced is a special register
 /// * `Global`: Global scope
 /// * `Local`: Local scope
-#[derive(PartialEq)]
-#[derive(Debug)]
-#[derive(Clone)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum RegisterLocation {
     ConstantPool,
     SpecialRegister,
@@ -19,9 +17,7 @@ pub enum RegisterLocation {
 /// 
 /// `u32`: Location of the virtual register in an array
 /// `RegisterLocation`: The scope of a register
-#[derive(PartialEq)]
-#[derive(Debug)]
-#[derive(Clone)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Register(u32, RegisterLocation);
 
 /// `RegisterReference`: Defines how we refer to a register in bytecode

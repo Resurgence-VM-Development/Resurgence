@@ -8,9 +8,8 @@ use smartstring::alias::String;
 /// * `Double(f64)`
 /// * `String(String)`
 /// * `Boolean(bool)`
-#[derive(PartialEq)]
-#[derive(Debug)]
-#[derive(Clone)]
+#[derive(Clone, Debug, PartialEq)]
+
 pub enum Constant {
     Int(i64),
     Double(f64),
