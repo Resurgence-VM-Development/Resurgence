@@ -1,22 +1,34 @@
+pub mod execution_engine;
+
+use crate::objects::{bytecode::ByteCode, stackframe::StackFrame};
+use super::super::constant::Constant;
 use smartstring::alias::String;
 
 /// `Interpreter`: Built-in Register Virtual Machine\
 /// 
 /// `args` (`Vec<String>`): Arguments used by the instance
-#[allow(non_snake_case)]
 pub struct Interpreter {
     pub args: Vec<String>,
     
     accumulator: f64,
     func_ret: Constant,
-    func_args: Vec<Constant>
+    func_args: Vec<Constant>,
+
+    bytecode: Vec<ByteCode>,
+
+    stack: Vec<StackFrame>,
 }
 
 impl Interpreter {
     /// Creates a new `Interpreter` instance
     pub fn new() -> Interpreter {
         Interpreter {
-            args: Vec::new()
+            args: Vec::new(),
+            accumulator: 0.0,
+            func_ret: Constant::Int(0),
+            func_args: Vec::new(),
+            bytecode: Vec::new(),
+            stack: Vec::new(),
         }
     }
 }
@@ -33,7 +45,12 @@ impl From<Vec<String>> for Interpreter {
     /// `passed_args` (`Vec<String>`): Arguments you want to pass to the Interpreter instance
     fn from(passed_args: Vec<String>) -> Self {
         Interpreter {
-            args: passed_args
+            args: Vec::new(),
+            accumulator: 0.0,
+            func_ret: Constant::Int(0),
+            func_args: Vec::new(),
+            bytecode: Vec::new(),
+            stack: Vec::new(),
         }
     }
 }
