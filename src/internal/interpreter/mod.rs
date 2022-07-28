@@ -45,7 +45,7 @@ impl From<Vec<String>> for Interpreter {
     /// `passed_args` (`Vec<String>`): Arguments you want to pass to the Interpreter instance
     fn from(passed_args: Vec<String>) -> Self {
         Interpreter {
-            args: Vec::new(),
+            args: passed_args,
             accumulator: 0.0,
             func_ret: Constant::Int(0),
             func_args: Vec::new(),
