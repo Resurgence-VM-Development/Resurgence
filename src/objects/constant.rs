@@ -24,10 +24,7 @@ impl Constant {
     /// `constant` (`&Constant::Int` or `&Constant::Double`): Constant you want to add to self
     /// 
     /// # Examples
-    /// ```
-    /// use resurgence::objects::constant::create_constant_int;
-    /// use resurgence::objects::constant::Constant;
-    /// 
+    /// ```no_run
     /// let int_const = create_constant_int(&5);
     /// let res = int_const.add(&create_constant_int(&5));
     /// assert_eq!(res, Constant::Int(10));
@@ -53,10 +50,7 @@ impl Constant {
     /// 
     /// `constant` (`&Constant::Int` or `&Constant::Double`): Constant you want to subtract from self
     /// # Examples
-    /// ```
-    /// use resurgence::objects::constant::create_constant_int;
-    /// use resurgence::objects::constant::Constant;
-    /// 
+    /// ```no_run
     /// let int_const = create_constant_int(&5);
     /// let res = int_const.sub(&create_constant_int(&5));
     /// assert_eq!(res, Constant::Int(0));
@@ -83,10 +77,7 @@ impl Constant {
     /// `constant` (`&Constant::Int` or `&Constant::Double`): Constant you want to multiply self by
     /// 
     /// # Examples
-    /// ```
-    /// use resurgence::objects::constant::create_constant_int;
-    /// use resurgence::objects::constant::Constant;
-    /// 
+    /// ```no_run
     /// let int_const = create_constant_int(&5);
     /// let res = int_const.mul(&create_constant_int(&5));
     /// assert_eq!(res, Constant::Int(25));
@@ -113,10 +104,7 @@ impl Constant {
     /// `constant` (`&Constant::Int` or `&Constant::Double`): Constant you want to divide self by
     /// 
     /// # Examples
-    /// ```
-    /// use resurgence::objects::constant::create_constant_int;
-    /// use resurgence::objects::constant::Constant;
-    /// 
+    /// ```no_run
     /// let int_const = create_constant_int(&5);
     /// let res = int_const.div(&create_constant_int(&5));
     /// assert_eq!(res, Constant::Int(1));
@@ -143,9 +131,7 @@ impl Constant {
     /// `constant` (`&Constant::String`): String you want to combine with the self
     /// 
     /// # Examples
-    /// ```
-    /// use resurgence::objects::constant::create_constant_string;
-    /// use resurgence::objects::constant::Constant;
+    /// ```no_run
     /// use smartstring::alias::String;
     /// 
     /// let (hello, world) = (create_constant_string("Hello "), create_constant_string("World!"));
@@ -167,9 +153,7 @@ impl Constant {
 /// `init_val` (`&i64`): The value you want to create a Constant with
 /// 
 /// # Examples
-/// ```
-/// use resurgence::objects::constant::create_constant_int;
-/// use resurgence::objects::constant::Constant;
+/// ```no_run
 /// let constant = create_constant_int(&10);
 /// ```
 pub fn create_constant_int(init_val: &i64) -> Constant {
@@ -181,9 +165,7 @@ pub fn create_constant_int(init_val: &i64) -> Constant {
 /// `init_val` (`&f64`): The value you want to create a Constant with
 /// 
 /// # Examples
-/// ```
-/// use resurgence::objects::constant::create_constant_double;
-/// use resurgence::objects::constant::Constant;
+/// ```no_run
 /// let constant = create_constant_double(&3.2);
 /// ```
 pub fn create_constant_double(init_val: &f64) -> Constant {
@@ -195,9 +177,7 @@ pub fn create_constant_double(init_val: &f64) -> Constant {
 /// `init_val` (`&str`): The value you want to create a Constant with
 ///
 /// # Examples
-/// ```
-/// use resurgence::objects::constant::create_constant_string;
-/// use resurgence::objects::constant::Constant;
+/// ```no_run
 /// use smartstring::alias::String;
 /// let constant = create_constant_string("Hello World!");
 /// ```
@@ -210,9 +190,7 @@ pub fn create_constant_string(init_val: &str) -> Constant {
 /// `init_val` (`&bool`): The value you want to create a Constant with
 ///
 /// # Examples
-/// ```
-/// use resurgence::objects::constant::create_constant_bool;
-/// use resurgence::objects::constant::Constant;
+/// ```no_run
 /// let constant = create_constant_bool(&true);
 /// ```
 pub fn create_constant_bool(init_val: &bool) -> Constant {

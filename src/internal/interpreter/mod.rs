@@ -1,22 +1,21 @@
-pub mod execution_engine;
+pub(crate) mod execution_engine;
 
 use crate::objects::{bytecode::ByteCode, stackframe::StackFrame};
 use super::super::constant::Constant;
 use smartstring::alias::String;
 
-/// `Interpreter`: Built-in Register Virtual Machine\
+/// `Interpreter`: Built-in Register Virtual Machine
 /// 
-/// `args` (`Vec<String>`): Arguments used by the instance
+/// `args (Vec<String>)`: Arguments used by the instance
+/// `accumulator (f64)`: Special register used for fast math
+/// `func_ret (Constant)`: Special register used for function returns
+/// `call_stack (Vec<StackFrame>)`: Holds stack frames for function calls
 pub struct Interpreter {
     pub args: Vec<String>,
-    
     accumulator: f64,
     func_ret: Constant,
-    func_args: Vec<Constant>,
-
-    bytecode: Vec<ByteCode>,
-
-    stack: Vec<StackFrame>,
+    call_stack: Vec<StackFrame>,
+    stack: Vec<Constant>
 }
 
 impl Interpreter {
@@ -26,8 +25,7 @@ impl Interpreter {
             args: Vec::new(),
             accumulator: 0.0,
             func_ret: Constant::Int(0),
-            func_args: Vec::new(),
-            bytecode: Vec::new(),
+            call_stack: Vec::new(),
             stack: Vec::new(),
         }
     }
@@ -45,11 +43,10 @@ impl From<Vec<String>> for Interpreter {
     /// `passed_args` (`Vec<String>`): Arguments you want to pass to the Interpreter instance
     fn from(passed_args: Vec<String>) -> Self {
         Interpreter {
-            args: Vec::new(),
+            args: passed_args,
             accumulator: 0.0,
             func_ret: Constant::Int(0),
-            func_args: Vec::new(),
-            bytecode: Vec::new(),
+            call_stack: Vec::new(),
             stack: Vec::new(),
         }
     }

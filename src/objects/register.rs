@@ -3,12 +3,14 @@
 /// Possible Values:
 /// * `ConstantPool`: The value being referenced is a constant
 /// * `SpecialRegister`: Register referenced is a special register
+/// * `LastStackFrame`: Register is in the last stack frame
 /// * `Global`: Global scope
 /// * `Local`: Local scope
 #[derive(Clone, Debug, PartialEq)]
 pub enum RegisterLocation {
     ConstantPool,
     SpecialRegister,
+    LastStackFrame,
     Global,
     Local,
 }

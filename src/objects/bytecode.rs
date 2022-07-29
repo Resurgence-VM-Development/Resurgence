@@ -5,7 +5,9 @@ use super::register::{Register, RegisterReference};
 /// Possible Values: 
 /// * `Alloc(u32)`: Preallocates memory in the vector stored in a `StackFrame` object 
 /// * `Free(u32)`: Pops n amount of `StackFrame` objects
-/// * `Jump(u64)`: Jumps n amount of operations
+/// * `Jump(i64)`: Jumps n amount of operations
+/// * `Call(u64)`: Jumps to index n by doing a recursive call of the execute_butecode function
+/// * `CCall(String)`: Calls a C API function
 /// * `Mov(Register, RegisterReference, Register, RegisterReference)`: Moves from one register to another
 /// * `Cpy(Register, RegisterReference, Register, RegisterReference)`: Copies a value from one register to another
 /// * `Ref(Register, RegisterReference, Register, RegisterReference)`: Stores the address of a register to another
@@ -22,11 +24,16 @@ use super::register::{Register, RegisterReference};
 pub enum ByteCode {
     Alloc(u32),
     Free(u32),
-    Jump(u64),
+    Jump(i64),
+    Call(u64),
+    CCall(String),
 
     Mov(Register, RegisterReference, Register, RegisterReference),
     Cpy(Register, RegisterReference, Register, RegisterReference),
     Ref(Register, RegisterReference, Register, RegisterReference),
+
+    StackPush(Register, RegisterReference),
+    StackPop,
 
     Add(Register, Register, Register),
     Sub(Register, Register, Register),
