@@ -1,9 +1,9 @@
 [package]
 name = "resurgence"
-version = "0.1.4"
+version = "0.1.5"
 edition = "2021"
 description = "A VM backend library that makes developing interpreters easy. Can be used either as an entire backend, or to create a backend"
-license = "GPL-3.0-only"
+license = "MIT"
 authors = ["Mahid Sheikh <sheikhmahid1@hotmail.com>"]
 readme = "README.md"
 homepage = "https://github.com/StandingPadAnimations/Resurgence"
