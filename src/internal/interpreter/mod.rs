@@ -1,21 +1,25 @@
 pub(crate) mod execution_engine;
 
-use crate::objects::{bytecode::ByteCode, stackframe::StackFrame};
+use crate::objects::stackframe::StackFrame;
 use super::super::constant::Constant;
 use smartstring::alias::String;
 
 /// `Interpreter`: Built-in Register Virtual Machine
-/// 
-/// `args (Vec<String>)`: Arguments used by the instance
-/// `accumulator (f64)`: Special register used for fast math
-/// `func_ret (Constant)`: Special register used for function returns
-/// `call_stack (Vec<StackFrame>)`: Holds stack frames for function calls
 pub struct Interpreter {
+    /// Arguments used by the instance
     pub args: Vec<String>,
+
+    /// Special register used for fast math
     accumulator: f64,
-    func_ret: Constant,
+
+    /// Holds stack frames for function calls
     call_stack: Vec<StackFrame>,
-    stack: Vec<Constant>
+
+    /// Holds temporary values
+    stack: Vec<Constant>,
+
+    /// Holds global variables
+    global: Vec<Constant>
 }
 
 impl Interpreter {
@@ -24,9 +28,9 @@ impl Interpreter {
         Interpreter {
             args: Vec::new(),
             accumulator: 0.0,
-            func_ret: Constant::Int(0),
             call_stack: Vec::new(),
             stack: Vec::new(),
+            global: Vec::new()
         }
     }
 }
@@ -45,9 +49,9 @@ impl From<Vec<String>> for Interpreter {
         Interpreter {
             args: passed_args,
             accumulator: 0.0,
-            func_ret: Constant::Int(0),
             call_stack: Vec::new(),
             stack: Vec::new(),
+            global: Vec::new()
         }
     }
 }

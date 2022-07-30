@@ -9,8 +9,7 @@
 #[derive(Clone, Debug, PartialEq)]
 pub enum RegisterLocation {
     ConstantPool,
-    SpecialRegister,
-    LastStackFrame,
+    Accumulator,
     Global,
     Local,
 }
@@ -20,9 +19,9 @@ pub enum RegisterLocation {
 /// `u32`: Location of the virtual register in an array
 /// `RegisterLocation`: The scope of a register
 #[derive(Clone, Debug, PartialEq)]
-pub struct Register(u32, RegisterLocation);
+pub struct Register(pub u32, pub RegisterLocation);
 
-/// `RegisterReference`: Defines how we refer to a register in bytecode
+/// `RegisterReference`: Defines how we refer to a register in Instruction
 /// 
 /// Possible Values:
 /// * `AsIs`: Register in memory location holds a value

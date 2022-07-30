@@ -1,6 +1,8 @@
 use crate::objects::codeholder::CodeHolder;
 
-/// `ExecutionEngine`: trait for implementing a bytecode interpreter
+/// `ExecutionEngine`: trait for implementing a Instruction interpreter
 pub trait ExecutionEngine {
-    fn execute_bytecode(&mut self, code_holder: &CodeHolder, start_index: usize);
+
+    /// Function that does the actual execution
+    fn execute_Instruction(&mut self, code_holder: &CodeHolder, start_index: usize);
 }

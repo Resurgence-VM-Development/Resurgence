@@ -1,6 +1,6 @@
 use super::register::{Register, RegisterReference};
 
-/// `Bytecode`: Represents instructions the built in Resurgence VM can use (this can be reused for any VM)
+/// `Instruction`: Represents instructions the built in Resurgence VM can use (this can be reused for any VM)
 /// 
 /// Possible Values: 
 /// * `Alloc(u32)`: Preallocates memory in the vector stored in a `StackFrame` object 
@@ -21,12 +21,12 @@ use super::register::{Register, RegisterReference};
 /// * `Less(Register, Register)`: Checks if one register is less then another and jumps one operation if the condition is `true`
 /// * `GreaterEqual(Register, Register)`: Checks if one register is greater than or equal to another and jumps one operation if the condition is `true`
 /// * `LessEqual(Register, Register)`: Checks if one register is less than or equal to another and jumps one operation if the condition is `true`
-pub enum ByteCode {
+pub enum Instruction {
     Alloc(u32),
     Free(u32),
     Jump(i64),
     Call(u64),
-    CCall(String),
+    ExtCall(u64),
 
     Mov(Register, RegisterReference, Register, RegisterReference),
     Cpy(Register, RegisterReference, Register, RegisterReference),

@@ -1,3 +1,3 @@
-use super::bytecode::ByteCode;
+use super::instruction::Instruction;
 
-pub struct CodeHolder(pub Vec<ByteCode>);
+pub struct CodeHolder(pub Vec<Instruction>);

@@ -1,8 +1,7 @@
 use crate::constant::Constant;
 /// `StackFrame`: Represents a stack frame.
-/// 
-/// `registers` (`Vec<Constant>`): Represents the registers of the stack frame
 pub struct StackFrame {
+    /// Represents the registers of the stack frame
     pub registers: Vec<Constant>,
 }
 
