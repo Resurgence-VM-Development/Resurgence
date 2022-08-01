@@ -18,6 +18,7 @@ Note: Resurgence is just a backend. This allows us to focus on making it good wi
 
 # Architecture
 ![Architecture](images/architecture.png)
+![Application Stack](images/application_stack.png)
 
 # Security
 Of course, with any VM that can be embeded, there's always the question regarding security. To prevent Resurgence from calling random functions, it was decided that all functions must be registered by the application itself with integers as IDs. This is more secure as it can be assumed that all functions registered were registered by the application developer(s), but it comes at the cost of dynamic loading.
