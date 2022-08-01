@@ -19,7 +19,7 @@ pub struct Interpreter {
     stack: Vec<Constant>,
 
     /// Holds global variables
-    global: Vec<Constant>
+    global: Vec<Option<Constant>>
 }
 
 impl Interpreter {

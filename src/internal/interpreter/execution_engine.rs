@@ -3,12 +3,6 @@ use crate::objects::constant::{Constant, create_constant_double};
 use crate::objects::{instruction::Instruction, stackframe::StackFrame, codeholder::CodeHolder};
 use crate::objects::register::{Register, RegisterLocation, RegisterReference};
 
-impl Interpreter {
-    // fn get_global(index: usize, ref_type: RegisterReference) -> Constant {
-
-    // }
-}
-
 impl ExecutionEngine for Interpreter {
 
     /// Execute Resurgence Instruction
@@ -43,15 +37,46 @@ impl ExecutionEngine for Interpreter {
                     let Register(dst_index, dst_loc) = dst_reg;
                     let Register(src_index, src_loc) = src_reg;
 
+                    let dst_index_usize = *dst_index as usize;
+                    let src_index_usize = *src_index as usize;
+
                     match (dst_loc, src_loc) {
                         (RegisterLocation::Accumulator, RegisterLocation::Global) => {
-
+                            let src_register = self.global[src_index_usize].take();
+                            if let Some(src_val) = src_register {
+                                if let Constant::Int(src_int) = src_val {
+                                    self.accumulator = src_int as f64;
+                                } else if let Constant::Double(src_double) = src_val {
+                                    self.accumulator = src_double;
+                                }
+                            }
                         },
-                        (RegisterLocation::Accumulator, RegisterLocation::Local) => todo!(),
+                        (RegisterLocation::Accumulator, RegisterLocation::Local) => {
+                            let stack_frame = self.call_stack.last_mut();
+                            if let Some(src_stack_frame) = stack_frame {
+                                let src_register = src_stack_frame.registers[src_index_usize].take();
+                                if let Some(src_val) = src_register {
+                                    if let Constant::Int(src_int) = src_val {
+                                        self.accumulator = src_int as f64;
+                                    } else if let Constant::Double(src_double) = src_val {
+                                        self.accumulator = src_double;
+                                    }
+                                }
+                            }
+                        },
 
-                        (RegisterLocation::Global, RegisterLocation::Accumulator) => todo!(),
-                        (RegisterLocation::Global, RegisterLocation::Global) => todo!(),
-                        (RegisterLocation::Global, RegisterLocation::Local) => todo!(),
+                        (RegisterLocation::Global, RegisterLocation::Accumulator) => {
+                            self.global[dst_index_usize] = Some(create_constant_double(&self.accumulator));
+                        },
+                        (RegisterLocation::Global, RegisterLocation::Global) => {
+                            self.global[dst_index_usize] = self.global[src_index_usize].take();
+                        },
+                        (RegisterLocation::Global, RegisterLocation::Local) => {
+                            let stack_frame = self.call_stack.last_mut();
+                            if let Some(src_stack_frame) = stack_frame { 
+                                self.global[dst_index_usize] = src_stack_frame.registers[src_index_usize].take();
+                            }
+                        },
 
                         (RegisterLocation::Local, RegisterLocation::Accumulator) => todo!(),
                         (RegisterLocation::Local, RegisterLocation::Global) => todo!(),
