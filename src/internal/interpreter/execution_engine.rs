@@ -36,25 +36,26 @@ impl ExecutionEngine for Interpreter {
                     let Register(mut src_index, mut src_loc) = src_reg; 
                     let mut dst_index_usize = dst_index as usize;
                     let mut src_index_usize = src_index as usize;
-                    
 
                     // Dereferenceing values for the destination register
                     if *dst_reg_ref == RegisterReference::Dereference {
                         match dst_loc {
                             RegisterLocation::Global => {
                                 // Take the register out of global memory and dereference
-                                if let Some(Constant::Address(dref_reg)) = &self.global[dst_index_usize] {
+                                let register = self.global[dst_index_usize].as_ref().expect("Non-existant register!");
+                                if let Constant::Address(dref_reg) = register {
                                     Register(dst_index, dst_loc) = *dref_reg;
                                 }
                             },
                             RegisterLocation::Local => {
                                 // Get the register, dereference it, and then store it in the src_index and src_loc values
                                 let stack_frame = self.call_stack.last_mut().unwrap();
-                                let src_reg = &stack_frame.registers[src_index_usize];
-                                if let Some(Constant::Address(dref_reg)) = src_reg {
-                                    Register(src_index, src_loc) = *dref_reg;
+
+                                let src_reg = stack_frame.registers[dst_index_usize].as_ref().expect("Non-existant register to dereference!");
+                                if let Constant::Address(dref_reg) = src_reg {
+                                    Register(dst_index, dst_loc) = *dref_reg;
                                 } else {
-                                    panic!("Non-existant register to dereference!")
+                                    panic!("Must dereference a address!")
                                 }
                             },
                             _ => panic!("Invalid dereference operation!")
@@ -66,11 +67,25 @@ impl ExecutionEngine for Interpreter {
                     if *src_reg_ref == RegisterReference::Dereference {
                         match src_loc {
                             RegisterLocation::Global => {
-                                if let Some(Constant::Address(dref_reg)) = &self.global[src_index_usize] {
-                                    Register(src_index, dst_loc) = *dref_reg;
+                                // Take the register out of global memory and dereference
+                                let register = self.global[src_index_usize].as_ref().expect("Non-existant register!");
+                                if let Constant::Address(dref_reg) = register {
+                                    Register(src_index, src_loc) = *dref_reg;
+                                } else {
+                                    panic!("Must dereference a address!")
                                 }
                             },
-                            RegisterLocation::Local => todo!(),
+                            RegisterLocation::Local => {
+                                // Get the register, dereference it, and then store it in the src_index and src_loc values
+                                let stack_frame = self.call_stack.last_mut().unwrap();
+
+                                let src_reg = stack_frame.registers[src_index_usize].as_ref().expect("Non-existant register to dereference!");
+                                if let Constant::Address(dref_reg) = src_reg {
+                                    Register(src_index, src_loc) = *dref_reg;
+                                } else {
+                                    panic!("Must dereference a address!")
+                                }
+                            },
                             _ => panic!("Invalid dereference operation!")
                         }
                         src_index_usize = src_index as usize;
@@ -97,19 +112,15 @@ impl ExecutionEngine for Interpreter {
                         },
                         (RegisterLocation::Accumulator, RegisterLocation::Local) => {
                             let stack_frame = self.call_stack.last_mut().unwrap();
-                            let src_register = stack_frame.registers[src_index_usize].take();
-                            if let Some(src_val) = src_register {
-                                match src_val {
-                                    Constant::Int(src_int) => {
-                                        self.accumulator = src_int as f64;
-                                    }
-                                    Constant::Double(src_double) => {
-                                        self.accumulator = src_double;
-                                    }
-                                    _ => panic!("Invalid move to accumulator register!"),
+                            let src_register = stack_frame.registers[src_index_usize].take().expect("Non-existant register!");
+                            match src_register {
+                                Constant::Int(src_int) => {
+                                    self.accumulator = src_int as f64;
                                 }
-                            } else {
-                                panic!("Segmentation Fault!")
+                                Constant::Double(src_double) => {
+                                    self.accumulator = src_double;
+                                }
+                                _ => panic!("Invalid move to accumulator register!"),
                             }
                         },
 
