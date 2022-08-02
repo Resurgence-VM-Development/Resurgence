@@ -9,13 +9,11 @@ impl ExecutionEngine for Interpreter {
     fn execute_Instruction(&mut self, code_holder: &CodeHolder, start_index: usize)
     {
         let mut index = start_index;
-        let CodeHolder(Instruction_vec) = &*code_holder;
+        let CodeHolder(instruction_vec) = &*code_holder;
 
         loop {
-            if index == Instruction_vec.len() {
-                break;
-            }
-            let operation = &Instruction_vec[index];
+            if index == instruction_vec.len() { break; }
+            let operation = &instruction_vec[index];
             match &*operation {
                 Instruction::Alloc(register_amount) => self.call_stack.push(StackFrame::from(*register_amount)), // Very simple operation
                 Instruction::Free(block_amount) => {
@@ -32,23 +30,28 @@ impl ExecutionEngine for Interpreter {
                     self.execute_Instruction(code_holder, *func_index as usize); // Do recursive call
                 },
                 Instruction::ExtCall(_) => todo!(),
-
+                
                 Instruction::Mov(dst_reg, dst_reg_ref, src_reg, src_reg_ref) => {
-                    let Register(dst_index, dst_loc) = dst_reg;
-                    let Register(src_index, src_loc) = src_reg;
-
-                    let dst_index_usize = *dst_index as usize;
-                    let src_index_usize = *src_index as usize;
+                    let Register(dst_index, dst_loc) = dst_reg; let dst_index_usize = *dst_index as usize;
+                    let Register(src_index, src_loc) = src_reg; let src_index_usize = *src_index as usize;
 
                     match (dst_loc, src_loc) {
                         (RegisterLocation::Accumulator, RegisterLocation::Global) => {
-                            let src_register = self.global[src_index_usize].take();
+                            let src_register = self.global[src_index_usize].take(); // take the value from global memory
+                            
+                            // Start doing the move if src_register is not None
                             if let Some(src_val) = src_register {
-                                if let Constant::Int(src_int) = src_val {
-                                    self.accumulator = src_int as f64;
-                                } else if let Constant::Double(src_double) = src_val {
-                                    self.accumulator = src_double;
+                                match src_val {
+                                    Constant::Int(src_int) => {
+                                        self.accumulator = src_int as f64;
+                                    }
+                                    Constant::Double(src_double) => {
+                                        self.accumulator = src_double;
+                                    }
+                                    _ => panic!("Invalid move to accumulator register!"),
                                 }
+                            } else {
+                                panic!("Segmentation Fault!")
                             }
                         },
                         (RegisterLocation::Accumulator, RegisterLocation::Local) => {
@@ -56,12 +59,18 @@ impl ExecutionEngine for Interpreter {
                             if let Some(src_stack_frame) = stack_frame {
                                 let src_register = src_stack_frame.registers[src_index_usize].take();
                                 if let Some(src_val) = src_register {
-                                    if let Constant::Int(src_int) = src_val {
-                                        self.accumulator = src_int as f64;
-                                    } else if let Constant::Double(src_double) = src_val {
-                                        self.accumulator = src_double;
+                                    match src_val {
+                                        Constant::Int(src_int) => {
+                                            self.accumulator = src_int as f64;
+                                        }
+                                        Constant::Double(src_double) => {
+                                            self.accumulator = src_double;
+                                        }
+                                        _ => panic!("Invalid move to accumulator register!"),
                                     }
                                 }
+                            } else {
+                                panic!("Segmentation Fault!")
                             }
                         },
 
@@ -78,13 +87,29 @@ impl ExecutionEngine for Interpreter {
                             }
                         },
 
-                        (RegisterLocation::Local, RegisterLocation::Accumulator) => todo!(),
-                        (RegisterLocation::Local, RegisterLocation::Global) => todo!(),
-                        (RegisterLocation::Local, RegisterLocation::Local) => todo!(),
+                        (RegisterLocation::Local, RegisterLocation::Accumulator) => {
+                            let stack_frame = self.call_stack.last_mut();
+                            if let Some(dst_stack_frame) = stack_frame { 
+                                dst_stack_frame.registers[dst_index_usize] = Some(create_constant_double(&self.accumulator));
+                            }
+                        },
+                        (RegisterLocation::Local, RegisterLocation::Global) => {
+                            let stack_frame = self.call_stack.last_mut();
+                            if let Some(dst_stack_frame) = stack_frame {
+                                dst_stack_frame.registers[dst_index_usize] = self.global[src_index_usize].take();
+                            }
+                        },
+                        (RegisterLocation::Local, RegisterLocation::Local) => {
+                            let stack_frame = self.call_stack.last_mut();
+                            if let Some(dst_stack_frame) = stack_frame {
+                                dst_stack_frame.registers[dst_index_usize] = dst_stack_frame.registers[src_index_usize].take();
+                            }                            
+                        },
 
                         _ => panic!("Invalid Mov operation!")
                     }
                 },
+
                 Instruction::Cpy(_, _, _, _) => todo!(),
                 Instruction::Ref(_, _, _, _) => todo!(),
 
