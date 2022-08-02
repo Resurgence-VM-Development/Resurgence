@@ -32,8 +32,49 @@ impl ExecutionEngine for Interpreter {
                 Instruction::ExtCall(_) => todo!(),
                 
                 Instruction::Mov(dst_reg, dst_reg_ref, src_reg, src_reg_ref) => {
-                    let Register(dst_index, dst_loc) = dst_reg; let dst_index_usize = *dst_index as usize;
-                    let Register(src_index, src_loc) = src_reg; let src_index_usize = *src_index as usize;
+                    let Register(mut dst_index, mut dst_loc) = dst_reg; 
+                    let Register(mut src_index, mut src_loc) = src_reg; 
+                    let mut dst_index_usize = dst_index as usize;
+                    let mut src_index_usize = src_index as usize;
+                    
+
+                    // Dereferenceing values for the destination register
+                    if *dst_reg_ref == RegisterReference::Dereference {
+                        match dst_loc {
+                            RegisterLocation::Global => {
+                                // Take the register out of global memory and dereference
+                                if let Some(Constant::Address(dref_reg)) = &self.global[dst_index_usize] {
+                                    Register(dst_index, dst_loc) = *dref_reg;
+                                }
+                            },
+                            RegisterLocation::Local => {
+                                // Get the register, dereference it, and then store it in the src_index and src_loc values
+                                let stack_frame = self.call_stack.last_mut().unwrap();
+                                let src_reg = &stack_frame.registers[src_index_usize];
+                                if let Some(Constant::Address(dref_reg)) = src_reg {
+                                    Register(src_index, src_loc) = *dref_reg;
+                                } else {
+                                    panic!("Non-existant register to dereference!")
+                                }
+                            },
+                            _ => panic!("Invalid dereference operation!")
+                        }
+                        dst_index_usize = dst_index as usize;
+                    }
+                    
+                    // Dereferencing values for the source register
+                    if *src_reg_ref == RegisterReference::Dereference {
+                        match src_loc {
+                            RegisterLocation::Global => {
+                                if let Some(Constant::Address(dref_reg)) = &self.global[src_index_usize] {
+                                    Register(src_index, dst_loc) = *dref_reg;
+                                }
+                            },
+                            RegisterLocation::Local => todo!(),
+                            _ => panic!("Invalid dereference operation!")
+                        }
+                        src_index_usize = src_index as usize;
+                    }
 
                     match (dst_loc, src_loc) {
                         (RegisterLocation::Accumulator, RegisterLocation::Global) => {
@@ -55,19 +96,17 @@ impl ExecutionEngine for Interpreter {
                             }
                         },
                         (RegisterLocation::Accumulator, RegisterLocation::Local) => {
-                            let stack_frame = self.call_stack.last_mut();
-                            if let Some(src_stack_frame) = stack_frame {
-                                let src_register = src_stack_frame.registers[src_index_usize].take();
-                                if let Some(src_val) = src_register {
-                                    match src_val {
-                                        Constant::Int(src_int) => {
-                                            self.accumulator = src_int as f64;
-                                        }
-                                        Constant::Double(src_double) => {
-                                            self.accumulator = src_double;
-                                        }
-                                        _ => panic!("Invalid move to accumulator register!"),
+                            let stack_frame = self.call_stack.last_mut().unwrap();
+                            let src_register = stack_frame.registers[src_index_usize].take();
+                            if let Some(src_val) = src_register {
+                                match src_val {
+                                    Constant::Int(src_int) => {
+                                        self.accumulator = src_int as f64;
                                     }
+                                    Constant::Double(src_double) => {
+                                        self.accumulator = src_double;
+                                    }
+                                    _ => panic!("Invalid move to accumulator register!"),
                                 }
                             } else {
                                 panic!("Segmentation Fault!")
@@ -81,29 +120,21 @@ impl ExecutionEngine for Interpreter {
                             self.global[dst_index_usize] = self.global[src_index_usize].take();
                         },
                         (RegisterLocation::Global, RegisterLocation::Local) => {
-                            let stack_frame = self.call_stack.last_mut();
-                            if let Some(src_stack_frame) = stack_frame { 
-                                self.global[dst_index_usize] = src_stack_frame.registers[src_index_usize].take();
-                            }
+                            let stack_frame = self.call_stack.last_mut().unwrap();
+                            self.global[dst_index_usize] = stack_frame.registers[src_index_usize].take();
                         },
 
                         (RegisterLocation::Local, RegisterLocation::Accumulator) => {
-                            let stack_frame = self.call_stack.last_mut();
-                            if let Some(dst_stack_frame) = stack_frame { 
-                                dst_stack_frame.registers[dst_index_usize] = Some(create_constant_double(&self.accumulator));
-                            }
+                            let stack_frame = self.call_stack.last_mut().unwrap();
+                            stack_frame.registers[dst_index_usize] = Some(create_constant_double(&self.accumulator));
                         },
                         (RegisterLocation::Local, RegisterLocation::Global) => {
-                            let stack_frame = self.call_stack.last_mut();
-                            if let Some(dst_stack_frame) = stack_frame {
-                                dst_stack_frame.registers[dst_index_usize] = self.global[src_index_usize].take();
-                            }
+                            let stack_frame = self.call_stack.last_mut().unwrap();
+                            stack_frame.registers[dst_index_usize] = self.global[src_index_usize].take();
                         },
                         (RegisterLocation::Local, RegisterLocation::Local) => {
-                            let stack_frame = self.call_stack.last_mut();
-                            if let Some(dst_stack_frame) = stack_frame {
-                                dst_stack_frame.registers[dst_index_usize] = dst_stack_frame.registers[src_index_usize].take();
-                            }                            
+                            let stack_frame = self.call_stack.last_mut().unwrap();
+                            stack_frame.registers[dst_index_usize] = stack_frame.registers[src_index_usize].take();
                         },
 
                         _ => panic!("Invalid Mov operation!")
