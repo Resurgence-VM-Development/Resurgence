@@ -10,7 +10,6 @@ homepage = "https://github.com/StandingPadAnimations/Resurgence"
 repository = "https://github.com/StandingPadAnimations/Resurgence"
 
 [dependencies]
-smartstring = {version = "1.0.1", features = ["proptest", "serde"]}
 
 [lib]
 doctest = false

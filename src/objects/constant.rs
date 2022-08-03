@@ -1,5 +1,4 @@
 use super::register::Register;
-use smartstring::alias::String;
 
 /// `Constant`: Represents a constant in the backend
 /// 
@@ -200,7 +199,6 @@ pub fn create_constant_bool(init_val: &bool) -> Constant {
 #[cfg(test)]
 mod constant_init_tests {
     use super::*;
-    use smartstring::alias::String;
 
     #[test]
     fn const_int() {
