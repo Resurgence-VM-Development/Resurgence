@@ -1,3 +1,4 @@
+mod instruction;
 pub(crate) mod execution_engine;
 
 use crate::objects::stackframe::StackFrame;
