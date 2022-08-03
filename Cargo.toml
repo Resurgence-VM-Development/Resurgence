@@ -1,8 +1,8 @@
 [package]
 name = "resurgence"
-version = "0.1.5"
+version = "0.1.6"
 edition = "2021"
-description = "A VM backend library that makes developing interpreters easy. Can be used either as an entire backend, or to create a backend"
+description = "A VM backend designed to be embedded in an application"
 license = "MIT"
 authors = ["Mahid Sheikh <sheikhmahid1@hotmail.com>"]
 readme = "README.md"
@@ -10,7 +10,6 @@ homepage = "https://github.com/StandingPadAnimations/Resurgence"
 repository = "https://github.com/StandingPadAnimations/Resurgence"
 
 [dependencies]
-smartstring = {version = "1.0.1", features = ["proptest", "serde"]}
 byteorder = "1.4.3"
 
 [lib]

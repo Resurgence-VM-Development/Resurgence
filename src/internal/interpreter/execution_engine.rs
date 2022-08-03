@@ -1,13 +1,5 @@
 use super::super::{interpreter::Interpreter, execution_engine::ExecutionEngine};
-use crate::objects::constant::{Constant, create_constant_double};
 use crate::objects::{instruction::Instruction, stackframe::StackFrame, codeholder::CodeHolder};
-use crate::objects::register::{Register, RegisterLocation, RegisterReference};
-
-impl Interpreter {
-    // fn get_global(index: usize, ref_type: RegisterReference) -> Constant {
-
-    // }
-}
 
 impl ExecutionEngine for Interpreter {
 
@@ -15,13 +7,11 @@ impl ExecutionEngine for Interpreter {
     fn execute_Instruction(&mut self, code_holder: &CodeHolder, start_index: usize)
     {
         let mut index = start_index;
-        let CodeHolder(Instruction_vec) = &*code_holder;
+        let CodeHolder(instruction_vec) = &*code_holder;
 
         loop {
-            if index == Instruction_vec.len() {
-                break;
-            }
-            let operation = &Instruction_vec[index];
+            if index == instruction_vec.len() { break; }
+            let operation = &instruction_vec[index];
             match &*operation {
                 Instruction::Alloc(register_amount) => self.call_stack.push(StackFrame::from(*register_amount)), // Very simple operation
                 Instruction::Free(block_amount) => {
@@ -34,33 +24,11 @@ impl ExecutionEngine for Interpreter {
                     continue;
                 },
 
-                Instruction::Call(func_index) => {
-                    self.execute_Instruction(code_holder, *func_index as usize); // Do recursive call
-                },
+                Instruction::Call(func_index) => self.execute_Instruction(code_holder, *func_index as usize),
                 Instruction::ExtCall(_) => todo!(),
-
-                Instruction::Mov(dst_reg, dst_reg_ref, src_reg, src_reg_ref) => {
-                    let Register(dst_index, dst_loc) = dst_reg;
-                    let Register(src_index, src_loc) = src_reg;
-
-                    match (dst_loc, src_loc) {
-                        (RegisterLocation::Accumulator, RegisterLocation::Global) => {
-
-                        },
-                        (RegisterLocation::Accumulator, RegisterLocation::Local) => todo!(),
-
-                        (RegisterLocation::Global, RegisterLocation::Accumulator) => todo!(),
-                        (RegisterLocation::Global, RegisterLocation::Global) => todo!(),
-                        (RegisterLocation::Global, RegisterLocation::Local) => todo!(),
-
-                        (RegisterLocation::Local, RegisterLocation::Accumulator) => todo!(),
-                        (RegisterLocation::Local, RegisterLocation::Global) => todo!(),
-                        (RegisterLocation::Local, RegisterLocation::Local) => todo!(),
-
-                        _ => panic!("Invalid Mov operation!")
-                    }
-                },
-                Instruction::Cpy(_, _, _, _) => todo!(),
+                
+                Instruction::Mov(dst_reg, dst_reg_ref, src_reg, src_reg_ref) => self.mov_registers(dst_reg, dst_reg_ref, src_reg, src_reg_ref),
+                Instruction::Cpy(dst_reg, dst_reg_ref, src_reg, src_reg_ref) => self.cpy_registers(dst_reg, dst_reg_ref, src_reg, src_reg_ref),
                 Instruction::Ref(_, _, _, _) => todo!(),
 
                 Instruction::StackPush(_, _) => todo!(),

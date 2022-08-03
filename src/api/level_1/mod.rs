@@ -1,6 +1,5 @@
-use std::{collections::HashMap, hash::Hash};
-use crate::objects::{codeholder::CodeHolder, instruction::Instruction};
-use smartstring::alias::String;
+use std::{collections::HashMap};
+use crate::objects::codeholder::CodeHolder;
 
 /// `CodeBuilder<'a>`: Helps contruct bytecode to be used by the VM
 struct CodeBuilder<'a> {
