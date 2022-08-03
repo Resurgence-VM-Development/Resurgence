@@ -5,6 +5,9 @@
 [![Docs](https://docs.rs/logos/badge.svg)](https://docs.rs/resurgence/)
 [![Crates.io license shield](https://img.shields.io/crates/l/resurgence.svg)](https://crates.io/crates/resurgence)
 
+
+Join the Discord server!
+
 [![Discord](https://badgen.net/badge/icon/discord?icon=discord&label)](https://discord.gg/e2GuJ2k6na)
 
 Resurgence aims to be an embedable VM backend with an easy to use API for projects like:
