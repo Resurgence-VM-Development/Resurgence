@@ -1,1 +1,2 @@
-pub mod mov;
+pub(crate) mod mov;
+pub(crate) mod cpy;

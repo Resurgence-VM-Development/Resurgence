@@ -3,7 +3,7 @@ use crate::objects::constant::{Constant, create_constant_double};
 use crate::objects::register::{Register, RegisterLocation, RegisterReference};
 
 impl Interpreter {
-    pub fn mov_registers(&mut self, dst_reg: &Register, dst_reg_ref: &RegisterReference, src_reg: &Register, src_reg_ref: &RegisterReference) {
+    pub fn cpy_registers(&mut self, dst_reg: &Register, dst_reg_ref: &RegisterReference, src_reg: &Register, src_reg_ref: &RegisterReference) {
         // Destination register
         let Register(mut dst_index, mut dst_loc) = dst_reg; 
         let mut dst_index_usize = dst_index as usize;
@@ -27,7 +27,7 @@ impl Interpreter {
         match (dst_loc, src_loc) {
             (RegisterLocation::Accumulator, RegisterLocation::Global) => {
                 // Start doing the move if src_register is not None
-                let src_register = self.mov_global(src_index_usize); // take the value from global memory
+                let src_register = self.cpy_global(src_index_usize); // take the value from global memory
                 match src_register {
                     Constant::Int(src_int) => {
                         self.accumulator = src_int as f64;
@@ -39,7 +39,7 @@ impl Interpreter {
                 }
         },
             (RegisterLocation::Accumulator, RegisterLocation::Local) => {
-                let src_register = self.mov_local(src_index_usize);
+                let src_register = self.cpy_local(src_index_usize);
                 match src_register {
                     Constant::Int(src_int) => {
                         self.accumulator = src_int as f64;
@@ -55,10 +55,10 @@ impl Interpreter {
                 self.global[dst_index_usize] = Some(create_constant_double(&self.accumulator));
             },
             (RegisterLocation::Global, RegisterLocation::Global) => {
-                self.global[dst_index_usize] = Some(self.mov_global(src_index_usize));
+                self.global[dst_index_usize] = Some(self.cpy_global(src_index_usize));
             },
             (RegisterLocation::Global, RegisterLocation::Local) => {
-                self.global[dst_index_usize] = Some(self.mov_local(src_index_usize));
+                self.global[dst_index_usize] = Some(self.cpy_local(src_index_usize));
             },
     
             (RegisterLocation::Local, RegisterLocation::Accumulator) => {
@@ -67,7 +67,7 @@ impl Interpreter {
                 stack_frame.registers[dst_index_usize] = Some(create_constant_double(&accumulator));
             },
             (RegisterLocation::Local, RegisterLocation::Global) => {
-                let global_value = Some(self.mov_global(src_index_usize));
+                let global_value = Some(self.cpy_global(src_index_usize));
                 let stack_frame = self.ref_stack_frame();
                 stack_frame.registers[dst_index_usize] = global_value;
             },

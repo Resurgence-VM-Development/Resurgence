@@ -1,9 +1,6 @@
 use super::super::{interpreter::Interpreter, execution_engine::ExecutionEngine};
 use crate::objects::{instruction::Instruction, stackframe::StackFrame, codeholder::CodeHolder};
 
-// Instruction functions
-use super::instruction::mov::MovRegisters;
-
 impl ExecutionEngine for Interpreter {
 
     /// Execute Resurgence Instruction
@@ -30,9 +27,8 @@ impl ExecutionEngine for Interpreter {
                 Instruction::Call(func_index) => self.execute_Instruction(code_holder, *func_index as usize),
                 Instruction::ExtCall(_) => todo!(),
                 
-                Instruction::Mov(dst_reg, dst_reg_ref, src_reg, src_reg_ref) => MovRegisters(self, dst_reg, dst_reg_ref, src_reg, src_reg_ref),
-
-                Instruction::Cpy(_, _, _, _) => todo!(),
+                Instruction::Mov(dst_reg, dst_reg_ref, src_reg, src_reg_ref) => self.mov_registers(dst_reg, dst_reg_ref, src_reg, src_reg_ref),
+                Instruction::Cpy(dst_reg, dst_reg_ref, src_reg, src_reg_ref) => self.cpy_registers(dst_reg, dst_reg_ref, src_reg, src_reg_ref),
                 Instruction::Ref(_, _, _, _) => todo!(),
 
                 Instruction::StackPush(_, _) => todo!(),
