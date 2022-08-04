@@ -46,6 +46,13 @@ impl Interpreter {
         stack_frame.ref_register(index)
     }
 
+    /// Copies a constant from the constant pool
+    /// 
+    /// `index` (`usize`): index of the constant
+    pub fn cpy_constant(&self, index: usize) -> Constant {
+        self.constant_pool[index].clone()
+    }
+
     /// Returns a reference to the last stackframe
     pub fn ref_stack_frame(&mut self) -> &mut StackFrame {
         self.call_stack.last_mut().unwrap()

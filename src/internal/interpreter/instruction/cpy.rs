@@ -50,7 +50,10 @@ impl Interpreter {
                     _ => panic!("Invalid move to accumulator register!"),
                 }
             },
-    
+            
+            (RegisterLocation::Global, RegisterLocation::ConstantPool) => {
+                self.global[dst_index_usize] = Some(self.cpy_constant(src_index_usize));
+            }
             (RegisterLocation::Global, RegisterLocation::Accumulator) => {
                 self.global[dst_index_usize] = Some(create_constant_double(&self.accumulator));
             },
@@ -60,11 +63,16 @@ impl Interpreter {
             (RegisterLocation::Global, RegisterLocation::Local) => {
                 self.global[dst_index_usize] = Some(self.cpy_local(src_index_usize));
             },
-    
-            (RegisterLocation::Local, RegisterLocation::Accumulator) => {
-                let accumulator = self.accumulator;
+
+            (RegisterLocation::Local, RegisterLocation::ConstantPool) => {
+                let constant = Some(self.cpy_constant(src_index_usize));
                 let stack_frame = self.ref_stack_frame();
-                stack_frame.registers[dst_index_usize] = Some(create_constant_double(&accumulator));
+                stack_frame.registers[dst_index_usize] = constant;
+            }
+            (RegisterLocation::Local, RegisterLocation::Accumulator) => {
+                let accumulator = Some(create_constant_double(&self.accumulator));
+                let stack_frame = self.ref_stack_frame();
+                stack_frame.registers[dst_index_usize] = accumulator;
             },
             (RegisterLocation::Local, RegisterLocation::Global) => {
                 let global_value = Some(self.cpy_global(src_index_usize));
@@ -75,6 +83,7 @@ impl Interpreter {
                 let stack_frame = self.ref_stack_frame();
                 stack_frame.registers[dst_index_usize] = Some(stack_frame.mov_register(src_index_usize));
             },
+
             _ => panic!("Invalid Mov operation!")
         }
     }
