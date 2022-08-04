@@ -1,13 +1,13 @@
 [package]
 name = "resurgence"
-version = "0.1.6"
+version = "0.1.7"
 edition = "2021"
 description = "A VM backend designed to be embedded in an application"
 license = "MIT"
 authors = ["Mahid Sheikh <sheikhmahid1@hotmail.com>"]
 readme = "README.md"
-homepage = "https://github.com/StandingPadAnimations/Resurgence"
-repository = "https://github.com/StandingPadAnimations/Resurgence"
+homepage = "https://github.com/Resurgence-VM-Development/Resurgence"
+repository = "https://github.com/Resurgence-VM-Development/Resurgence"
 
 [lib]
 doctest = false
