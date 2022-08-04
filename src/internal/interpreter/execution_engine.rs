@@ -4,7 +4,7 @@ use crate::objects::{instruction::Instruction, stackframe::StackFrame, codeholde
 impl ExecutionEngine for Interpreter {
 
     /// Execute Resurgence Instruction
-    fn execute_Instruction(&mut self, code_holder: &CodeHolder, start_index: usize)
+    fn execute_instruction(&mut self, code_holder: &CodeHolder, start_index: usize)
     {
         let mut index = start_index;
         let CodeHolder(instruction_vec) = &*code_holder;
@@ -24,7 +24,7 @@ impl ExecutionEngine for Interpreter {
                     continue;
                 },
 
-                Instruction::Call(func_index) => self.execute_Instruction(code_holder, *func_index as usize),
+                Instruction::Call(func_index) => self.execute_instruction(code_holder, *func_index as usize),
                 Instruction::ExtCall(_) => todo!(),
                 
                 Instruction::Mov(dst_reg, dst_reg_ref, src_reg, src_reg_ref) => self.mov_registers(dst_reg, dst_reg_ref, src_reg, src_reg_ref),
