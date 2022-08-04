@@ -29,7 +29,7 @@ impl ExecutionEngine for Interpreter {
                 
                 Instruction::Mov(dst_reg, dst_reg_ref, src_reg, src_reg_ref) => self.mov_registers(dst_reg, dst_reg_ref, src_reg, src_reg_ref),
                 Instruction::Cpy(dst_reg, dst_reg_ref, src_reg, src_reg_ref) => self.cpy_registers(dst_reg, dst_reg_ref, src_reg, src_reg_ref),
-                Instruction::Ref(_, _, _, _) => todo!(),
+                Instruction::Ref(dst_reg, dst_reg_ref, src_reg, src_reg_ref) => self.ref_registers(dst_reg, dst_reg_ref, src_reg, src_reg_ref),
 
                 Instruction::StackPush(_, _) => todo!(),
                 Instruction::StackPop => todo!(),
