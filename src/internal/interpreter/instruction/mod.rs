@@ -1,3 +1,4 @@
 pub(crate) mod mov;
 pub(crate) mod cpy;
-mod ref_reg;
+pub(crate) mod ref_reg;
+pub(crate) mod stk_push;
