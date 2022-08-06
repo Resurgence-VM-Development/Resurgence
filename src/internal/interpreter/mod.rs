@@ -16,6 +16,9 @@ pub struct Interpreter {
     /// Holds temporary values
     stack: Vec<Constant>,
 
+    // Constant pool
+    constant_pool: Vec<Constant>,
+
     /// Holds global variables
     global: Vec<Option<Constant>>
 }
@@ -27,6 +30,7 @@ impl Interpreter {
             accumulator: 0.0,
             call_stack: Vec::new(),
             stack: Vec::new(),
+            constant_pool: Vec::new(),
             global: Vec::new()
         }
     }

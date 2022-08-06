@@ -1,41 +1,40 @@
 use super::super::{interpreter::Interpreter, execution_engine::ExecutionEngine};
-use crate::objects::{instruction::Instruction, stackframe::StackFrame, codeholder::CodeHolder};
+use crate::objects::{instruction::Instruction, stackframe::StackFrame, codeholder::CodeHolder, register::{self, Register, RegisterReference}};
 
 impl ExecutionEngine for Interpreter {
 
     /// Execute Resurgence Instruction
-    fn execute_Instruction(&mut self, code_holder: &CodeHolder, start_index: usize)
+    fn execute_instruction(&mut self, code_holder: &CodeHolder, start_index: usize)
     {
-        let mut index = start_index;
         let CodeHolder(instruction_vec) = &*code_holder;
-
-        loop {
-            if index == instruction_vec.len() { break; }
+        
+        let mut index = start_index; let max_length = instruction_vec.len();
+        while index != max_length {
             let operation = &instruction_vec[index];
             match &*operation {
-                Instruction::Alloc(register_amount) => self.call_stack.push(StackFrame::from(*register_amount)), // Very simple operation
-                Instruction::Free(block_amount) => {
+                Instruction::Alloc(ref register_amount) => self.call_stack.push(StackFrame::from(*register_amount)), // Very simple operation
+                Instruction::Free(ref block_amount) => {
                     for _ in 0..*block_amount {
                         self.call_stack.pop();
                     }
                 },
-                Instruction::Jump(jmp_amount) => {
+                Instruction::Jump(ref jmp_amount) => {
                     index += *jmp_amount as usize;
                     continue;
                 },
 
-                Instruction::Call(func_index) => self.execute_Instruction(code_holder, *func_index as usize),
+                Instruction::Call(ref func_index) => self.execute_instruction(code_holder, *func_index as usize),
                 Instruction::ExtCall(_) => todo!(),
                 
-                Instruction::Mov(dst_reg, dst_reg_ref, src_reg, src_reg_ref) => self.mov_registers(dst_reg, dst_reg_ref, src_reg, src_reg_ref),
-                Instruction::Cpy(dst_reg, dst_reg_ref, src_reg, src_reg_ref) => self.cpy_registers(dst_reg, dst_reg_ref, src_reg, src_reg_ref),
-                Instruction::Ref(_, _, _, _) => todo!(),
+                Instruction::Mov(ref dst_reg, ref dst_reg_ref, ref src_reg, ref src_reg_ref) => self.mov_registers(dst_reg, dst_reg_ref, src_reg, src_reg_ref),
+                Instruction::Cpy(ref dst_reg, ref dst_reg_ref, ref src_reg, ref src_reg_ref) => self.cpy_registers(dst_reg, dst_reg_ref, src_reg, src_reg_ref),
+                Instruction::Ref(ref dst_reg, ref dst_reg_ref, ref src_reg, ref src_reg_ref) => self.ref_registers(dst_reg, dst_reg_ref, src_reg, src_reg_ref),
 
-                Instruction::StackPush(_, _) => todo!(),
-                Instruction::StackPop => todo!(),
+                Instruction::StackPush(ref register, ref reference) => self.push_on_stack(register, reference),
+                Instruction::StackPop => {self.stack.pop();}, // We have the braces around this call to make the Rust compiler happy
 
-                Instruction::Add(_, _, _) => todo!(),
-                Instruction::Sub(_, _, _) => todo!(),
+                Instruction::Add(ref dst_reg, ref reg_1, ref reg_2) => self.add(dst_reg, reg_1, reg_2),
+                Instruction::Sub(ref dst_reg, ref reg_1, ref reg_2) => self.sub(dst_reg, reg_1, reg_2),
                 Instruction::Mul(_, _, _) => todo!(),
                 Instruction::Div(_, _, _) => todo!(),
                 
