@@ -41,7 +41,7 @@ pub fn write_bytecode(code: &CodeHolder) -> Result<Vec<u8>, Error> {
     let mut buf: Vec<u8> = Vec::new();
     buf.extend([0x52, 0x56, 0x4D, 0x88, 0x00, 0x01]); // write header (4 bytes) + version (2 bytes)
 
-    for i in &(code.0) {
+    for i in &(code.instructions) {
         match i {
             Instruction::Alloc(size) => {
                 buf.push(0x01);

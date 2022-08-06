@@ -75,7 +75,10 @@ pub fn read_bytecode(buf: &Vec<u8>) -> Result<CodeHolder, Error> {
     let len = buf.len();
 
     let mut cur = Cursor::new(buf);
-    let mut holder = CodeHolder(Vec::new());
+    let mut holder = CodeHolder {
+        instructions: Vec::new(),
+        constant_pool: Vec::new(),
+    };
 
     // check if this is a rvm bytecode file
     // 52564D88
@@ -112,27 +115,27 @@ pub fn read_bytecode(buf: &Vec<u8>) -> Result<CodeHolder, Error> {
             0x01 => {
                 // Alloc
                 let size = cur.read_u32::<BigEndian>()?;
-                holder.0.push(Instruction::Alloc(size));
+                holder.instructions.push(Instruction::Alloc(size));
             }
             0x02 => {
                 // Free
                 let size = cur.read_u32::<BigEndian>()?;
-                holder.0.push(Instruction::Free(size));
+                holder.instructions.push(Instruction::Free(size));
             }
             0x03 => {
                 // Jump
                 let addr = cur.read_i64::<BigEndian>()?;
-                holder.0.push(Instruction::Jump(addr));
+                holder.instructions.push(Instruction::Jump(addr));
             }
             0x04 => {
                 // Call
                 let addr = cur.read_u64::<BigEndian>()?;
-                holder.0.push(Instruction::Call(addr));
+                holder.instructions.push(Instruction::Call(addr));
             }
             0x05 => {
                 // ExtCall
                 let id = cur.read_u64::<BigEndian>()?;
-                holder.0.push(Instruction::ExtCall(id));
+                holder.instructions.push(Instruction::ExtCall(id));
             }
             0x06 => {
                 // Mov
@@ -140,7 +143,9 @@ pub fn read_bytecode(buf: &Vec<u8>) -> Result<CodeHolder, Error> {
                 let aref = make_rref(&mut cur)?;
                 let rb = make_register(&mut cur)?;
                 let bref = make_rref(&mut cur)?;
-                holder.0.push(Instruction::Mov(ra, aref, rb, bref));
+                holder
+                    .instructions
+                    .push(Instruction::Mov(ra, aref, rb, bref));
             }
             0x07 => {
                 // Cpy
@@ -148,7 +153,9 @@ pub fn read_bytecode(buf: &Vec<u8>) -> Result<CodeHolder, Error> {
                 let aref = make_rref(&mut cur)?;
                 let rb = make_register(&mut cur)?;
                 let bref = make_rref(&mut cur)?;
-                holder.0.push(Instruction::Cpy(ra, aref, rb, bref));
+                holder
+                    .instructions
+                    .push(Instruction::Cpy(ra, aref, rb, bref));
             }
             0x08 => {
                 // Ref
@@ -156,81 +163,83 @@ pub fn read_bytecode(buf: &Vec<u8>) -> Result<CodeHolder, Error> {
                 let aref = make_rref(&mut cur)?;
                 let rb = make_register(&mut cur)?;
                 let bref = make_rref(&mut cur)?;
-                holder.0.push(Instruction::Ref(ra, aref, rb, bref));
+                holder
+                    .instructions
+                    .push(Instruction::Ref(ra, aref, rb, bref));
             }
             0x09 => {
                 // StackPush
                 let reg = make_register(&mut cur)?;
                 let rref = make_rref(&mut cur)?;
-                holder.0.push(Instruction::StackPush(reg, rref));
+                holder.instructions.push(Instruction::StackPush(reg, rref));
             }
             0x0A => {
                 // StackPop
-                holder.0.push(Instruction::StackPop);
+                holder.instructions.push(Instruction::StackPop);
             }
             0x0B => {
                 // Add
                 let ra = make_register(&mut cur)?;
                 let rb = make_register(&mut cur)?;
                 let rc = make_register(&mut cur)?;
-                holder.0.push(Instruction::Add(ra, rb, rc));
+                holder.instructions.push(Instruction::Add(ra, rb, rc));
             }
             0x0C => {
                 // Sub
                 let ra = make_register(&mut cur)?;
                 let rb = make_register(&mut cur)?;
                 let rc = make_register(&mut cur)?;
-                holder.0.push(Instruction::Sub(ra, rb, rc));
+                holder.instructions.push(Instruction::Sub(ra, rb, rc));
             }
             0x0D => {
                 // Mul
                 let ra = make_register(&mut cur)?;
                 let rb = make_register(&mut cur)?;
                 let rc = make_register(&mut cur)?;
-                holder.0.push(Instruction::Mul(ra, rb, rc));
+                holder.instructions.push(Instruction::Mul(ra, rb, rc));
             }
             0x0E => {
                 // Div
                 let ra = make_register(&mut cur)?;
                 let rb = make_register(&mut cur)?;
                 let rc = make_register(&mut cur)?;
-                holder.0.push(Instruction::Div(ra, rb, rc));
+                holder.instructions.push(Instruction::Div(ra, rb, rc));
             }
             0x0F => {
                 // Equal
                 let ra = make_register(&mut cur)?;
                 let rb = make_register(&mut cur)?;
-                holder.0.push(Instruction::Equal(ra, rb));
+                holder.instructions.push(Instruction::Equal(ra, rb));
             }
             0x10 => {
                 // NotEqual
                 let ra = make_register(&mut cur)?;
                 let rb = make_register(&mut cur)?;
-                holder.0.push(Instruction::NotEqual(ra, rb));
+                holder.instructions.push(Instruction::NotEqual(ra, rb));
             }
             0x11 => {
                 // Greater
                 let ra = make_register(&mut cur)?;
                 let rb = make_register(&mut cur)?;
-                holder.0.push(Instruction::Greater(ra, rb));
+                holder.instructions.push(Instruction::Greater(ra, rb));
             }
             0x12 => {
                 // Less
                 let ra = make_register(&mut cur)?;
                 let rb = make_register(&mut cur)?;
-                holder.0.push(Instruction::Less(ra, rb));
+                holder.instructions.push(Instruction::Less(ra, rb));
             }
             0x13 => {
                 // GreaterEqual
                 let ra = make_register(&mut cur)?;
                 let rb = make_register(&mut cur)?;
-                holder.0.push(Instruction::GreaterEqual(ra, rb));
+                holder.instructions.push(Instruction::GreaterEqual(ra, rb));
             }
             0x14 => {
                 // LessEqual
                 let ra = make_register(&mut cur)?;
                 let rb = make_register(&mut cur)?;
-                holder.0.push(Instruction::LessEqual(ra, rb));
+                holder.instructions.push(Instruction::LessEqual(ra, rb));
             }
             _ => {
                 // catch-all for invalid instructions

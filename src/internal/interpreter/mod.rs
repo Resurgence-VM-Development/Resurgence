@@ -1,9 +1,14 @@
-mod utils;
-mod instruction;
-pub(crate) mod execution_engine;
+use std::io::Error;
+use std::result::Result;
 
-use crate::objects::stackframe::StackFrame;
+pub(crate) mod execution_engine;
+mod instruction;
+mod utils;
+
 use super::super::constant::Constant;
+use crate::api::read_bytecode_file;
+use crate::objects::codeholder::CodeHolder;
+use crate::objects::stackframe::StackFrame;
 
 /// `Interpreter`: Built-in Register Virtual Machine
 pub struct Interpreter {
@@ -16,28 +21,29 @@ pub struct Interpreter {
     /// Holds temporary values
     stack: Vec<Constant>,
 
-    // Constant pool
-    constant_pool: Vec<Constant>,
+    code_holder: CodeHolder,
 
     /// Holds global variables
-    global: Vec<Option<Constant>>
+    global: Vec<Option<Constant>>,
 }
 
 impl Interpreter {
     /// Creates a new `Interpreter` instance
-    pub fn new() -> Interpreter {
+    pub fn new(ch: CodeHolder) -> Interpreter {
         Interpreter {
             accumulator: 0.0,
             call_stack: Vec::new(),
             stack: Vec::new(),
-            constant_pool: Vec::new(),
-            global: Vec::new()
+            code_holder: ch,
+            global: Vec::new(),
         }
     }
-}
 
-impl Default for Interpreter {
-    fn default() -> Self {
-        Self::new()
+    /// Reads a file at a given path, parses it, and creates an [`Interpreter`] instance.
+    ///
+    /// This is a convenience wrapper for [`crate::api::read_bytecode_file`] and behaves the same
+    /// way.
+    pub fn from_file(path: &str) -> Result<Interpreter, Error> {
+        return Ok(Self::new(read_bytecode_file(&path)?));
     }
 }
