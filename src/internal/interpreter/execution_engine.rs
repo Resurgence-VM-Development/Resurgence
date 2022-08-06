@@ -33,9 +33,7 @@ impl ExecutionEngine for Interpreter {
                 Instruction::StackPush(ref register, ref reference) => self.push_on_stack(register, reference),
                 Instruction::StackPop => {self.stack.pop();}, // We have the braces around this call to make the Rust compiler happy
 
-                Instruction::Add(ref dst_reg, ref reg_1, ref reg_2) => {
-                    
-                },
+                Instruction::Add(ref dst_reg, ref reg_1, ref reg_2) => self.add(dst_reg, reg_1, reg_2),
                 Instruction::Sub(_, _, _) => todo!(),
                 Instruction::Mul(_, _, _) => todo!(),
                 Instruction::Div(_, _, _) => todo!(),
