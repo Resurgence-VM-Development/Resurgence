@@ -1,5 +1,6 @@
 use std::{collections::HashMap};
 use crate::objects::codeholder::CodeHolder;
+mod generate_instruction;
 
 /// `CodeBuilder<'a>`: Helps contruct bytecode to be used by the VM
 struct CodeBuilder<'a> {
