@@ -87,27 +87,4 @@ impl Interpreter {
             _ => panic!("Invalid dereference operation!"),
         }
     }
-
-    pub fn mov_dst_math(&mut self, dst: &Register, value: Constant) {
-        // Destination register itself
-        let Register(dst_index, dst_loc) = dst;
-        let dst_index_usize = *dst_index as usize;
-
-        // Get the location of the destination register
-        match *dst_loc {
-            RegisterLocation::ConstantPool => {
-                panic!("Segmentation fault! Can not assign to a constant!")
-            }
-            RegisterLocation::Accumulator => match value {
-                Constant::Int(int_value) => self.accumulator = int_value as f64,
-                Constant::Double(double_value) => self.accumulator = double_value,
-                _ => panic!("Invalid type!"),
-            },
-            RegisterLocation::Global => self.global[dst_index_usize] = Some(value),
-            RegisterLocation::Local => {
-                let stack_frame = self.ref_stack_frame();
-                stack_frame.registers[dst_index_usize] = Some(value);
-            }
-        }
-    }
 }
