@@ -2,6 +2,10 @@ use crate::{Interpreter, objects::register::{Register, RegisterLocation}, object
 
 
 impl Interpreter {
+    /*
+        Private utility functions used by this module
+    */
+
     /// Takes 2 `Register` objects, and returns 2 `Constant` objects
     fn get_constants(&mut self, reg_1: &Register, reg_2: &Register) -> (Constant, Constant) {
         let Register(index_1, loc_1) = reg_1; let Register(index_2, loc_2) = reg_2;
@@ -26,6 +30,11 @@ impl Interpreter {
             _ => panic!("Segmentation fault!")
         }
     }
+
+    /// Moves a value to the destination register
+    /// 
+    /// `dst` (`&Register`): Destination register
+    /// `value` (`&Constant`): Constant being moved
     fn mov_dst(&mut self, dst: &Register, value: Constant) {
         // Destination register itself
         let Register(dst_index, dst_loc) = dst; let dst_index_usize = *dst_index as usize;
@@ -48,6 +57,9 @@ impl Interpreter {
         }
     }
 
+    /*
+        All of the actual math functions used in the execution engine
+    */
     pub fn add(&mut self, dst: &Register, reg_1: &Register, reg_2: &Register) {
         let (constant_1, constant_2) = self.get_constants(reg_1, reg_2);
         let dst_value = constant_1.add(&constant_2);
