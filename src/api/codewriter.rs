@@ -1,9 +1,25 @@
+/*!
+# Bytecode Writer API
+This module provides functions for writing a [`crate::CodeHolder`] into bytecode. This is not
+particularly useful for a pure virtual machine, but is useful for compilers and interpreters.
+
+# Examples
+Convert a [`crate::CodeHolder`] to bytecode and write it to a file:
+```no_run
+use resurgence::{api::codewriter, CodeHolder};
+
+let holder = CodeHolder::new();
+codewriter::write_bytecode_file(&holder, "path/to/destination.rvm").unwrap();
+```
+*/
+
 use byteorder::{BigEndian, WriteBytesExt};
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::Error;
 use std::result::Result;
 
+use super::parser_constants as pc;
 use crate::objects::codeholder::CodeHolder;
 use crate::objects::constant::Constant;
 use crate::objects::instruction::Instruction;
@@ -12,18 +28,18 @@ use crate::objects::register::{Register, RegisterLocation, RegisterReference};
 fn write_register(buf: &mut Vec<u8>, r: &Register) -> Result<(), Error> {
     buf.write_u32::<BigEndian>(r.0)?;
     buf.push(match r.1 {
-        RegisterLocation::ConstantPool => 0x01,
-        RegisterLocation::Accumulator => 0x02,
-        RegisterLocation::Global => 0x03,
-        RegisterLocation::Local => 0x04,
+        RegisterLocation::ConstantPool => pc::LOC_CONSTANT,
+        RegisterLocation::Accumulator => pc::LOC_ACCUMULATOR,
+        RegisterLocation::Global => pc::LOC_GLOBAL,
+        RegisterLocation::Local => pc::LOC_LOCAL,
     });
     return Ok(());
 }
 
-fn write_rref(buf: &mut Vec<u8>, rref: &RegisterReference) {
+fn write_reg_ref(buf: &mut Vec<u8>, rref: &RegisterReference) {
     buf.push(match rref {
-        RegisterReference::AsIs => 0x01,
-        RegisterReference::Dereference => 0x02,
+        RegisterReference::AsIs => pc::REF_AS_IS,
+        RegisterReference::Dereference => pc::REF_DEREFERENCE,
     });
 }
 
@@ -40,35 +56,39 @@ pub fn write_bytecode_file(code: &CodeHolder, path: &str) -> Result<(), Error> {
 /// Takes a CodeHolder and outputs a vec containing bytecode in binary form.
 pub fn write_bytecode(code: &CodeHolder) -> Result<Vec<u8>, Error> {
     let mut buf: Vec<u8> = Vec::new();
-    buf.extend([0x52, 0x56, 0x4D, 0x88, 0x00, 0x02]); // write header (4 bytes) + version (2 bytes)
+
+    // write magic number
+    buf.write_u32::<BigEndian>(pc::MAGIC_NUMBER)?;
+    // write version number
+    buf.write_u16::<BigEndian>(pc::VERSION)?;
 
     // constants pool
     buf.write_u32::<BigEndian>(code.constant_pool.len() as u32)?;
     for i in &(code.constant_pool) {
         match i {
             Constant::Int(val) => {
-                buf.write_u8(0x01)?;
+                buf.write_u8(pc::CONST_INT)?;
                 buf.write_i64::<BigEndian>(*val)?;
             }
             Constant::Double(val) => {
-                buf.write_u8(0x02)?;
+                buf.write_u8(pc::CONST_DOUBLE)?;
                 buf.write_f64::<BigEndian>(*val)?;
             }
             Constant::String(val) => {
-                buf.write_u8(0x03)?;
+                buf.write_u8(pc::CONST_STRING)?;
                 let bytes = val.clone().into_bytes();
                 buf.write_u64::<BigEndian>(bytes.len() as u64)?;
                 buf.write_all(&bytes)?;
             }
             Constant::Boolean(val) => {
-                buf.write_u8(0x04)?;
+                buf.write_u8(pc::CONST_BOOLEAN)?;
                 buf.write_u8(match val {
                     false => 0x00,
                     true => 0x01,
                 })?;
             }
             Constant::Address(val) => {
-                buf.write_u8(0x05)?;
+                buf.write_u8(pc::CONST_ADDRESS)?;
                 write_register(&mut buf, val)?;
             }
         }
@@ -78,105 +98,105 @@ pub fn write_bytecode(code: &CodeHolder) -> Result<Vec<u8>, Error> {
     for i in &(code.instructions) {
         match i {
             Instruction::Alloc(size) => {
-                buf.push(0x01);
+                buf.push(pc::INST_ALLOC);
                 buf.write_u32::<BigEndian>(*size)?;
             }
             Instruction::Free(size) => {
-                buf.push(0x02);
+                buf.push(pc::INST_FREE);
                 buf.write_u32::<BigEndian>(*size)?;
             }
             Instruction::Jump(addr) => {
-                buf.push(0x03);
+                buf.push(pc::INST_JUMP);
                 buf.write_i64::<BigEndian>(*addr)?;
             }
             Instruction::Call(addr) => {
-                buf.push(0x04);
+                buf.push(pc::INST_CALL);
                 buf.write_u64::<BigEndian>(*addr)?;
             }
             Instruction::ExtCall(id) => {
-                buf.push(0x05);
+                buf.push(pc::INST_EXTCALL);
                 buf.write_u64::<BigEndian>(*id)?;
             }
             Instruction::Mov(ra, aref, rb, bref) => {
-                buf.push(0x06);
+                buf.push(pc::INST_MOV);
                 write_register(&mut buf, ra)?;
-                write_rref(&mut buf, aref);
+                write_reg_ref(&mut buf, aref);
                 write_register(&mut buf, rb)?;
-                write_rref(&mut buf, bref);
+                write_reg_ref(&mut buf, bref);
             }
             Instruction::Cpy(ra, aref, rb, bref) => {
-                buf.push(0x07);
+                buf.push(pc::INST_CPY);
                 write_register(&mut buf, ra)?;
-                write_rref(&mut buf, aref);
+                write_reg_ref(&mut buf, aref);
                 write_register(&mut buf, rb)?;
-                write_rref(&mut buf, bref);
+                write_reg_ref(&mut buf, bref);
             }
             Instruction::Ref(ra, aref, rb, bref) => {
-                buf.push(0x08);
+                buf.push(pc::INST_REF);
                 write_register(&mut buf, ra)?;
-                write_rref(&mut buf, aref);
+                write_reg_ref(&mut buf, aref);
                 write_register(&mut buf, rb)?;
-                write_rref(&mut buf, bref);
+                write_reg_ref(&mut buf, bref);
             }
             Instruction::StackPush(reg, rref) => {
-                buf.push(0x09);
+                buf.push(pc::INST_STACK_PUSH);
                 write_register(&mut buf, reg)?;
-                write_rref(&mut buf, rref);
+                write_reg_ref(&mut buf, rref);
             }
             Instruction::StackPop => {
-                buf.push(0x0A);
+                buf.push(pc::INST_STACK_POP);
             }
             Instruction::Add(ra, rb, rc) => {
-                buf.push(0x0B);
+                buf.push(pc::INST_ADD);
                 write_register(&mut buf, ra)?;
                 write_register(&mut buf, rb)?;
                 write_register(&mut buf, rc)?;
             }
             Instruction::Sub(ra, rb, rc) => {
-                buf.push(0x0C);
+                buf.push(pc::INST_SUB);
                 write_register(&mut buf, ra)?;
                 write_register(&mut buf, rb)?;
                 write_register(&mut buf, rc)?;
             }
             Instruction::Mul(ra, rb, rc) => {
-                buf.push(0x0D);
+                buf.push(pc::INST_MUL);
                 write_register(&mut buf, ra)?;
                 write_register(&mut buf, rb)?;
                 write_register(&mut buf, rc)?;
             }
             Instruction::Div(ra, rb, rc) => {
-                buf.push(0x0E);
+                buf.push(pc::INST_DIV);
                 write_register(&mut buf, ra)?;
                 write_register(&mut buf, rb)?;
                 write_register(&mut buf, rc)?;
             }
             Instruction::Equal(ra, rb) => {
-                buf.push(0x0F);
+                buf.push(pc::INST_EQUAL);
                 write_register(&mut buf, ra)?;
                 write_register(&mut buf, rb)?;
             }
             Instruction::NotEqual(ra, rb) => {
-                buf.push(0x10);
+                buf.push(pc::INST_NOT_EQUAL);
                 write_register(&mut buf, ra)?;
                 write_register(&mut buf, rb)?;
             }
             Instruction::Greater(ra, rb) => {
-                buf.push(0x11);
+                buf.push(pc::INST_GREATER);
                 write_register(&mut buf, ra)?;
                 write_register(&mut buf, rb)?;
             }
             Instruction::Less(ra, rb) => {
-                buf.push(0x12);
+                buf.push(pc::INST_LESS);
                 write_register(&mut buf, ra)?;
                 write_register(&mut buf, rb)?;
             }
             Instruction::GreaterEqual(ra, rb) => {
-                buf.push(0x13);
+                buf.push(pc::INST_GREATER_EQUAL);
                 write_register(&mut buf, ra)?;
                 write_register(&mut buf, rb)?;
             }
             Instruction::LessEqual(ra, rb) => {
-                buf.push(0x14);
+                buf.push(pc::INST_LESS_EQUAL);
                 write_register(&mut buf, ra)?;
                 write_register(&mut buf, rb)?;
             }

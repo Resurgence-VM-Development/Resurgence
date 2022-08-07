@@ -1,26 +1,39 @@
+/*!
+# Bytecode Reader API
+This module provides functions for reading raw bytecode data into a [`crate::CodeHolder`]
+instance.
+
+# Examples
+Read a bytecode file:
+```no_run
+use resurgence::api::codereader;
+
+let holder = codereader::read_bytecode_file("path/to/bytecode.rvm").unwrap();
+```
+*/
+
 use byteorder::{BigEndian, ReadBytesExt};
 use std::fs::File;
 use std::io::{Cursor, Read};
 use std::io::{Error, ErrorKind};
 use std::result::Result;
-use std::slice;
 
+use super::parser_constants as pc;
 use crate::objects::codeholder::CodeHolder;
 use crate::objects::constant::Constant;
 use crate::objects::instruction::Instruction;
 use crate::objects::register::{Register, RegisterLocation, RegisterReference};
 
 /// Creates a register instance from 5 bytes
-fn make_register(cur: &mut Cursor<&Vec<u8>>) -> Result<Register, Error> {
+fn read_register(cur: &mut Cursor<&Vec<u8>>) -> Result<Register, Error> {
     let reg = cur.read_u32::<BigEndian>()?;
-    let mut locval: u8 = 0;
-    cur.read(slice::from_mut(&mut locval))?;
+    let locval = cur.read_u8()?;
 
     let regloc = match locval {
-        0x01 => RegisterLocation::ConstantPool,
-        0x02 => RegisterLocation::Accumulator,
-        0x03 => RegisterLocation::Global,
-        0x04 => RegisterLocation::Local,
+        pc::LOC_CONSTANT => RegisterLocation::ConstantPool,
+        pc::LOC_ACCUMULATOR => RegisterLocation::Accumulator,
+        pc::LOC_GLOBAL => RegisterLocation::Global,
+        pc::LOC_LOCAL => RegisterLocation::Local,
         _ => {
             return Err(Error::new(
                 ErrorKind::Other,
@@ -37,13 +50,12 @@ fn make_register(cur: &mut Cursor<&Vec<u8>>) -> Result<Register, Error> {
 }
 
 /// Creates a register reference
-fn make_rref(cur: &mut Cursor<&Vec<u8>>) -> Result<RegisterReference, Error> {
-    let mut v: u8 = 0;
-    cur.read(slice::from_mut(&mut v))?;
+fn read_reg_ref(cur: &mut Cursor<&Vec<u8>>) -> Result<RegisterReference, Error> {
+    let v = cur.read_u8()?;
 
     let rref = match v {
-        0x01 => RegisterReference::AsIs,
-        0x02 => RegisterReference::Dereference,
+        pc::REF_AS_IS => RegisterReference::AsIs,
+        pc::REF_DEREFERENCE => RegisterReference::Dereference,
         _ => {
             return Err(Error::new(
                 ErrorKind::Other,
@@ -83,16 +95,16 @@ pub fn read_bytecode(buf: &Vec<u8>) -> Result<CodeHolder, Error> {
 
     // check if this is a rvm bytecode file
     // 52564D88
-    if !(cur.read_u32::<BigEndian>()? == 0x52564D88) {
+    if !(cur.read_u32::<BigEndian>()? == pc::MAGIC_NUMBER) {
         return Err(Error::new(
             ErrorKind::Other,
-            "Invalid bytecode (Header missing)",
+            "Invalid bytecode (Missing header)",
         ));
     }
 
     // check if bytecode version is supported
     let ver = cur.read_u16::<BigEndian>()?;
-    if ver != 2 {
+    if ver != pc::VERSION {
         return Err(Error::new(
             ErrorKind::Other,
             format!("Unsupported bytecode version {}", ver),
@@ -103,17 +115,17 @@ pub fn read_bytecode(buf: &Vec<u8>) -> Result<CodeHolder, Error> {
     for _ in 0..clen {
         let ctype = cur.read_u8()?;
         match ctype {
-            0x01 => {
+            pc::CONST_INT => {
                 // integer
                 let val = cur.read_i64::<BigEndian>()?;
                 holder.constant_pool.push(Constant::Int(val));
             }
-            0x02 => {
+            pc::CONST_DOUBLE => {
                 // float / double
                 let val = cur.read_f64::<BigEndian>()?;
                 holder.constant_pool.push(Constant::Double(val));
             }
-            0x03 => {
+            pc::CONST_STRING => {
                 // string
                 let length = cur.read_u64::<BigEndian>()? as usize;
                 let mut data = vec![0u8; length];
@@ -133,7 +145,7 @@ pub fn read_bytecode(buf: &Vec<u8>) -> Result<CodeHolder, Error> {
                 };
                 holder.constant_pool.push(Constant::String(str));
             }
-            0x04 => {
+            pc::CONST_BOOLEAN => {
                 // boolean
                 let val = match cur.read_u8()? {
                     0x00 => false,
@@ -141,9 +153,9 @@ pub fn read_bytecode(buf: &Vec<u8>) -> Result<CodeHolder, Error> {
                 };
                 holder.constant_pool.push(Constant::Boolean(val));
             }
-            0x05 => {
+            pc::CONST_ADDRESS => {
                 // address / register
-                let val = make_register(&mut cur)?;
+                let val = read_register(&mut cur)?;
                 holder.constant_pool.push(Constant::Address(val));
             }
             _ => {
@@ -165,141 +177,140 @@ pub fn read_bytecode(buf: &Vec<u8>) -> Result<CodeHolder, Error> {
             break;
         }
 
-        let mut op: u8 = 0; // opcode
-        cur.read(slice::from_mut(&mut op))?;
+        let op = cur.read_u8()?; // opcode
 
         match op {
-            0x00 => {
+            pc::INST_NOOP => {
                 // NOOP
                 continue;
             }
-            0x01 => {
+            pc::INST_ALLOC => {
                 // Alloc
                 let size = cur.read_u32::<BigEndian>()?;
                 holder.instructions.push(Instruction::Alloc(size));
             }
-            0x02 => {
+            pc::INST_FREE => {
                 // Free
                 let size = cur.read_u32::<BigEndian>()?;
                 holder.instructions.push(Instruction::Free(size));
             }
-            0x03 => {
+            pc::INST_JUMP => {
                 // Jump
                 let addr = cur.read_i64::<BigEndian>()?;
                 holder.instructions.push(Instruction::Jump(addr));
             }
-            0x04 => {
+            pc::INST_CALL => {
                 // Call
                 let addr = cur.read_u64::<BigEndian>()?;
                 holder.instructions.push(Instruction::Call(addr));
             }
-            0x05 => {
+            pc::INST_EXTCALL => {
                 // ExtCall
                 let id = cur.read_u64::<BigEndian>()?;
                 holder.instructions.push(Instruction::ExtCall(id));
             }
-            0x06 => {
+            pc::INST_MOV => {
                 // Mov
-                let ra = make_register(&mut cur)?;
-                let aref = make_rref(&mut cur)?;
-                let rb = make_register(&mut cur)?;
-                let bref = make_rref(&mut cur)?;
+                let ra = read_register(&mut cur)?;
+                let aref = read_reg_ref(&mut cur)?;
+                let rb = read_register(&mut cur)?;
+                let bref = read_reg_ref(&mut cur)?;
                 holder
                     .instructions
                     .push(Instruction::Mov(ra, aref, rb, bref));
             }
-            0x07 => {
+            pc::INST_CPY => {
                 // Cpy
-                let ra = make_register(&mut cur)?;
-                let aref = make_rref(&mut cur)?;
-                let rb = make_register(&mut cur)?;
-                let bref = make_rref(&mut cur)?;
+                let ra = read_register(&mut cur)?;
+                let aref = read_reg_ref(&mut cur)?;
+                let rb = read_register(&mut cur)?;
+                let bref = read_reg_ref(&mut cur)?;
                 holder
                     .instructions
                     .push(Instruction::Cpy(ra, aref, rb, bref));
             }
-            0x08 => {
+            pc::INST_REF => {
                 // Ref
-                let ra = make_register(&mut cur)?;
-                let aref = make_rref(&mut cur)?;
-                let rb = make_register(&mut cur)?;
-                let bref = make_rref(&mut cur)?;
+                let ra = read_register(&mut cur)?;
+                let aref = read_reg_ref(&mut cur)?;
+                let rb = read_register(&mut cur)?;
+                let bref = read_reg_ref(&mut cur)?;
                 holder
                     .instructions
                     .push(Instruction::Ref(ra, aref, rb, bref));
             }
-            0x09 => {
+            pc::INST_STACK_PUSH => {
                 // StackPush
-                let reg = make_register(&mut cur)?;
-                let rref = make_rref(&mut cur)?;
+                let reg = read_register(&mut cur)?;
+                let rref = read_reg_ref(&mut cur)?;
                 holder.instructions.push(Instruction::StackPush(reg, rref));
             }
-            0x0A => {
+            pc::INST_STACK_POP => {
                 // StackPop
                 holder.instructions.push(Instruction::StackPop);
             }
-            0x0B => {
+            pc::INST_ADD => {
                 // Add
-                let ra = make_register(&mut cur)?;
-                let rb = make_register(&mut cur)?;
-                let rc = make_register(&mut cur)?;
+                let ra = read_register(&mut cur)?;
+                let rb = read_register(&mut cur)?;
+                let rc = read_register(&mut cur)?;
                 holder.instructions.push(Instruction::Add(ra, rb, rc));
             }
-            0x0C => {
+            pc::INST_SUB => {
                 // Sub
-                let ra = make_register(&mut cur)?;
-                let rb = make_register(&mut cur)?;
-                let rc = make_register(&mut cur)?;
+                let ra = read_register(&mut cur)?;
+                let rb = read_register(&mut cur)?;
+                let rc = read_register(&mut cur)?;
                 holder.instructions.push(Instruction::Sub(ra, rb, rc));
             }
-            0x0D => {
+            pc::INST_MUL => {
                 // Mul
-                let ra = make_register(&mut cur)?;
-                let rb = make_register(&mut cur)?;
-                let rc = make_register(&mut cur)?;
+                let ra = read_register(&mut cur)?;
+                let rb = read_register(&mut cur)?;
+                let rc = read_register(&mut cur)?;
                 holder.instructions.push(Instruction::Mul(ra, rb, rc));
             }
-            0x0E => {
+            pc::INST_DIV => {
                 // Div
-                let ra = make_register(&mut cur)?;
-                let rb = make_register(&mut cur)?;
-                let rc = make_register(&mut cur)?;
+                let ra = read_register(&mut cur)?;
+                let rb = read_register(&mut cur)?;
+                let rc = read_register(&mut cur)?;
                 holder.instructions.push(Instruction::Div(ra, rb, rc));
             }
-            0x0F => {
+            pc::INST_EQUAL => {
                 // Equal
-                let ra = make_register(&mut cur)?;
-                let rb = make_register(&mut cur)?;
+                let ra = read_register(&mut cur)?;
+                let rb = read_register(&mut cur)?;
                 holder.instructions.push(Instruction::Equal(ra, rb));
             }
-            0x10 => {
+            pc::INST_NOT_EQUAL => {
                 // NotEqual
-                let ra = make_register(&mut cur)?;
-                let rb = make_register(&mut cur)?;
+                let ra = read_register(&mut cur)?;
+                let rb = read_register(&mut cur)?;
                 holder.instructions.push(Instruction::NotEqual(ra, rb));
             }
-            0x11 => {
+            pc::INST_GREATER => {
                 // Greater
-                let ra = make_register(&mut cur)?;
-                let rb = make_register(&mut cur)?;
+                let ra = read_register(&mut cur)?;
+                let rb = read_register(&mut cur)?;
                 holder.instructions.push(Instruction::Greater(ra, rb));
             }
-            0x12 => {
+            pc::INST_LESS => {
                 // Less
-                let ra = make_register(&mut cur)?;
-                let rb = make_register(&mut cur)?;
+                let ra = read_register(&mut cur)?;
+                let rb = read_register(&mut cur)?;
                 holder.instructions.push(Instruction::Less(ra, rb));
             }
-            0x13 => {
+            pc::INST_GREATER_EQUAL => {
                 // GreaterEqual
-                let ra = make_register(&mut cur)?;
-                let rb = make_register(&mut cur)?;
+                let ra = read_register(&mut cur)?;
+                let rb = read_register(&mut cur)?;
                 holder.instructions.push(Instruction::GreaterEqual(ra, rb));
             }
-            0x14 => {
+            pc::INST_LESS_EQUAL => {
                 // LessEqual
-                let ra = make_register(&mut cur)?;
-                let rb = make_register(&mut cur)?;
+                let ra = read_register(&mut cur)?;
+                let rb = read_register(&mut cur)?;
                 holder.instructions.push(Instruction::LessEqual(ra, rb));
             }
             _ => {

@@ -6,7 +6,7 @@ mod instruction;
 mod utils;
 
 use super::super::constant::Constant;
-use crate::api::read_bytecode_file;
+use crate::api::codereader;
 use crate::objects::codeholder::CodeHolder;
 use crate::objects::stackframe::StackFrame;
 
@@ -28,8 +28,8 @@ pub struct Interpreter {
 }
 
 impl Interpreter {
-    /// Creates a new `Interpreter` instance
-    pub fn new(ch: CodeHolder) -> Interpreter {
+    /// Creates a new `Interpreter` instance using a given CodeHolder
+    pub fn from(ch: CodeHolder) -> Interpreter {
         Interpreter {
             accumulator: 0.0,
             call_stack: Vec::new(),
@@ -41,9 +41,9 @@ impl Interpreter {
 
     /// Reads a file at a given path, parses it, and creates an [`Interpreter`] instance.
     ///
-    /// This is a convenience wrapper for [`crate::api::read_bytecode_file`] and behaves the same
-    /// way.
+    /// This is a convenience wrapper for [`crate::api::codereader::read_bytecode_file`] and
+    /// behaves the same way.
     pub fn from_file(path: &str) -> Result<Interpreter, Error> {
-        return Ok(Self::new(read_bytecode_file(&path)?));
+        return Ok(Self::from(codereader::read_bytecode_file(&path)?));
     }
 }
