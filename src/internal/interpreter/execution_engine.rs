@@ -6,12 +6,9 @@ impl ExecutionEngine for Interpreter {
     /// Execute Resurgence Instruction
     fn execute_instruction(&mut self, code_holder: &CodeHolder, start_index: usize)
     {
-        let CodeHolder(instruction_vec) = &*code_holder;
-        
-        // TODO: Make this loop much cleaner. It looks both ugly and unsafe
-        let mut index = start_index; let max_length = instruction_vec.len();
+        let mut index = start_index; let max_length = code_holder.instructions.len();
         while index != max_length {
-            let operation = &instruction_vec[index];
+            let operation = &code_holder.instructions[index];
             match &*operation {
                 Instruction::Alloc(ref register_amount) => self.call_stack.push(StackFrame::from(*register_amount)), // Very simple operation
                 Instruction::Free(ref block_amount) => {
@@ -25,6 +22,8 @@ impl ExecutionEngine for Interpreter {
                 },
 
                 Instruction::Call(ref func_index) => self.execute_instruction(code_holder, *func_index as usize),
+
+                // TODO: Implement ExtCall
                 Instruction::ExtCall(_) => todo!(),
                 
                 Instruction::Mov(ref dst_reg, ref dst_reg_ref, ref src_reg, ref src_reg_ref) => self.mov_registers(dst_reg, dst_reg_ref, src_reg, src_reg_ref),
@@ -39,12 +38,12 @@ impl ExecutionEngine for Interpreter {
                 Instruction::Mul(ref dst_reg, ref reg_1, ref reg_2) => self.mul(dst_reg, reg_1, reg_2),
                 Instruction::Div(ref dst_reg, ref reg_1, ref reg_2) => self.div(dst_reg, reg_1, reg_2),
                 
-                Instruction::Equal(_, _) => todo!(),
-                Instruction::NotEqual(_, _) => todo!(),
-                Instruction::Greater(_, _) => todo!(),
-                Instruction::Less(_, _) => todo!(),
-                Instruction::GreaterEqual(_, _) => todo!(),
-                Instruction::LessEqual(_, _) => todo!(),
+                Instruction::Equal(ref reg_1, ref reg_2) => if self.equal(reg_1, reg_2){index += 1;},
+                Instruction::NotEqual(ref reg_1, ref reg_2) => if self.not_equal(reg_1, reg_2){index += 1;},
+                Instruction::Greater(ref reg_1, ref reg_2) => if self.greater_than(reg_1, reg_2){index += 1;},
+                Instruction::Less(ref reg_1, ref reg_2) => if self.less_than(reg_1, reg_2){index += 1;},
+                Instruction::GreaterEqual(ref reg_1, ref reg_2) => if self.greater_or_equal(reg_1, reg_2){index += 1;},
+                Instruction::LessEqual(ref reg_1, ref reg_2) => if self.less_or_equal(reg_1, reg_2){index += 1;},
             }
 
             // Increment i to advance to the next index
