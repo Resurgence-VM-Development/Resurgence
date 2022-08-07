@@ -42,17 +42,49 @@ impl ExecutionEngine for Interpreter {
                     self.stack.pop();
                 } // We have the braces around this call to make the Rust compiler happy
 
-                Instruction::Add(ref dst_reg, ref reg_1, ref reg_2) => self.add(dst_reg, reg_1, reg_2),
-                Instruction::Sub(ref dst_reg, ref reg_1, ref reg_2) => self.sub(dst_reg, reg_1, reg_2),
-                Instruction::Mul(ref dst_reg, ref reg_1, ref reg_2) => self.mul(dst_reg, reg_1, reg_2),
-                Instruction::Div(ref dst_reg, ref reg_1, ref reg_2) => self.div(dst_reg, reg_1, reg_2),
+                Instruction::Add(ref dst_reg, ref reg_1, ref reg_2) => {
+                    self.add(dst_reg, reg_1, reg_2)
+                }
+                Instruction::Sub(ref dst_reg, ref reg_1, ref reg_2) => {
+                    self.sub(dst_reg, reg_1, reg_2)
+                }
+                Instruction::Mul(ref dst_reg, ref reg_1, ref reg_2) => {
+                    self.mul(dst_reg, reg_1, reg_2)
+                }
+                Instruction::Div(ref dst_reg, ref reg_1, ref reg_2) => {
+                    self.div(dst_reg, reg_1, reg_2)
+                }
 
-                Instruction::Equal(_, _) => todo!(),
-                Instruction::NotEqual(_, _) => todo!(),
-                Instruction::Greater(_, _) => todo!(),
-                Instruction::Less(_, _) => todo!(),
-                Instruction::GreaterEqual(_, _) => todo!(),
-                Instruction::LessEqual(_, _) => todo!(),
+                Instruction::Equal(ref reg_1, ref reg_2) => {
+                    if self.equal(reg_1, reg_2) {
+                        index += 1;
+                    }
+                }
+                Instruction::NotEqual(ref reg_1, ref reg_2) => {
+                    if self.not_equal(reg_1, reg_2) {
+                        index += 1;
+                    }
+                }
+                Instruction::Greater(ref reg_1, ref reg_2) => {
+                    if self.greater_than(reg_1, reg_2) {
+                        index += 1;
+                    }
+                }
+                Instruction::Less(ref reg_1, ref reg_2) => {
+                    if self.less_than(reg_1, reg_2) {
+                        index += 1;
+                    }
+                }
+                Instruction::GreaterEqual(ref reg_1, ref reg_2) => {
+                    if self.greater_or_equal(reg_1, reg_2) {
+                        index += 1;
+                    }
+                }
+                Instruction::LessEqual(ref reg_1, ref reg_2) => {
+                    if self.less_or_equal(reg_1, reg_2) {
+                        index += 1;
+                    }
+                }
             }
 
             // Increment i to advance to the next index
