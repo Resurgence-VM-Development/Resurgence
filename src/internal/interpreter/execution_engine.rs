@@ -1,5 +1,5 @@
 use super::super::{interpreter::Interpreter, execution_engine::ExecutionEngine};
-use crate::objects::{instruction::Instruction, stackframe::StackFrame, codeholder::CodeHolder, register::{self, Register, RegisterReference}};
+use crate::objects::{instruction::Instruction, stackframe::StackFrame, codeholder::CodeHolder};
 
 impl ExecutionEngine for Interpreter {
 
@@ -8,6 +8,7 @@ impl ExecutionEngine for Interpreter {
     {
         let CodeHolder(instruction_vec) = &*code_holder;
         
+        // TODO: Make this loop much cleaner. It looks both ugly and unsafe
         let mut index = start_index; let max_length = instruction_vec.len();
         while index != max_length {
             let operation = &instruction_vec[index];
