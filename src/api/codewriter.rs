@@ -5,6 +5,7 @@ use std::io::Error;
 use std::result::Result;
 
 use crate::objects::codeholder::CodeHolder;
+use crate::objects::constant::Constant;
 use crate::objects::instruction::Instruction;
 use crate::objects::register::{Register, RegisterLocation, RegisterReference};
 
@@ -39,8 +40,41 @@ pub fn write_bytecode_file(code: &CodeHolder, path: &str) -> Result<(), Error> {
 /// Takes a CodeHolder and outputs a vec containing bytecode in binary form.
 pub fn write_bytecode(code: &CodeHolder) -> Result<Vec<u8>, Error> {
     let mut buf: Vec<u8> = Vec::new();
-    buf.extend([0x52, 0x56, 0x4D, 0x88, 0x00, 0x01]); // write header (4 bytes) + version (2 bytes)
+    buf.extend([0x52, 0x56, 0x4D, 0x88, 0x00, 0x02]); // write header (4 bytes) + version (2 bytes)
 
+    // constants pool
+    buf.write_u32::<BigEndian>(code.constant_pool.len() as u32)?;
+    for i in &(code.constant_pool) {
+        match i {
+            Constant::Int(val) => {
+                buf.write_u8(0x01)?;
+                buf.write_i64::<BigEndian>(*val)?;
+            }
+            Constant::Double(val) => {
+                buf.write_u8(0x02)?;
+                buf.write_f64::<BigEndian>(*val)?;
+            }
+            Constant::String(val) => {
+                buf.write_u8(0x03)?;
+                let bytes = val.clone().into_bytes();
+                buf.write_u64::<BigEndian>(bytes.len() as u64)?;
+                buf.write_all(&bytes)?;
+            }
+            Constant::Boolean(val) => {
+                buf.write_u8(0x04)?;
+                buf.write_u8(match val {
+                    false => 0x00,
+                    true => 0x01,
+                })?;
+            }
+            Constant::Address(val) => {
+                buf.write_u8(0x05)?;
+                write_register(&mut buf, val)?;
+            }
+        }
+    }
+
+    // instructions
     for i in &(code.instructions) {
         match i {
             Instruction::Alloc(size) => {

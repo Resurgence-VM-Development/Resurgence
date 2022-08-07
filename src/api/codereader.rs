@@ -6,6 +6,7 @@ use std::result::Result;
 use std::slice;
 
 use crate::objects::codeholder::CodeHolder;
+use crate::objects::constant::Constant;
 use crate::objects::instruction::Instruction;
 use crate::objects::register::{Register, RegisterLocation, RegisterReference};
 
@@ -91,11 +92,71 @@ pub fn read_bytecode(buf: &Vec<u8>) -> Result<CodeHolder, Error> {
 
     // check if bytecode version is supported
     let ver = cur.read_u16::<BigEndian>()?;
-    if ver != 1 {
+    if ver != 2 {
         return Err(Error::new(
             ErrorKind::Other,
             format!("Unsupported bytecode version {}", ver),
         ));
+    }
+
+    let clen = cur.read_u32::<BigEndian>()?;
+    for _ in 0..clen {
+        let ctype = cur.read_u8()?;
+        match ctype {
+            0x01 => {
+                // integer
+                let val = cur.read_i64::<BigEndian>()?;
+                holder.constant_pool.push(Constant::Int(val));
+            }
+            0x02 => {
+                // float / double
+                let val = cur.read_f64::<BigEndian>()?;
+                holder.constant_pool.push(Constant::Double(val));
+            }
+            0x03 => {
+                // string
+                let length = cur.read_u64::<BigEndian>()? as usize;
+                let mut data = vec![0u8; length];
+                cur.read_exact(&mut data)?;
+                let str = match String::from_utf8(data) {
+                    Ok(d) => d,
+                    Err(error) => {
+                        return Err(Error::new(
+                            ErrorKind::Other,
+                            format!(
+                                "Bad UTF-8 string at position {}: {}",
+                                cur.position() - 1,
+                                error
+                            ),
+                        ));
+                    }
+                };
+                holder.constant_pool.push(Constant::String(str));
+            }
+            0x04 => {
+                // boolean
+                let val = match cur.read_u8()? {
+                    0x00 => false,
+                    _ => true,
+                };
+                holder.constant_pool.push(Constant::Boolean(val));
+            }
+            0x05 => {
+                // address / register
+                let val = make_register(&mut cur)?;
+                holder.constant_pool.push(Constant::Address(val));
+            }
+            _ => {
+                return Err(Error::new(
+                    ErrorKind::Other,
+                    format!(
+                        "Unrecognized constant type {} at position {}",
+                        ctype,
+                        cur.position() - 1
+                    ),
+                ));
+            }
+        }
     }
 
     // read bytecode into vector
