@@ -23,7 +23,7 @@ impl ExecutionEngine for Interpreter {
                 }
 
                 Instruction::Call(ref func_index) => self.execute_instruction(*func_index as usize),
-                Instruction::ExtCall(_) => todo!(),
+                Instruction::ExtCall(ref func_reg) => self.ext_call(*func_reg),
 
                 Instruction::Mov(ref dst_reg, ref dst_reg_ref, ref src_reg, ref src_reg_ref) => {
                     self.mov_registers(dst_reg, dst_reg_ref, src_reg, src_reg_ref)

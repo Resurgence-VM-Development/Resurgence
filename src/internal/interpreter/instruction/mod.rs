@@ -4,3 +4,4 @@ pub(crate) mod ref_reg;
 pub(crate) mod stk_push;
 pub(crate) mod math;
 pub(crate) mod cmp;
+pub(crate) mod ext_call;

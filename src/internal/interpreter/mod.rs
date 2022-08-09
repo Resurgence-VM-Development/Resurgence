@@ -9,6 +9,7 @@ use super::super::constant::Constant;
 use crate::api::codereader;
 use crate::objects::codeholder::CodeHolder;
 use crate::objects::stackframe::StackFrame;
+use crate::api::ext_func::resurgence_state::ResurgenceState;
 
 /// `Interpreter`: Built-in Register Virtual Machine
 pub struct Interpreter {
@@ -25,6 +26,9 @@ pub struct Interpreter {
 
     /// Holds global variables
     global: Vec<Option<Constant>>,
+
+    // All Rust functions registered before runtime
+    rust_functions: Vec<fn(ResurgenceState) -> Result<(), String>>,
 }
 
 impl Interpreter {
@@ -36,6 +40,7 @@ impl Interpreter {
             stack: Vec::new(),
             code_holder: ch,
             global: Vec::new(),
+            rust_functions: Vec::new(),
         }
     }
 
@@ -44,6 +49,13 @@ impl Interpreter {
     /// This is a convenience wrapper for [`crate::api::codereader::read_bytecode_file`] and
     /// behaves the same way.
     pub fn from_file(path: &str) -> Result<Interpreter, Error> {
-        return Ok(Self::from(codereader::read_bytecode_file(&path)?));
+        Ok(Self::from(codereader::read_bytecode_file(path)?))
+    }
+
+    /// Registers a single function to the interpreter instance
+    /// 
+    /// `function` (`)
+    pub fn register_function(&mut self, function: fn(ResurgenceState) -> Result<(), String>, func_name: String, func_id: u64) {
+        self.rust_functions.push(function);
     }
 }
