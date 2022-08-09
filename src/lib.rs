@@ -15,6 +15,7 @@ A VM backend library that makes developing interpreters easy. Can be used either
 */
 pub(crate) mod objects;
 pub(crate) use objects::constant;
+pub use objects::codeholder::CodeHolder;
 
 pub(crate) mod internal;
 pub use internal::interpreter::Interpreter;

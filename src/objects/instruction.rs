@@ -1,9 +1,9 @@
 use super::register::{Register, RegisterReference};
 
 /// `Instruction`: Represents instructions the built in Resurgence VM can use (this can be reused for any VM)
-/// 
-/// Possible Values: 
-/// * `Alloc(u32)`: Preallocates memory in the vector stored in a `StackFrame` object 
+///
+/// Possible Values:
+/// * `Alloc(u32)`: Preallocates memory in the vector stored in a `StackFrame` object
 /// * `Free(u32)`: Pops n amount of `StackFrame` objects
 /// * `Jump(i64)`: Jumps n amount of operations
 /// * `Call(u64)`: Jumps to index n by doing a recursive call of the execute_butecode function
@@ -21,6 +21,7 @@ use super::register::{Register, RegisterReference};
 /// * `Less(Register, Register)`: Checks if one register is less then another and jumps one operation if the condition is `true`
 /// * `GreaterEqual(Register, Register)`: Checks if one register is greater than or equal to another and jumps one operation if the condition is `true`
 /// * `LessEqual(Register, Register)`: Checks if one register is less than or equal to another and jumps one operation if the condition is `true`
+#[derive(Clone, Copy)]
 pub enum Instruction {
     Alloc(u32),
     Free(u32),

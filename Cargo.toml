@@ -9,5 +9,8 @@ readme = "README.md"
 homepage = "https://github.com/Resurgence-VM-Development/Resurgence"
 repository = "https://github.com/Resurgence-VM-Development/Resurgence"
 
+[dependencies]
+byteorder = "1.4.3"
+
 [lib]
 doctest = false
