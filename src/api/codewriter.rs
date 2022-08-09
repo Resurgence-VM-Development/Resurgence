@@ -33,7 +33,7 @@ fn write_register(buf: &mut Vec<u8>, r: &Register) -> Result<(), Error> {
         RegisterLocation::Global => pc::LOC_GLOBAL,
         RegisterLocation::Local => pc::LOC_LOCAL,
     });
-    return Ok(());
+    Ok(())
 }
 
 fn write_reg_ref(buf: &mut Vec<u8>, rref: &RegisterReference) {
@@ -47,10 +47,10 @@ fn write_reg_ref(buf: &mut Vec<u8>, rref: &RegisterReference) {
 pub fn write_bytecode_file(code: &CodeHolder, path: &str) -> Result<(), Error> {
     let mut f = File::create(path)?;
 
-    let data = write_bytecode(&code)?;
+    let data = write_bytecode(code)?;
     f.write_all(&data)?;
 
-    return Ok(());
+    Ok(())
 }
 
 /// Takes a CodeHolder and outputs a vec containing bytecode in binary form.
@@ -203,5 +203,5 @@ pub fn write_bytecode(code: &CodeHolder) -> Result<Vec<u8>, Error> {
         }
     }
 
-    return Ok(buf);
+    Ok(buf)
 }

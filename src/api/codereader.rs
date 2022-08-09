@@ -95,7 +95,7 @@ pub fn read_bytecode(buf: &Vec<u8>) -> Result<CodeHolder, Error> {
 
     // check if this is a rvm bytecode file
     // 52564D88
-    if !(cur.read_u32::<BigEndian>()? == pc::MAGIC_NUMBER) {
+    if cur.read_u32::<BigEndian>()? != pc::MAGIC_NUMBER {
         return Err(Error::new(
             ErrorKind::Other,
             "Invalid bytecode (Missing header)",
@@ -147,10 +147,7 @@ pub fn read_bytecode(buf: &Vec<u8>) -> Result<CodeHolder, Error> {
             }
             pc::CONST_BOOLEAN => {
                 // boolean
-                let val = match cur.read_u8()? {
-                    0x00 => false,
-                    _ => true,
-                };
+                let val = !matches!(cur.read_u8()?, 0x00);
                 holder.constant_pool.push(Constant::Boolean(val));
             }
             pc::CONST_ADDRESS => {

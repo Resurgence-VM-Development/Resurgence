@@ -70,7 +70,7 @@ impl Interpreter {
             RegisterLocation::Global => {
                 let register = self.ref_global(index); // get the register that stores the address
                 if let Constant::Address(dref_reg) = register {
-                    dref_reg.clone()
+                    *dref_reg
                 } else {
                     panic!("Dereferencing requires address")
                 }
@@ -79,7 +79,7 @@ impl Interpreter {
                 let stack_frame = self.ref_stack_frame(); // reference the last stackframe
                 let src_reg = stack_frame.ref_register(index); // get the register that stores the address
                 if let Constant::Address(dref_reg) = src_reg {
-                    dref_reg.clone()
+                    *dref_reg
                 } else {
                     panic!("Must dereference a address!")
                 }

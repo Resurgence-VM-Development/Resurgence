@@ -1,4 +1,4 @@
-use crate::{Interpreter, objects::register::{Register, RegisterLocation}, objects::constant::{Constant, create_constant_double}};
+use crate::{Interpreter, objects::register::{Register, RegisterLocation}, objects::constant::{Constant}};
 
 
 impl Interpreter {

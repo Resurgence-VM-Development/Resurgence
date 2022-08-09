@@ -17,7 +17,7 @@ impl Interpreter {
                     self.global[dst_index_usize] = Some(Constant::Address(self.dereference_register(src_reg.0 as usize, &src_reg.1)));
                     return;
                 }
-                self.global[dst_index_usize] = Some(Constant::Address(src_reg.clone()));
+                self.global[dst_index_usize] = Some(Constant::Address(*src_reg));
             },
             RegisterLocation::Local => {
                 if *src_reg_ref == RegisterReference::Dereference {
@@ -26,7 +26,7 @@ impl Interpreter {
                     return;
                 }
                 let stack_frame = self.ref_stack_frame();
-                stack_frame.registers[dst_index_usize] = Some(Constant::Address(src_reg.clone()));
+                stack_frame.registers[dst_index_usize] = Some(Constant::Address(*src_reg));
             },
             _ => panic!("Can't reference anything other then a local or global register!"),
         }
