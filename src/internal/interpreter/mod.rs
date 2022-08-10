@@ -2,10 +2,12 @@ use std::io::Error;
 use std::result::Result;
 
 pub(crate) mod execution_engine;
+pub(crate) mod rust_func;
 mod instruction;
 mod utils;
 
 use super::super::constant::Constant;
+use self::rust_func::RustFunc;
 use crate::api::codereader;
 use crate::objects::codeholder::CodeHolder;
 use crate::objects::stackframe::StackFrame;
@@ -28,7 +30,7 @@ pub struct Interpreter {
     global: Vec<Option<Constant>>,
 
     // All Rust functions registered before runtime
-    rust_functions: Vec<fn(ResurgenceState) -> Result<(), String>>,
+    rust_functions: Vec<RustFunc>,
 }
 
 impl Interpreter {
@@ -56,6 +58,10 @@ impl Interpreter {
     /// 
     /// `function` (`)
     pub fn register_function(&mut self, function: fn(ResurgenceState) -> Result<(), String>, func_name: String, func_id: u64) {
-        self.rust_functions.push(function);
+        let registered_funcs_size = self.rust_functions.len() as u64;
+        if func_id != registered_funcs_size {
+            panic!("function ID mismatch!");
+        }
+        self.rust_functions.push(RustFunc{name: func_name, func: function});
     }
 }
