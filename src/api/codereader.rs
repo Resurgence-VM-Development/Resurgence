@@ -24,6 +24,26 @@ use crate::objects::constant::Constant;
 use crate::objects::instruction::Instruction;
 use crate::objects::register::{Register, RegisterLocation, RegisterReference};
 
+/// Reads a string from a cursor
+fn read_string(cur: &mut Cursor<&Vec<u8>>) -> Result<String, Error> {
+    let length = cur.read_u64::<BigEndian>()? as usize;
+    let mut data = vec![0u8; length];
+    cur.read_exact(&mut data)?;
+    return match String::from_utf8(data) {
+        Ok(d) => Ok(d),
+        Err(error) => {
+            return Err(Error::new(
+                ErrorKind::Other,
+                format!(
+                    "Bad UTF-8 string at position {}: {}",
+                    cur.position() - 1,
+                    error
+                ),
+            ));
+        }
+    };
+}
+
 /// Creates a register instance from 5 bytes
 fn read_register(cur: &mut Cursor<&Vec<u8>>) -> Result<Register, Error> {
     let reg = cur.read_u32::<BigEndian>()?;
@@ -88,10 +108,7 @@ pub fn read_bytecode(buf: &Vec<u8>) -> Result<CodeHolder, Error> {
     let len = buf.len();
 
     let mut cur = Cursor::new(buf);
-    let mut holder = CodeHolder {
-        instructions: Vec::new(),
-        constant_pool: Vec::new(),
-    };
+    let mut holder = CodeHolder::new();
 
     // check if this is a rvm bytecode file
     // 52564D88
@@ -111,6 +128,7 @@ pub fn read_bytecode(buf: &Vec<u8>) -> Result<CodeHolder, Error> {
         ));
     }
 
+    // constants table
     let clen = cur.read_u32::<BigEndian>()?;
     for _ in 0..clen {
         let ctype = cur.read_u8()?;
@@ -127,22 +145,7 @@ pub fn read_bytecode(buf: &Vec<u8>) -> Result<CodeHolder, Error> {
             }
             pc::CONST_STRING => {
                 // string
-                let length = cur.read_u64::<BigEndian>()? as usize;
-                let mut data = vec![0u8; length];
-                cur.read_exact(&mut data)?;
-                let str = match String::from_utf8(data) {
-                    Ok(d) => d,
-                    Err(error) => {
-                        return Err(Error::new(
-                            ErrorKind::Other,
-                            format!(
-                                "Bad UTF-8 string at position {}: {}",
-                                cur.position() - 1,
-                                error
-                            ),
-                        ));
-                    }
-                };
+                let str = read_string(&mut cur)?;
                 holder.constant_pool.push(Constant::String(str));
             }
             pc::CONST_BOOLEAN => {
@@ -167,6 +170,14 @@ pub fn read_bytecode(buf: &Vec<u8>) -> Result<CodeHolder, Error> {
             }
         }
     }
+    
+    // read imports table
+    let ilen = cur.read_u64::<BigEndian>()?;
+    for _ in 0..ilen {
+        let import_func = read_string(&mut cur)?;
+        holder.imports.push(import_func);
+    }
+
 
     // read bytecode into vector
     loop {

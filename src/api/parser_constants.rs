@@ -7,7 +7,7 @@ This module describes constant values used in bytecode reading and writing.
 pub(crate) const MAGIC_NUMBER: u32 = 0x52564D88;
 
 /// Format version number
-pub(crate) const VERSION: u16 = 2;
+pub(crate) const VERSION: u16 = 3;
 
 /*
  * Constant types
