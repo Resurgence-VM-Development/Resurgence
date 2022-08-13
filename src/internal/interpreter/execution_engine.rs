@@ -1,4 +1,4 @@
-use std::io::{Error, ErrorKind};
+use std::io::Error;
 
 use super::super::{execution_engine::ExecutionEngine, interpreter::Interpreter};
 use crate::objects::{instruction::Instruction, stackframe::StackFrame};
