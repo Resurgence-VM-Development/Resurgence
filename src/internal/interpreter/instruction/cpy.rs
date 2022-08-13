@@ -1,9 +1,11 @@
+use std::io::{Error, ErrorKind};
+
 use super::super::super::{interpreter::Interpreter};
 use crate::objects::constant::{Constant, create_constant_double};
 use crate::objects::register::{Register, RegisterLocation, RegisterReference};
 
 impl Interpreter {
-    pub fn cpy_registers(&mut self, dst_reg: &Register, dst_reg_ref: &RegisterReference, src_reg: &Register, src_reg_ref: &RegisterReference) {
+    pub fn cpy_registers(&mut self, dst_reg: &Register, dst_reg_ref: &RegisterReference, src_reg: &Register, src_reg_ref: &RegisterReference) -> Result<(), Error> {
         // Destination register
         let Register(mut dst_index, mut dst_loc) = dst_reg; 
         let mut dst_index_usize = dst_index as usize;
@@ -35,7 +37,7 @@ impl Interpreter {
                     Constant::Double(src_double) => {
                         self.accumulator = src_double;
                     }
-                    _ => panic!("Invalid move to accumulator register!"),
+                    _ => return Err(Error::new(ErrorKind::InvalidInput, "Invalid copy to the accumulator!".to_string())),
                 }
         },
             (RegisterLocation::Accumulator, RegisterLocation::Local) => {
@@ -47,7 +49,7 @@ impl Interpreter {
                     Constant::Double(src_double) => {
                         self.accumulator = src_double;
                     }
-                    _ => panic!("Invalid move to accumulator register!"),
+                    _ => return Err(Error::new(ErrorKind::InvalidInput, "Invalid copy to the accumulator!".to_string())),
                 }
             },
             
@@ -84,7 +86,8 @@ impl Interpreter {
                 stack_frame.registers[dst_index_usize] = Some(stack_frame.mov_register(src_index_usize));
             },
 
-            _ => panic!("Invalid Mov operation!")
+            _ => return Err(Error::new(ErrorKind::InvalidInput, "Invalid cpy operation!".to_string()))
         }
+        Result::Ok(())
     }
 }

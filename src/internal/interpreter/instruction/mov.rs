@@ -1,9 +1,11 @@
+use std::io::{Error, ErrorKind};
+
 use super::super::super::{interpreter::Interpreter};
 use crate::objects::constant::{Constant, create_constant_double};
 use crate::objects::register::{Register, RegisterLocation, RegisterReference};
 
 impl Interpreter {
-    pub fn mov_registers(&mut self, dst_reg: &Register, dst_reg_ref: &RegisterReference, src_reg: &Register, src_reg_ref: &RegisterReference) {
+    pub fn mov_registers(&mut self, dst_reg: &Register, dst_reg_ref: &RegisterReference, src_reg: &Register, src_reg_ref: &RegisterReference) -> Result<(), Error> {
         // Destination register
         let Register(mut dst_index, mut dst_loc) = dst_reg; 
         let mut dst_index_usize = dst_index as usize;
@@ -35,9 +37,9 @@ impl Interpreter {
                     Constant::Double(src_double) => {
                         self.accumulator = src_double;
                     }
-                    _ => panic!("Invalid move to accumulator register!"),
+                    _ => return Err(Error::new(ErrorKind::InvalidInput, "Invalid move to accumulator register!".to_string()))
                 }
-        },
+            },
             (RegisterLocation::Accumulator, RegisterLocation::Local) => {
                 let src_register = self.mov_local(src_index_usize);
                 match src_register {
@@ -47,7 +49,7 @@ impl Interpreter {
                     Constant::Double(src_double) => {
                         self.accumulator = src_double;
                     }
-                    _ => panic!("Invalid move to accumulator register!"),
+                    _ => return Err(Error::new(ErrorKind::InvalidInput, "Invalid move to accumulator register!".to_string())),
                 }
             },
     
@@ -75,7 +77,8 @@ impl Interpreter {
                 let stack_frame = self.ref_stack_frame();
                 stack_frame.registers[dst_index_usize] = Some(stack_frame.mov_register(src_index_usize));
             },
-            _ => panic!("Invalid Mov operation!")
+            _ => return Err(Error::new(ErrorKind::InvalidInput, "Invalid mov operation".to_string())),
         }
+        Result::Ok(())
     }
 }

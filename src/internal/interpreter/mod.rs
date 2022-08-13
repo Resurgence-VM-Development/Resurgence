@@ -13,6 +13,8 @@ use crate::objects::codeholder::CodeHolder;
 use crate::objects::stackframe::StackFrame;
 use crate::api::ext_func::resurgence_state::ResurgenceState;
 
+// API exports
+pub mod resolve_imports;
 /// `Interpreter`: Built-in Register Virtual Machine
 pub struct Interpreter {
     /// Special register used for fast math
@@ -29,6 +31,9 @@ pub struct Interpreter {
     /// Holds global variables
     global: Vec<Option<Constant>>,
 
+    // Converts bytecode indices into internal indicies
+    byte_to_interal: Vec<u64>,
+
     // All Rust functions registered before runtime
     rust_functions: Vec<RustFunc>,
 }
@@ -42,6 +47,7 @@ impl Interpreter {
             stack: Vec::new(),
             code_holder: ch,
             global: Vec::new(),
+            byte_to_interal: Vec::new(),
             rust_functions: Vec::new(),
         }
     }
@@ -57,11 +63,7 @@ impl Interpreter {
     /// Registers a single function to the interpreter instance
     /// 
     /// `function` (`)
-    pub fn register_function(&mut self, function: fn(ResurgenceState) -> Result<(), String>, func_name: String, func_id: u64) {
-        let registered_funcs_size = self.rust_functions.len() as u64;
-        if func_id != registered_funcs_size {
-            panic!("function ID mismatch!");
-        }
+    pub fn register_function(&mut self, function: fn(ResurgenceState) -> Result<(), Error>, func_name: String) {
         self.rust_functions.push(RustFunc{name: func_name, func: function});
     }
 }

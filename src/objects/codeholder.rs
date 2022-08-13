@@ -6,8 +6,10 @@ use super::instruction::Instruction;
 pub struct CodeHolder {
     /// A [`Vec`] of executable instructions
     pub instructions: Vec<Instruction>,
+
     /// A pool of immutable data that is available to the VM at runtime.
     pub constant_pool: Vec<Constant>,
+    
     /// A list of imports that are required to properly link with the application
     pub(crate) imports: Vec<String>,
 }
