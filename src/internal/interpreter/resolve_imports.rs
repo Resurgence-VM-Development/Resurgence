@@ -2,6 +2,7 @@ use std::io::{Error, ErrorKind};
 use super::Interpreter;
 
 impl Interpreter {
+    /// Resolves any Rust functions used in the bytecode file by creating a "compatibility layer" based on indicies
     pub fn resolve_imports(&mut self) -> Result<(), Error> {
         let imports = &self.code_holder.imports;
         for (index, name) in imports.iter().enumerate() {
