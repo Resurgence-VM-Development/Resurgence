@@ -1,3 +1,4 @@
+use std::fmt;
 use super::register::Register;
 
 /// `Constant`: Represents a constant in the backend
