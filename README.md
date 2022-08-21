@@ -10,25 +10,32 @@ Join the Discord server!
 
 [![Discord](https://badgen.net/badge/icon/discord?icon=discord&label)](https://discord.gg/e2GuJ2k6na)
 
-Resurgence aims to be an embedable VM backend with an easy to use API for projects like:
+Resurgence aims to be an embeddable virtual machine with an easy to use API for projects like:
 * Game engines
-* Full blown interpreters
-* Applications that want custom scripting
+* Language interpreters
+* Applications that want custom scripting behavior
+* Applications that want to execute custom user code in a secure manner
 
-Right now, Resurgence isn't ready and isn't meant to be used right now
+Right now, Resurgence is currently in early stages of development, and shouldn't be used in any serious projects yet.
 
-Note: Resurgence is just a backend. This allows us to focus on making it good without having to worry about maintaining a front end. For making a full blown VM, we recommend [Crafting Interpters](https://craftinginterpreters.com/) to get an idea on how to make one. Eventually there will be a reference implementation for anyone that needs it
+Note: Resurgence is just a virtual machine. This allows us to focus on making it good without having to worry about maintaining a language interpreter or library interface. For making a fully featured interpreter, we recommend [Crafting Interpters](https://craftinginterpreters.com/) to get an idea on how to make one.
 
-# Architecture
+## Features
+* Resurgence is a Register-based VM, which closely replicates the design of a real computer
+* Resurgence is designed to be very lightweight and simple
+* Resurgence is designed specifically for embedding into another application
+* Code running inside of a Resurgence VM is sandboxed by default
+
+## Architecture
 ![Architecture](images/architecture.png)
 ![Application Stack](images/application_stack.png)
 
-# Security
-Of course, with any VM that can be embeded, there's always the question regarding security. To prevent Resurgence from calling random functions, it was decided that all functions must be registered by the application itself with integers as IDs. This is more secure as it can be assumed that all functions registered were registered by the application developer(s), but it comes at the cost of dynamic loading.
+## Security
+Code running inside of a Resurgence VM is secure and sandboxed by default. The embedding application must explicitly register functions for any instructions to call external code. This essentially sandboxes code running inside of a VM to have a limited ability to access system features. Resurgence is also written using safe Rust code, which makes it extremely difficult to escape this sandbox. This design makes Resurgence suitable for executing untrusted user code without compromising security.
 
-Note that while dynamic loading could be implemeted by the application, Resurgence VM will never natively support it
+Note: Dynamic loading is not supported by Resurgence. However, it could be implemented by the embedding application.
 
-# Building Docs
+## Building Docs
 To get basic documentation, run:
 
 `cargo doc --open` 
