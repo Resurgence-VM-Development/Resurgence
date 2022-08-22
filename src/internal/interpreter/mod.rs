@@ -2,16 +2,16 @@ use std::io::Error;
 use std::result::Result;
 
 pub(crate) mod execution_engine;
-pub(crate) mod rust_func;
 mod instruction;
+pub(crate) mod rust_func;
 mod utils;
 
-use super::super::constant::Constant;
 use self::rust_func::RustFunc;
+use super::super::constant::Constant;
 use crate::api::codereader;
+use crate::api::ext_func::resurgence_state::ResurgenceState;
 use crate::objects::codeholder::CodeHolder;
 use crate::objects::stackframe::StackFrame;
-use crate::api::ext_func::resurgence_state::ResurgenceState;
 
 // API exports
 pub mod resolve_imports;
@@ -61,9 +61,16 @@ impl Interpreter {
     }
 
     /// Registers a single function to the interpreter instance
-    /// 
+    ///
     /// `function` (`)
-    pub fn register_function(&mut self, function: fn(ResurgenceState) -> Result<(), Error>, func_name: String) {
-        self.rust_functions.push(RustFunc{name: func_name, func: function});
+    pub fn register_function(
+        &mut self,
+        function: fn(&mut ResurgenceState) -> Result<(), Error>,
+        func_name: String,
+    ) {
+        self.rust_functions.push(RustFunc {
+            name: func_name,
+            func: function,
+        });
     }
 }
