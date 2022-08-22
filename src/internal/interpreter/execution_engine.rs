@@ -21,7 +21,7 @@ impl ExecutionEngine for Interpreter {
                     }
                 }
                 Instruction::Jump(ref jmp_amount) => {
-                    index += *jmp_amount as usize;
+                    index = (index as i64 + *jmp_amount) as usize;
                     continue;
                 }
 
