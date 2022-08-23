@@ -12,7 +12,9 @@ impl Interpreter {
     ///
     /// `index` (`usize`): index of register
     pub fn mov_global(&mut self, index: usize) -> Constant {
-        self.global[index].take().expect("Non-existant register!")
+        let ret = self.global[index].take().expect("Non-existant register!");
+        self.global[index] = Some(Constant::Boolean(false));
+        ret
     }
 
     /// Returns a copy of a global register
