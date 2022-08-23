@@ -10,9 +10,7 @@ impl StackFrame {
     /// 
     /// `index` (`usize`): index of register
     pub fn mov_register(&mut self, index: usize) -> Constant {
-        let ret = self.registers[index].take().expect("Non-existant register!");
-        self.registers[index] = Some(Constant::Boolean(false));
-        ret
+        self.registers[index].take().expect("Non-existant register!")
     }
 
     /// Copys a value out of a register
