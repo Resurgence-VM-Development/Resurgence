@@ -7,7 +7,7 @@ use crate::objects::register::{Register, RegisterLocation, RegisterReference};
 impl Interpreter {
     pub fn cpy_registers(&mut self, dst_reg: &Register, dst_reg_ref: &RegisterReference, src_reg: &Register, src_reg_ref: &RegisterReference) -> Result<(), Error> {
         // Destination register
-        let Register(mut dst_index, mut dst_loc) = dst_reg; 
+        let Register(mut dst_index, mut dst_loc) = dst_reg;
         let mut dst_index_usize = dst_index as usize;
 
         // Dereference the destination register if needed
@@ -15,9 +15,9 @@ impl Interpreter {
             Register(dst_index, dst_loc) = self.dereference_register(dst_index_usize, &dst_loc);
             dst_index_usize = dst_index as usize;
         }
-        
+
         // Source register
-        let Register(mut src_index, mut src_loc) = src_reg; 
+        let Register(mut src_index, mut src_loc) = src_reg;
         let mut src_index_usize = src_index as usize;
 
         // Dereference the source register if needed
@@ -25,7 +25,7 @@ impl Interpreter {
             Register(src_index, src_loc) = self.dereference_register(src_index_usize, &src_loc);
             src_index_usize = src_index as usize;
         }
-    
+
         match (dst_loc, src_loc) {
             (RegisterLocation::Accumulator, RegisterLocation::Global) => {
                 // Start doing the move if src_register is not None
@@ -52,7 +52,7 @@ impl Interpreter {
                     _ => return Err(Error::new(ErrorKind::InvalidInput, "Invalid copy to the accumulator!".to_string())),
                 }
             },
-            
+
             (RegisterLocation::Global, RegisterLocation::ConstantPool) => {
                 self.global[dst_index_usize] = Some(self.cpy_constant(src_index_usize));
             }
@@ -83,7 +83,7 @@ impl Interpreter {
             },
             (RegisterLocation::Local, RegisterLocation::Local) => {
                 let stack_frame = self.ref_stack_frame();
-                stack_frame.registers[dst_index_usize] = Some(stack_frame.mov_register(src_index_usize));
+                stack_frame.registers[dst_index_usize] = Some(stack_frame.cpy_register(src_index_usize));
             },
 
             _ => return Err(Error::new(ErrorKind::InvalidInput, "Invalid cpy operation!".to_string()))
