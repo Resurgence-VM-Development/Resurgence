@@ -1,4 +1,3 @@
-use std::fmt;
 use super::register::Register;
 
 /// `Constant`: Represents a constant in the backend
@@ -19,6 +18,12 @@ pub enum Constant {
 }
 
 impl Constant {
+    fn check_overflow(&self, value: Option<i64>) -> i64 {
+        if value.is_none() {
+            panic!("Overflow!");
+        }
+        value.unwrap()
+    }
     /// Adds 2 numerical Constants together
     /// 
     /// `constant` (`&Constant::Int` or `&Constant::Double`): Constant you want to add to self
@@ -32,7 +37,7 @@ impl Constant {
     pub fn add(&self, constant: &Constant) -> Constant {
         match (self.clone(), (*constant).clone()) {
             (Constant::Int(val_1), Constant::Int(val_2)) => {
-                Constant::Int(val_1 + val_2)
+                Constant::Int(self.check_overflow(val_1.checked_add(val_2)))
             },
             (Constant::Double(val_1), Constant::Double(val_2)) => {
                 Constant::Double(val_1 + val_2)
@@ -58,7 +63,7 @@ impl Constant {
     pub fn sub(&self, constant: &Constant) -> Constant {
         match (self.clone(), (*constant).clone()) {
             (Constant::Int(val_1), Constant::Int(val_2)) => {
-                Constant::Int(val_1 - val_2)
+                Constant::Int(self.check_overflow(val_1.checked_sub(val_2)))
             },
             (Constant::Double(val_1), Constant::Double(val_2)) => {
                 Constant::Double(val_1 - val_2)
@@ -85,7 +90,7 @@ impl Constant {
     pub fn mul(&self, constant: &Constant) -> Constant {
         match (self.clone(), (*constant).clone()) {
             (Constant::Int(val_1), Constant::Int(val_2)) => {
-                Constant::Int(val_1 * val_2)
+                Constant::Int(self.check_overflow(val_1.checked_mul(val_2)))
             },
             (Constant::Double(val_1), Constant::Double(val_2)) => {
                 Constant::Double(val_1 * val_2)
@@ -112,7 +117,7 @@ impl Constant {
     pub fn div(&self, constant: &Constant) -> Constant {
         match (self.clone(), (*constant).clone()) {
             (Constant::Int(val_1), Constant::Int(val_2)) => {
-                Constant::Int(val_1 / val_2)
+                Constant::Int(self.check_overflow(val_1.checked_div(val_2)))
             },
             (Constant::Double(val_1), Constant::Double(val_2)) => {
                 Constant::Double(val_1 / val_2)
