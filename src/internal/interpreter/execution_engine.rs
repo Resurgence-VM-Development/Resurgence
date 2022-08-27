@@ -45,6 +45,7 @@ impl ExecutionEngine for Interpreter {
                 Instruction::Ref(ref dst_reg, ref dst_reg_ref, ref src_reg, ref src_reg_ref) => self.ref_registers(dst_reg, dst_reg_ref, src_reg, src_reg_ref)?,
 
                 Instruction::StackPush(ref register, ref reference) => self.push_on_stack(register, reference),
+                Instruction::StackMov(ref register, ref reference) => self.stack_mov(register, reference)?,
                 Instruction::StackPop => {
                     self.stack.pop();
                 } // We have the braces around this call to make the Rust compiler happy
