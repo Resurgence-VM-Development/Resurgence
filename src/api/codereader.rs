@@ -197,10 +197,20 @@ pub fn read_bytecode(buf: &Vec<u8>) -> Result<CodeHolder, Error> {
                 let size = cur.read_u32::<BigEndian>()?;
                 holder.instructions.push(Instruction::Alloc(size));
             }
+            pc::INST_FRAME_ALLOC => {
+                // FrameAlloc
+                let size = cur.read_u32::<BigEndian>()?;
+                holder.instructions.push(Instruction::Alloc(size));
+            }
             pc::INST_FREE => {
                 // Free
                 let size = cur.read_u32::<BigEndian>()?;
                 holder.instructions.push(Instruction::Free(size));
+            }
+            pc::INST_FRAME_FREE => {
+                // FrameFree
+                let size = cur.read_u32::<BigEndian>()?;
+                holder.instructions.push(Instruction::FrameFree(size));
             }
             pc::INST_JUMP => {
                 // Jump
@@ -253,6 +263,12 @@ pub fn read_bytecode(buf: &Vec<u8>) -> Result<CodeHolder, Error> {
                 let rref = read_reg_ref(&mut cur)?;
                 holder.instructions.push(Instruction::StackPush(reg, rref));
             }
+            pc::INST_STACK_MOV => {
+                // StackMov
+                let reg = read_register(&mut cur)?;
+                let rref = read_reg_ref(&mut cur)?;
+                holder.instructions.push(Instruction::StackMov(reg, rref));
+            }
             pc::INST_STACK_POP => {
                 // StackPop
                 holder.instructions.push(Instruction::StackPop);
@@ -284,6 +300,13 @@ pub fn read_bytecode(buf: &Vec<u8>) -> Result<CodeHolder, Error> {
                 let rb = read_register(&mut cur)?;
                 let rc = read_register(&mut cur)?;
                 holder.instructions.push(Instruction::Div(ra, rb, rc));
+            }
+            pc::INST_MOD => {
+                // Mod
+                let ra = read_register(&mut cur)?;
+                let rb = read_register(&mut cur)?;
+                let rc = read_register(&mut cur)?;
+                holder.instructions.push(Instruction::Mod(ra, rb, rc));
             }
             pc::INST_EQUAL => {
                 // Equal
