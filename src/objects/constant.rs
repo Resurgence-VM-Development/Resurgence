@@ -131,6 +131,33 @@ impl Constant {
         }
     }
 
+    /// Divides 2 numerical Constants together and returns the remainder
+    /// 
+    /// `constant` (`&Constant::Int` or `&Constant::Double`): Constant you want to divide self by
+    /// 
+    /// # Examples
+    /// ```no_run
+    /// let int_const = create_constant_int(&5);
+    /// let res = int_const.modlo(&create_constant_int(&5));
+    /// assert_eq!(res, Constant::Int(1));
+    /// ```
+    pub fn modlo(&self, constant: &Constant) -> Constant {
+        match (self.clone(), (*constant).clone()) {
+            (Constant::Int(val_1), Constant::Int(val_2)) => {
+                Constant::Int(val_1 % val_2)
+            },
+            (Constant::Double(val_1), Constant::Double(val_2)) => {
+                Constant::Double(val_1 % val_2)
+            },
+            (Constant::Int(val_1), Constant::Double(val_2)) | (Constant::Double(val_2), Constant::Int(val_1)) => {
+                Constant::Double(val_1 as f64 % val_2)
+            },
+            _ => {
+                panic!("Can't subtract non-numerical types");
+            }
+        }
+    }
+
     /// Combines 2 `Constant::String`s together
     /// 
     /// `constant` (`&Constant::String`): String you want to combine with the self

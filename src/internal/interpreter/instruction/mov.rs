@@ -53,15 +53,9 @@ impl Interpreter {
                 }
             },
     
-            (RegisterLocation::Global, RegisterLocation::Accumulator) => {
-                self.global[dst_index_usize] = Some(create_constant_double(&self.accumulator));
-            },
-            (RegisterLocation::Global, RegisterLocation::Global) => {
-                self.global[dst_index_usize] = Some(self.mov_global(src_index_usize));
-            },
-            (RegisterLocation::Global, RegisterLocation::Local) => {
-                self.global[dst_index_usize] = Some(self.mov_local(src_index_usize));
-            },
+            (RegisterLocation::Global, RegisterLocation::Accumulator) => self.global[dst_index_usize] = Some(create_constant_double(&self.accumulator)),
+            (RegisterLocation::Global, RegisterLocation::Global) => self.global[dst_index_usize] = Some(self.mov_global(src_index_usize)),
+            (RegisterLocation::Global, RegisterLocation::Local) => self.global[dst_index_usize] = Some(self.mov_local(src_index_usize)),
     
             (RegisterLocation::Local, RegisterLocation::Accumulator) => {
                 let accumulator = self.accumulator;
@@ -78,6 +72,42 @@ impl Interpreter {
                 stack_frame.registers[dst_index_usize] = Some(stack_frame.mov_register(src_index_usize));
             },
             _ => return Err(Error::new(ErrorKind::InvalidInput, "Invalid mov operation".to_string())),
+        }
+        Result::Ok(())
+    }
+
+    pub fn stack_mov(&mut self, dst_reg: &Register, dst_reg_ref: &RegisterReference) -> Result<(), Error> {
+        // Destination register
+        let Register(mut dst_index, mut dst_loc) = dst_reg; 
+        let mut dst_index_usize = dst_index as usize;
+
+        // Dereference the destination register if needed
+        if *dst_reg_ref == RegisterReference::Dereference {
+            Register(dst_index, dst_loc) = self.dereference_register(dst_index_usize, &dst_loc);
+            dst_index_usize = dst_index as usize;
+        }
+
+        // Check if the stack is empty
+        if self.stack.is_empty() {
+            return Err(Error::new(ErrorKind::Other, "Stack empty; can't move from the stack!".to_string()))
+        }
+        let object = self.stack.remove(self.stack.len() - 1); // We do self.stack.len() - 1 to get the true index. For example, if the vector has a size of 1, the true index is 0
+        match dst_loc {
+            RegisterLocation::ConstantPool => return Err(Error::new(ErrorKind::Other, "Moving to the constant pool is forbidden!")),
+            RegisterLocation::Accumulator => {
+                match object {
+                    Constant::Int(val) => self.accumulator = val as f64,
+                    Constant::Double(val) => self.accumulator = val,
+                    _ => {
+                        return Err(Error::new(ErrorKind::InvalidInput, "Can only write integers and doubles to the accumulator register".to_string()));
+                    }
+                }
+            },
+            RegisterLocation::Global => self.global[dst_index_usize] = Some(object),
+            RegisterLocation::Local => {
+                let stack_frame = self.ref_stack_frame();
+                stack_frame.registers[dst_index_usize] = Some(object);
+            },
         }
         Result::Ok(())
     }

@@ -1,7 +1,7 @@
 use std::io::Error;
 
 use super::super::{execution_engine::ExecutionEngine, interpreter::Interpreter};
-use crate::objects::{instruction::Instruction, stackframe::StackFrame};
+use crate::objects::{instruction::Instruction, stackframe::StackFrame, constant::create_constant_int};
 
 impl ExecutionEngine for Interpreter {
     /// Execute Resurgence Instructions
@@ -15,9 +15,21 @@ impl ExecutionEngine for Interpreter {
                 Instruction::Alloc(ref register_amount) => {
                     self.call_stack.push(StackFrame::from(*register_amount))
                 }
+                Instruction::FrameAlloc(ref register_amount) => {
+                    let stackframe = self.call_stack.last_mut().unwrap();
+                    for _ in 0..*register_amount {
+                        stackframe.registers.push(Option::None);
+                    }
+                }
                 Instruction::Free(ref block_amount) => {
                     for _ in 0..*block_amount {
                         self.call_stack.pop();
+                    }
+                }
+                Instruction::FrameFree(ref register_amount) => {
+                    let stackframe = self.call_stack.last_mut().unwrap();
+                    for _ in 0..*register_amount {
+                        stackframe.registers.pop();
                     }
                 }
                 Instruction::Jump(ref jmp_amount) => {
@@ -41,6 +53,7 @@ impl ExecutionEngine for Interpreter {
                 Instruction::Sub(ref dst_reg, ref reg_1, ref reg_2) => self.sub(dst_reg, reg_1, reg_2),
                 Instruction::Mul(ref dst_reg, ref reg_1, ref reg_2) => self.mul(dst_reg, reg_1, reg_2),
                 Instruction::Div(ref dst_reg, ref reg_1, ref reg_2) => self.div(dst_reg, reg_1, reg_2),
+                Instruction::Mod(ref dst_reg, ref reg_1, ref reg_2) => self.modlo(dst_reg, reg_1, reg_2),
 
                 Instruction::Equal(ref reg_1, ref reg_2) => {
                     if self.equal(reg_1, reg_2) {

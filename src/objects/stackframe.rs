@@ -37,7 +37,7 @@ impl From<u32> for StackFrame
         let mut new_frame = StackFrame { 
             registers: Vec::new() 
         };
-        new_frame.registers.resize(size as usize, Option::Some(Constant::Int(0)));
+        new_frame.registers.resize(size as usize, Option::None);
         new_frame
     }
 }

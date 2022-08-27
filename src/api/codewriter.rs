@@ -112,8 +112,16 @@ pub fn write_bytecode(code: &CodeHolder) -> Result<Vec<u8>, Error> {
                 buf.push(pc::INST_ALLOC);
                 buf.write_u32::<BigEndian>(*size)?;
             }
+            Instruction::FrameAlloc(size) => {
+                buf.push(pc::INST_FRAME_ALLOC);
+                buf.write_u32::<BigEndian>(*size)?;
+            }
             Instruction::Free(size) => {
                 buf.push(pc::INST_FREE);
+                buf.write_u32::<BigEndian>(*size)?;
+            }
+            Instruction::FrameFree(size) => {
+                buf.push(pc::INST_FRAME_FREE);
                 buf.write_u32::<BigEndian>(*size)?;
             }
             Instruction::Jump(addr) => {
@@ -154,6 +162,11 @@ pub fn write_bytecode(code: &CodeHolder) -> Result<Vec<u8>, Error> {
                 write_register(&mut buf, reg)?;
                 write_reg_ref(&mut buf, rref);
             }
+            Instruction::StackMov(ra, aref) => {
+                buf.push(pc::INST_STACK_MOV);
+                write_register(&mut buf, ra)?;
+                write_reg_ref(&mut buf, aref);
+            }
             Instruction::StackPop => {
                 buf.push(pc::INST_STACK_POP);
             }
@@ -177,6 +190,12 @@ pub fn write_bytecode(code: &CodeHolder) -> Result<Vec<u8>, Error> {
             }
             Instruction::Div(ra, rb, rc) => {
                 buf.push(pc::INST_DIV);
+                write_register(&mut buf, ra)?;
+                write_register(&mut buf, rb)?;
+                write_register(&mut buf, rc)?;
+            }
+            Instruction::Mod(ra, rb, rc) => {
+                buf.push(pc::INST_MOD);
                 write_register(&mut buf, ra)?;
                 write_register(&mut buf, rb)?;
                 write_register(&mut buf, rc)?;
