@@ -39,6 +39,7 @@ impl ExecutionEngine for Interpreter {
 
                 Instruction::Call(ref func_index) => self.execute_instruction(*func_index as usize)?,
                 Instruction::ExtCall(ref func_reg) => self.ext_call(*func_reg)?,
+                Instruction::Ret => return Result::Ok(()),
 
                 Instruction::Mov(ref dst_reg, ref dst_reg_ref, ref src_reg, ref src_reg_ref) => self.mov_registers(dst_reg, dst_reg_ref, src_reg, src_reg_ref)?,
                 Instruction::Cpy(ref dst_reg, ref dst_reg_ref, ref src_reg, ref src_reg_ref) => self.cpy_registers(dst_reg, dst_reg_ref, src_reg, src_reg_ref)?,

@@ -136,6 +136,9 @@ pub fn write_bytecode(code: &CodeHolder) -> Result<Vec<u8>, Error> {
                 buf.push(pc::INST_EXTCALL);
                 buf.write_u64::<BigEndian>(*id)?;
             }
+            Instruction::Ret => {
+                buf.push(pc::INST_RET);
+            }
             Instruction::Mov(ra, aref, rb, bref) => {
                 buf.push(pc::INST_MOV);
                 write_register(&mut buf, ra)?;

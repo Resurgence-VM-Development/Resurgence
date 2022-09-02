@@ -227,6 +227,10 @@ pub fn read_bytecode(buf: &Vec<u8>) -> Result<CodeHolder, Error> {
                 let id = cur.read_u64::<BigEndian>()?;
                 holder.instructions.push(Instruction::ExtCall(id));
             }
+            pc::INST_RET => {
+                // Ret
+                holder.instructions.push(Instruction::Ret);
+            }
             pc::INST_MOV => {
                 // Mov
                 let ra = read_register(&mut cur)?;

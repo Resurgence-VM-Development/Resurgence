@@ -10,21 +10,21 @@ Join the Discord server!
 
 [![Discord](https://badgen.net/badge/icon/discord?icon=discord&label)](https://discord.gg/e2GuJ2k6na)
 
-Resurgence aims to be an embeddable virtual machine with an easy to use API for projects like:
+Resurgence aims to be an embeddable virtual machine with an easy-to-use API for projects like:
 * Game engines
 * Language interpreters
 * Applications that want custom scripting behavior
-* Applications that want to execute custom user code in a secure manner
+* Applications that want to execute custom user code securely
 
 Right now, Resurgence is currently in early stages of development, and shouldn't be used in any serious projects yet.
 
-Note: Resurgence is just a virtual machine. This allows us to focus on making it good without having to worry about maintaining a language interpreter or library interface. For making a fully featured interpreter, we recommend [Crafting Interpters](https://craftinginterpreters.com/) to get an idea on how to make one.
+Note: Resurgence is just a virtual machine. This allows us to focus on making it good without having to worry about maintaining a language interpreter or library interface. For making a fully featured interpreter, we recommend [Crafting Interpreters](https://craftinginterpreters.com/) to get an idea on how to make one.
 
 ## Features
 * Resurgence is a Register-based VM, which closely replicates the design of a real computer
 * Resurgence is designed to be very lightweight and simple
 * Resurgence is designed specifically for embedding into another application
-* Code running inside of a Resurgence VM is sandboxed by default
+* Code running inside Resurgence is sandboxed by default
 
 ## Architecture
 ![Architecture](images/architecture.png)

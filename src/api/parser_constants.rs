@@ -111,3 +111,6 @@ pub(crate) const INST_STACK_MOV: u8 = 0x017;
 
 // Mod
 pub(crate) const INST_MOD: u8 = 0x018;
+
+// Ret
+pub(crate) const INST_RET: u8 = 0x19;

@@ -58,6 +58,14 @@ pub enum Instruction {
     /// ```
     ExtCall(u64),
 
+    /// Ends execution of execution_engine
+    /// 
+    /// ```no_run
+    /// 0 FREE 1
+    /// 1 RET // execution ends here
+    /// ```
+    Ret,
+
     /// Moves from one register to another
     /// 
     /// ```no_run
