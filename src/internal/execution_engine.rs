@@ -4,4 +4,5 @@ use std::io::Error;
 pub trait ExecutionEngine {
     /// Function that does the actual execution
     fn execute_instruction(&mut self, start_index: usize) -> Result<(), Error>;
+    fn execute_function(&mut self, func_name: &String) -> Result<(), Error>;
 }

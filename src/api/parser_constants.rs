@@ -7,7 +7,7 @@ This module describes constant values used in bytecode reading and writing.
 pub(crate) const MAGIC_NUMBER: u32 = 0x52564D88;
 
 /// Format version number
-pub(crate) const VERSION: u16 = 4;
+pub(crate) const VERSION: u16 = 5;
 
 /*
  * Constant types
@@ -101,16 +101,16 @@ pub(crate) const INST_GREATER_EQUAL: u8 = 0x13;
 pub(crate) const INST_LESS_EQUAL: u8 = 0x14;
 
 // FrameAlloc
-pub(crate) const INST_FRAME_ALLOC: u8 = 0x015;
+pub(crate) const INST_FRAME_ALLOC: u8 = 0x15;
 
 // FrameFree
-pub(crate) const INST_FRAME_FREE: u8 = 0x016;
+pub(crate) const INST_FRAME_FREE: u8 = 0x16;
 
 // StackMov
-pub(crate) const INST_STACK_MOV: u8 = 0x017;
+pub(crate) const INST_STACK_MOV: u8 = 0x17;
 
 // Mod
-pub(crate) const INST_MOD: u8 = 0x018;
+pub(crate) const INST_MOD: u8 = 0x18;
 
 // Ret
 pub(crate) const INST_RET: u8 = 0x19;

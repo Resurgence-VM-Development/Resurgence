@@ -98,11 +98,18 @@ pub fn write_bytecode(code: &CodeHolder) -> Result<Vec<u8>, Error> {
             }
         }
     }
-    
+
     // imports table
     buf.write_u64::<BigEndian>(code.imports.len() as u64)?;
     for i in &(code.imports) {
         write_string(&mut buf, &i)?;
+    }
+
+    // exports table
+    buf.write_u64::<BigEndian>(code.exports.len() as u64)?;
+    for (export_name, export_pos) in &(code.exports) {
+        write_string(&mut buf, export_name)?;
+        buf.write_u64::<BigEndian>(*export_pos)?;
     }
 
     // instructions

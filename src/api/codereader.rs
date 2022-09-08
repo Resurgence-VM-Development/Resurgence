@@ -170,7 +170,7 @@ pub fn read_bytecode(buf: &Vec<u8>) -> Result<CodeHolder, Error> {
             }
         }
     }
-    
+
     // read imports table
     let ilen = cur.read_u64::<BigEndian>()?;
     for _ in 0..ilen {
@@ -178,6 +178,13 @@ pub fn read_bytecode(buf: &Vec<u8>) -> Result<CodeHolder, Error> {
         holder.imports.push(import_func);
     }
 
+    // read exports table
+    let elen = cur.read_u64::<BigEndian>()?;
+    for _ in 0..elen {
+        let export_name = read_string(&mut cur)?;
+        let export_pos = cur.read_u64::<BigEndian>()?;
+        holder.exports.insert(export_name, export_pos);
+    }
 
     // read bytecode into vector
     loop {
