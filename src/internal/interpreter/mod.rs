@@ -19,6 +19,7 @@ pub mod resolve_imports;
 pub struct Interpreter {
     /// Special register used for fast math
     accumulator: f64,
+    accumulator_as_const: Constant,
 
     /// Holds stack frames for function calls
     call_stack: Vec<StackFrame>,
@@ -43,6 +44,7 @@ impl Interpreter {
     pub fn from(ch: CodeHolder) -> Interpreter {
         Interpreter {
             accumulator: 0.0,
+            accumulator_as_const: Constant::Double(0.0),
             call_stack: Vec::new(),
             stack: Vec::new(),
             code_holder: ch,
