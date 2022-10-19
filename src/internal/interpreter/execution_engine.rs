@@ -2,7 +2,7 @@ use std::io::{Error, ErrorKind};
 
 use super::super::{execution_engine::ExecutionEngine, interpreter::Interpreter};
 use crate::objects::{
-    constant::create_constant_int, instruction::Instruction, stackframe::StackFrame,
+    instruction::Instruction, stackframe::StackFrame,
 };
 
 impl ExecutionEngine for Interpreter {
@@ -122,9 +122,9 @@ impl ExecutionEngine for Interpreter {
     // Execute an exported function.
     fn execute_function(&mut self, func_name: &String) -> Result<(), Error> {
         match self.code_holder.exports.get(func_name) {
-            Some(inst) => return self.execute_instruction(*inst as usize),
+            Some(inst) => self.execute_instruction(*inst as usize),
             None => {
-                return Err(Error::new(
+                Err(Error::new(
                     ErrorKind::Other,
                     format!("Function {} does not exist", func_name),
                 ))
