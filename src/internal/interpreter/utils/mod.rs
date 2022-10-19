@@ -48,8 +48,8 @@ impl Interpreter {
     /// References a local register
     ///
     /// `index` (`usize`): index of register
-    pub fn ref_local(&mut self, index: usize) -> &Constant {
-        let stack_frame = self.ref_stack_frame();
+    pub fn ref_local(&self, index: usize) -> &Constant {
+        let stack_frame = self.ref_stack_frame_imut();
         stack_frame.ref_register(index)
     }
 
@@ -60,9 +60,28 @@ impl Interpreter {
         self.code_holder.constant_pool[index].clone()
     }
 
+    /// References a constant from the constant pool
+    /// 
+    /// `index` (`usize`): index of the constant
+    pub fn ref_constant(&self, index: usize) -> &Constant {
+        &self.code_holder.constant_pool[index]
+    }
+
     /// Returns a reference to the last stackframe
     pub fn ref_stack_frame(&mut self) -> &mut StackFrame {
         self.call_stack.last_mut().unwrap()
+    }
+
+    pub fn ref_stack_frame_imut(&self) -> &StackFrame {
+        self.call_stack.last().unwrap()
+    }
+
+    pub fn accu_const(&mut self) {
+        let val = match self.accumulator_as_const {
+                    Constant::Double(ref mut val) => val,
+                    _ => unreachable!(),
+                };
+        *val = self.accumulator
     }
 
     pub fn dereference_register(&mut self, index: usize, reg_loc: &RegisterLocation) -> Register {
@@ -88,73 +107,87 @@ impl Interpreter {
         }
     }
     /// Takes 2 `Register` objects, and returns 2 `Constant` objects
-    pub fn get_constants(&mut self, reg_1: &Register, reg_2: &Register) -> (Constant, Constant) {
+    pub fn get_constants(&mut self, reg_1: &Register, reg_2: &Register) -> (&Constant, &Constant) {
         let Register(index_1, loc_1) = reg_1;
         let Register(index_2, loc_2) = reg_2;
         let index_1_usize = *index_1 as usize;
         let index_2_usize = *index_2 as usize;
 
+        let const_1: &Constant;
+        let const_2: &Constant;
         match (loc_1, loc_2) {
-            (RegisterLocation::ConstantPool, RegisterLocation::ConstantPool) => (
-                self.cpy_constant(index_1_usize),
-                self.cpy_constant(index_2_usize),
-            ),
-            (RegisterLocation::ConstantPool, RegisterLocation::Accumulator) => (
-                self.cpy_constant(index_1_usize),
-                create_constant_double(&self.accumulator),
-            ),
-            (RegisterLocation::ConstantPool, RegisterLocation::Global) => (
-                self.cpy_constant(index_1_usize),
-                self.cpy_global(index_2_usize),
-            ),
-            (RegisterLocation::ConstantPool, RegisterLocation::Local) => (
-                self.cpy_constant(index_1_usize),
-                self.cpy_local(index_2_usize),
-            ),
-            (RegisterLocation::Accumulator, RegisterLocation::ConstantPool) => (
-                create_constant_double(&self.accumulator),
-                self.cpy_constant(index_2_usize),
-            ),
-            (RegisterLocation::Accumulator, RegisterLocation::Global) => (
-                create_constant_double(&self.accumulator),
-                self.cpy_global(index_2_usize),
-            ),
-            (RegisterLocation::Accumulator, RegisterLocation::Local) => (
-                create_constant_double(&self.accumulator),
-                self.cpy_local(index_2_usize),
-            ),
-            (RegisterLocation::Global, RegisterLocation::ConstantPool) => (
-                self.cpy_global(index_1_usize),
-                self.cpy_constant(index_2_usize),
-            ),
-            (RegisterLocation::Global, RegisterLocation::Accumulator) => (
-                self.cpy_global(index_1_usize),
-                create_constant_double(&self.accumulator),
-            ),
-            (RegisterLocation::Global, RegisterLocation::Global) => (
-                self.cpy_global(index_1_usize),
-                self.cpy_global(index_2_usize),
-            ),
-            (RegisterLocation::Global, RegisterLocation::Local) => (
-                self.cpy_global(index_1_usize),
-                self.cpy_local(index_2_usize),
-            ),
-            (RegisterLocation::Local, RegisterLocation::ConstantPool) => (
-                self.cpy_local(index_1_usize),
-                self.cpy_constant(index_2_usize),
-            ),
-            (RegisterLocation::Local, RegisterLocation::Accumulator) => (
-                self.cpy_local(index_1_usize),
-                create_constant_double(&self.accumulator),
-            ),
-            (RegisterLocation::Local, RegisterLocation::Global) => (
-                self.cpy_local(index_1_usize),
-                self.cpy_global(index_2_usize),
-            ),
+            (RegisterLocation::ConstantPool, RegisterLocation::ConstantPool) => {
+                const_1 = self.ref_constant(index_1_usize);
+                const_2 = self.ref_constant(index_2_usize);
+            },
+            (RegisterLocation::ConstantPool, RegisterLocation::Accumulator) => {
+                self.accu_const();
+                const_1 = self.ref_constant(index_1_usize);
+                const_2 = &self.accumulator_as_const;
+            },
+            (RegisterLocation::ConstantPool, RegisterLocation::Global) => {
+                const_1 = self.ref_constant(index_1_usize);
+                const_2 = self.ref_global(index_2_usize);
+            },
+            (RegisterLocation::ConstantPool, RegisterLocation::Local) => {
+                const_1 = self.ref_constant(index_1_usize);
+                const_2 = self.ref_local(index_2_usize);
+            },
+            (RegisterLocation::Accumulator, RegisterLocation::ConstantPool) => {
+                self.accu_const();
+                const_1 = &self.accumulator_as_const;
+                const_2 = self.ref_constant(index_2_usize);
+            },
+            (RegisterLocation::Accumulator, RegisterLocation::Accumulator) => {
+                self.accu_const();
+                const_1 = &self.accumulator_as_const;
+                const_2 = &self.accumulator_as_const;
+            },
+            (RegisterLocation::Accumulator, RegisterLocation::Global) => {
+                self.accu_const();
+                const_1 = &self.accumulator_as_const;
+                const_2 = self.ref_global(index_2_usize);
+            },
+            (RegisterLocation::Accumulator, RegisterLocation::Local) => {
+                self.accu_const();
+                const_1 = &self.accumulator_as_const;
+                const_2 = self.ref_local(index_2_usize);
+            },
+            (RegisterLocation::Global, RegisterLocation::ConstantPool) => {
+                const_1 = self.ref_global(index_1_usize);
+                const_2 = self.ref_constant(index_2_usize);
+            },
+            (RegisterLocation::Global, RegisterLocation::Accumulator) => {
+                self.accu_const();
+                const_1 = self.ref_global(index_1_usize);
+                const_2 = &self.accumulator_as_const;
+            },
+            (RegisterLocation::Global, RegisterLocation::Global) => {
+                const_1 = self.ref_global(index_1_usize);
+                const_2 = self.ref_global(index_2_usize);
+            },
+            (RegisterLocation::Global, RegisterLocation::Local) => {
+                const_1 = self.ref_global(index_1_usize);
+                const_2 = self.ref_local(index_2_usize);
+            },
+            (RegisterLocation::Local, RegisterLocation::ConstantPool) => {
+                const_1 = self.ref_local(index_1_usize);
+                const_2 = self.ref_constant(index_2_usize);
+            },
+            (RegisterLocation::Local, RegisterLocation::Accumulator) => {
+                self.accu_const();
+                const_1 = self.ref_local(index_1_usize);
+                const_2 = &self.accumulator_as_const;
+            },
+            (RegisterLocation::Local, RegisterLocation::Global) => {
+                const_1 = self.ref_local(index_1_usize);
+                const_2 = self.ref_global(index_2_usize);
+            },
             (RegisterLocation::Local, RegisterLocation::Local) => {
-                (self.cpy_local(index_1_usize), self.cpy_local(index_2_usize))
+                const_1 = self.ref_local(index_1_usize);
+                const_2 = self.ref_local(index_2_usize);
             }
-            _ => panic!("Segmentation fault!"),
         }
+        (const_1, const_2)
     }
 }
