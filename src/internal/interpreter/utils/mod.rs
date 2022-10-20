@@ -1,6 +1,6 @@
 use crate::{
     objects::{
-        constant::{create_constant_double, Constant},
+        constant::Constant,
         register::{Register, RegisterLocation},
         stackframe::StackFrame,
     },
