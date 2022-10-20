@@ -1,6 +1,6 @@
 [package]
 name = "resurgence"
-version = "0.1.8"
+version = "0.1.9"
 edition = "2021"
 description = "A VM backend designed to be embedded in an application"
 license = "MIT"
