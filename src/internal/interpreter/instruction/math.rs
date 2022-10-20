@@ -37,31 +37,31 @@ impl Interpreter {
     */
     pub fn add(&mut self, dst: &Register, reg_1: &Register, reg_2: &Register) {
         let (constant_1, constant_2) = self.get_constants(reg_1, reg_2);
-        let dst_value = constant_1.add(&constant_2);
+        let dst_value = constant_1.add(constant_2);
         self.mov_dst(dst, dst_value);
     }
 
     pub fn sub(&mut self, dst: &Register, reg_1: &Register, reg_2: &Register) {
         let (constant_1, constant_2) = self.get_constants(reg_1, reg_2);
-        let dst_value = constant_1.sub(&constant_2);
+        let dst_value = constant_1.sub(constant_2);
         self.mov_dst(dst, dst_value)
     }
 
     pub fn mul(&mut self, dst: &Register, reg_1: &Register, reg_2: &Register) {
         let (constant_1, constant_2) = self.get_constants(reg_1, reg_2);
-        let dst_value = constant_1.sub(&constant_2);
+        let dst_value = constant_1.sub(constant_2);
         self.mov_dst(dst, dst_value);
     }
 
     pub fn div(&mut self, dst: &Register, reg_1: &Register, reg_2: &Register) {
         let (constant_1, constant_2) = self.get_constants(reg_1, reg_2);
-        let dst_value = constant_1.div(&constant_2);
+        let dst_value = constant_1.div(constant_2);
         self.mov_dst(dst, dst_value);
     }
 
     pub fn modlo(&mut self, dst: &Register, reg_1: &Register, reg_2: &Register) {
         let (constant_1, constant_2) = self.get_constants(reg_1, reg_2);
-        let dst_value = constant_1.modlo(&constant_2);
+        let dst_value = constant_1.modlo(constant_2);
         self.mov_dst(dst, dst_value);
     }
 }
