@@ -120,7 +120,7 @@ impl ExecutionEngine for Interpreter {
     }
 
     // Execute an exported function.
-    fn execute_function(&mut self, func_name: &String) -> Result<(), Error> {
+    fn execute_function(&mut self, func_name: &str) -> Result<(), Error> {
         match self.code_holder.exports.get(func_name) {
             Some(inst) => self.execute_instruction(*inst as usize),
             None => {
