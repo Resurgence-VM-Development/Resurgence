@@ -25,8 +25,8 @@ use crate::objects::constant::Constant;
 use crate::objects::instruction::Instruction;
 use crate::objects::register::{Register, RegisterLocation, RegisterReference};
 
-fn write_string(buf: &mut Vec<u8>, val: &String) -> Result<(), Error> {
-    let bytes = val.clone().into_bytes();
+fn write_string(buf: &mut Vec<u8>, val: &str) -> Result<(), Error> {
+    let bytes = val.to_owned().into_bytes();
     buf.write_u64::<BigEndian>(bytes.len() as u64)?;
     buf.write_all(&bytes)?;
     Ok(())
@@ -83,7 +83,7 @@ pub fn write_bytecode(code: &CodeHolder) -> Result<Vec<u8>, Error> {
             }
             Constant::String(val) => {
                 buf.write_u8(pc::CONST_STRING)?;
-                write_string(&mut buf, &val)?;
+                write_string(&mut buf, val)?;
             }
             Constant::Boolean(val) => {
                 buf.write_u8(pc::CONST_BOOLEAN)?;
@@ -102,7 +102,7 @@ pub fn write_bytecode(code: &CodeHolder) -> Result<Vec<u8>, Error> {
     // imports table
     buf.write_u64::<BigEndian>(code.imports.len() as u64)?;
     for i in &(code.imports) {
-        write_string(&mut buf, &i)?;
+        write_string(&mut buf, i)?;
     }
 
     // exports table
