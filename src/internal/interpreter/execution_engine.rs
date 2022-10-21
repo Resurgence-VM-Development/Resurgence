@@ -90,32 +90,56 @@ impl ExecutionEngine for Interpreter {
 
                 Instruction::Equal(ref reg_1, ref reg_2) => {
                     if self.equal(reg_1, reg_2) {
-                        index += 1;
+                        if index < max_length {
+                            self.code_holder.instructions[index] = Some(operation);
+                        }
+                        index += 2;
+                        continue;
                     }
                 }
                 Instruction::NotEqual(ref reg_1, ref reg_2) => {
                     if self.not_equal(reg_1, reg_2) {
-                        index += 1;
+                        if index < max_length {
+                            self.code_holder.instructions[index] = Some(operation);
+                        }
+                        index += 2;
+                        continue;
                     }
                 }
                 Instruction::Greater(ref reg_1, ref reg_2) => {
                     if self.greater_than(reg_1, reg_2) {
-                        index += 1;
+                        if index < max_length {
+                            self.code_holder.instructions[index] = Some(operation);
+                        }
+                        index += 2;
+                        continue;
                     }
                 }
                 Instruction::Less(ref reg_1, ref reg_2) => {
                     if self.less_than(reg_1, reg_2) {
-                        index += 1;
+                        if index < max_length {
+                            self.code_holder.instructions[index] = Some(operation);
+                        }
+                        index += 2;
+                        continue;
                     }
                 }
                 Instruction::GreaterEqual(ref reg_1, ref reg_2) => {
                     if self.greater_or_equal(reg_1, reg_2) {
-                        index += 1;
+                        if index < max_length {
+                            self.code_holder.instructions[index] = Some(operation);
+                        }
+                        index += 2;
+                        continue;
                     }
                 }
                 Instruction::LessEqual(ref reg_1, ref reg_2) => {
                     if self.less_or_equal(reg_1, reg_2) {
-                        index += 1;
+                        if index < max_length {
+                            self.code_holder.instructions[index] = Some(operation);
+                        }
+                        index += 2;
+                        continue;
                     }
                 }
             }
