@@ -171,7 +171,7 @@ impl Constant {
     /// assert_eq!(hello_world, create_constant_string("Hello World!"));
     /// ```
     pub fn concat(&self, constant: &Constant) -> Constant {
-        if let (Constant::String(str_1), Constant::String(str_2)) = (self.clone(), &*constant) {
+        if let (Constant::String(str_1), Constant::String(str_2)) = (self.clone(), constant) {
             Constant::String(str_1 + str_2)
         } 
         else {
