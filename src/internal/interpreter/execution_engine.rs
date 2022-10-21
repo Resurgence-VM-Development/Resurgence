@@ -12,7 +12,7 @@ impl ExecutionEngine for Interpreter {
         let mut index = start_index;
         let max_length = self.code_holder.instructions.len();
         while index != max_length {
-            let operation = self.code_holder.instructions[index];
+            let operation = self.code_holder.instructions[index].take().unwrap();
             match operation {
                 Instruction::Alloc(ref register_amount) => {
                     self.call_stack.push(StackFrame::from(*register_amount))
@@ -36,14 +36,24 @@ impl ExecutionEngine for Interpreter {
                 }
                 Instruction::Jump(ref jmp_amount) => {
                     index = (index as i64 + *jmp_amount) as usize;
+                    if index < max_length {
+                        self.code_holder.instructions[index] = Some(operation);
+                    }
                     continue;
                 }
 
                 Instruction::Call(ref func_index) => {
                     self.execute_instruction(*func_index as usize)?
                 }
-                Instruction::ExtCall(ref func_reg) => self.ext_call(*func_reg)?,
-                Instruction::Ret => return Result::Ok(()),
+                Instruction::ExtCall(ref func_reg) => {
+                    self.ext_call(*func_reg)?
+                }
+                Instruction::Ret => {
+                    if index < max_length{
+                        self.code_holder.instructions[index] = Some(operation);
+                    }
+                    return Result::Ok(())
+                },
 
                 Instruction::Mov(ref dst_reg, ref dst_reg_ref, ref src_reg, ref src_reg_ref) => {
                     self.mov_registers(dst_reg, dst_reg_ref, src_reg, src_reg_ref)?
@@ -115,6 +125,10 @@ impl ExecutionEngine for Interpreter {
 
             // Increment i to advance to the next index
             index += 1;
+            
+            if index < max_length{
+                self.code_holder.instructions[index] = Some(operation);
+            }
         }
         Result::Ok(())
     }

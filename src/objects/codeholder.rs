@@ -6,7 +6,7 @@ use std::collections::HashMap;
 /// [`crate::Interpreter`] to use at runtime.
 pub struct CodeHolder {
     /// A [`Vec`] of executable instructions
-    pub instructions: Vec<Instruction>,
+    pub instructions: Vec<Option<Instruction>>,
 
     /// A pool of immutable data that is available to the VM at runtime.
     pub constant_pool: Vec<Constant>,

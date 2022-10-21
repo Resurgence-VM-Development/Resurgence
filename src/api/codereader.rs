@@ -202,41 +202,41 @@ pub fn read_bytecode(buf: &Vec<u8>) -> Result<CodeHolder, Error> {
             pc::INST_ALLOC => {
                 // Alloc
                 let size = cur.read_u32::<BigEndian>()?;
-                holder.instructions.push(Instruction::Alloc(size));
+                holder.instructions.push(Some(Instruction::Alloc(size)));
             }
             pc::INST_FRAME_ALLOC => {
                 // FrameAlloc
                 let size = cur.read_u32::<BigEndian>()?;
-                holder.instructions.push(Instruction::Alloc(size));
+                holder.instructions.push(Some(Instruction::Alloc(size)));
             }
             pc::INST_FREE => {
                 // Free
                 let size = cur.read_u32::<BigEndian>()?;
-                holder.instructions.push(Instruction::Free(size));
+                holder.instructions.push(Some(Instruction::Free(size)));
             }
             pc::INST_FRAME_FREE => {
                 // FrameFree
                 let size = cur.read_u32::<BigEndian>()?;
-                holder.instructions.push(Instruction::FrameFree(size));
+                holder.instructions.push(Some(Instruction::FrameFree(size)));
             }
             pc::INST_JUMP => {
                 // Jump
                 let addr = cur.read_i64::<BigEndian>()?;
-                holder.instructions.push(Instruction::Jump(addr));
+                holder.instructions.push(Some(Instruction::Jump(addr)));
             }
             pc::INST_CALL => {
                 // Call
                 let addr = cur.read_u64::<BigEndian>()?;
-                holder.instructions.push(Instruction::Call(addr));
+                holder.instructions.push(Some(Instruction::Call(addr)));
             }
             pc::INST_EXTCALL => {
                 // ExtCall
                 let id = cur.read_u64::<BigEndian>()?;
-                holder.instructions.push(Instruction::ExtCall(id));
+                holder.instructions.push(Some(Instruction::ExtCall(id)));
             }
             pc::INST_RET => {
                 // Ret
-                holder.instructions.push(Instruction::Ret);
+                holder.instructions.push(Some(Instruction::Ret));
             }
             pc::INST_MOV => {
                 // Mov
@@ -246,7 +246,7 @@ pub fn read_bytecode(buf: &Vec<u8>) -> Result<CodeHolder, Error> {
                 let bref = read_reg_ref(&mut cur)?;
                 holder
                     .instructions
-                    .push(Instruction::Mov(ra, aref, rb, bref));
+                    .push(Some(Instruction::Mov(ra, aref, rb, bref)));
             }
             pc::INST_CPY => {
                 // Cpy
@@ -256,7 +256,7 @@ pub fn read_bytecode(buf: &Vec<u8>) -> Result<CodeHolder, Error> {
                 let bref = read_reg_ref(&mut cur)?;
                 holder
                     .instructions
-                    .push(Instruction::Cpy(ra, aref, rb, bref));
+                    .push(Some(Instruction::Cpy(ra, aref, rb, bref)));
             }
             pc::INST_REF => {
                 // Ref
@@ -266,94 +266,94 @@ pub fn read_bytecode(buf: &Vec<u8>) -> Result<CodeHolder, Error> {
                 let bref = read_reg_ref(&mut cur)?;
                 holder
                     .instructions
-                    .push(Instruction::Ref(ra, aref, rb, bref));
+                    .push(Some(Instruction::Ref(ra, aref, rb, bref)));
             }
             pc::INST_STACK_PUSH => {
                 // StackPush
                 let reg = read_register(&mut cur)?;
                 let rref = read_reg_ref(&mut cur)?;
-                holder.instructions.push(Instruction::StackPush(reg, rref));
+                holder.instructions.push(Some(Instruction::StackPush(reg, rref)));
             }
             pc::INST_STACK_MOV => {
                 // StackMov
                 let reg = read_register(&mut cur)?;
                 let rref = read_reg_ref(&mut cur)?;
-                holder.instructions.push(Instruction::StackMov(reg, rref));
+                holder.instructions.push(Some(Instruction::StackMov(reg, rref)));
             }
             pc::INST_STACK_POP => {
                 // StackPop
-                holder.instructions.push(Instruction::StackPop);
+                holder.instructions.push(Some(Instruction::StackPop));
             }
             pc::INST_ADD => {
                 // Add
                 let ra = read_register(&mut cur)?;
                 let rb = read_register(&mut cur)?;
                 let rc = read_register(&mut cur)?;
-                holder.instructions.push(Instruction::Add(ra, rb, rc));
+                holder.instructions.push(Some(Instruction::Add(ra, rb, rc)));
             }
             pc::INST_SUB => {
                 // Sub
                 let ra = read_register(&mut cur)?;
                 let rb = read_register(&mut cur)?;
                 let rc = read_register(&mut cur)?;
-                holder.instructions.push(Instruction::Sub(ra, rb, rc));
+                holder.instructions.push(Some(Instruction::Sub(ra, rb, rc)));
             }
             pc::INST_MUL => {
                 // Mul
                 let ra = read_register(&mut cur)?;
                 let rb = read_register(&mut cur)?;
                 let rc = read_register(&mut cur)?;
-                holder.instructions.push(Instruction::Mul(ra, rb, rc));
+                holder.instructions.push(Some(Instruction::Mul(ra, rb, rc)));
             }
             pc::INST_DIV => {
                 // Div
                 let ra = read_register(&mut cur)?;
                 let rb = read_register(&mut cur)?;
                 let rc = read_register(&mut cur)?;
-                holder.instructions.push(Instruction::Div(ra, rb, rc));
+                holder.instructions.push(Some(Instruction::Div(ra, rb, rc)));
             }
             pc::INST_MOD => {
                 // Mod
                 let ra = read_register(&mut cur)?;
                 let rb = read_register(&mut cur)?;
                 let rc = read_register(&mut cur)?;
-                holder.instructions.push(Instruction::Mod(ra, rb, rc));
+                holder.instructions.push(Some(Instruction::Mod(ra, rb, rc)));
             }
             pc::INST_EQUAL => {
                 // Equal
                 let ra = read_register(&mut cur)?;
                 let rb = read_register(&mut cur)?;
-                holder.instructions.push(Instruction::Equal(ra, rb));
+                holder.instructions.push(Some(Instruction::Equal(ra, rb)));
             }
             pc::INST_NOT_EQUAL => {
                 // NotEqual
                 let ra = read_register(&mut cur)?;
                 let rb = read_register(&mut cur)?;
-                holder.instructions.push(Instruction::NotEqual(ra, rb));
+                holder.instructions.push(Some(Instruction::NotEqual(ra, rb)));
             }
             pc::INST_GREATER => {
                 // Greater
                 let ra = read_register(&mut cur)?;
                 let rb = read_register(&mut cur)?;
-                holder.instructions.push(Instruction::Greater(ra, rb));
+                holder.instructions.push(Some(Instruction::Greater(ra, rb)));
             }
             pc::INST_LESS => {
                 // Less
                 let ra = read_register(&mut cur)?;
                 let rb = read_register(&mut cur)?;
-                holder.instructions.push(Instruction::Less(ra, rb));
+                holder.instructions.push(Some(Instruction::Less(ra, rb)));
             }
             pc::INST_GREATER_EQUAL => {
                 // GreaterEqual
                 let ra = read_register(&mut cur)?;
                 let rb = read_register(&mut cur)?;
-                holder.instructions.push(Instruction::GreaterEqual(ra, rb));
+                holder.instructions.push(Some(Instruction::GreaterEqual(ra, rb)));
             }
             pc::INST_LESS_EQUAL => {
                 // LessEqual
                 let ra = read_register(&mut cur)?;
                 let rb = read_register(&mut cur)?;
-                holder.instructions.push(Instruction::LessEqual(ra, rb));
+                holder.instructions.push(Some(Instruction::LessEqual(ra, rb)));
             }
             _ => {
                 // catch-all for invalid instructions

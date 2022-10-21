@@ -114,7 +114,8 @@ pub fn write_bytecode(code: &CodeHolder) -> Result<Vec<u8>, Error> {
 
     // instructions
     for i in &(code.instructions) {
-        match i {
+        let unwrapped_i = i.as_ref();
+        match unwrapped_i.unwrap() {
             Instruction::Alloc(size) => {
                 buf.push(pc::INST_ALLOC);
                 buf.write_u32::<BigEndian>(*size)?;

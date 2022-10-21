@@ -1,7 +1,6 @@
 use super::register::{Register, RegisterReference};
 
 /// `Instruction`: Represents instructions the built in Resurgence VM can use (this can be reused for any VM)
-#[derive(Clone, Copy)]
 pub enum Instruction {
     /// Creates a `StackFrame` object and allocates n amount of registers
     /// 
