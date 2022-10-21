@@ -35,21 +35,18 @@ impl ExecutionEngine for Interpreter {
                     }
                 }
                 Instruction::Jump(ref jmp_amount) => {
-                    index = (index as i64 + *jmp_amount) as usize;
+                    let cloned_jmp_amount = *jmp_amount;
                     if index < max_length {
                         self.code_holder.instructions[index] = Some(operation);
                     }
+                    index = (index as i64 + cloned_jmp_amount) as usize;
                     continue;
                 }
 
-                Instruction::Call(ref func_index) => {
-                    self.execute_instruction(*func_index as usize)?
-                }
-                Instruction::ExtCall(ref func_reg) => {
-                    self.ext_call(*func_reg)?
-                }
+                Instruction::Call(ref func_index) => self.execute_instruction(*func_index as usize)?,
+                Instruction::ExtCall(ref func_reg) => self.ext_call(*func_reg)?,
                 Instruction::Ret => {
-                    if index < max_length{
+                    if index < max_length {
                         self.code_holder.instructions[index] = Some(operation);
                     }
                     return Result::Ok(())
@@ -123,12 +120,11 @@ impl ExecutionEngine for Interpreter {
                 }
             }
 
-            // Increment i to advance to the next index
-            index += 1;
-            
-            if index < max_length{
+            // Store instruction back into memory and increment index
+            if index < max_length {
                 self.code_holder.instructions[index] = Some(operation);
             }
+            index += 1;
         }
         Result::Ok(())
     }
