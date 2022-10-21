@@ -8,7 +8,10 @@ use crate::objects::{
 impl ExecutionEngine for Interpreter {
     /// Execute Resurgence Instructions
     fn execute_instruction(&mut self, start_index: usize) -> Result<(), Error> {
-        self.resolve_imports()?;
+        if !self.imports_resolved {
+            self.resolve_imports()?;
+            self.imports_resolved = true;
+        }
         let mut index = start_index;
         let max_length = self.code_holder.instructions.len();
         while index != max_length {

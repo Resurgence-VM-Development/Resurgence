@@ -5,11 +5,11 @@ impl Interpreter {
     /// Resolves any Rust functions used in the bytecode file by creating a "compatibility layer" based on indicies
     pub fn resolve_imports(&mut self) -> Result<(), Error> {
         let imports = &self.code_holder.imports;
-        for (index, name) in imports.iter().enumerate() {
+        for (_, name) in imports.iter().enumerate() {
             let mut success = false;
             for (internal_index, internal_name) in self.rust_functions.iter().enumerate() {
                 if *internal_name.name == *name {
-                    self.byte_to_interal.insert(index, internal_index as u64);
+                    self.byte_to_interal.push(internal_index as u64);
                     success = true;
                 }
             }

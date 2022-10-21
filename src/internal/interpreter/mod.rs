@@ -37,6 +37,7 @@ pub struct Interpreter {
 
     // All Rust functions registered before runtime
     rust_functions: Vec<RustFunc>,
+    imports_resolved: bool,
 }
 
 impl Interpreter {
@@ -51,6 +52,7 @@ impl Interpreter {
             global: Vec::new(),
             byte_to_interal: Vec::new(),
             rust_functions: Vec::new(),
+            imports_resolved: false,
         }
     }
 
