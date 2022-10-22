@@ -29,19 +29,19 @@ fn read_string(cur: &mut Cursor<&Vec<u8>>) -> Result<String, Error> {
     let length = cur.read_u64::<BigEndian>()? as usize;
     let mut data = vec![0u8; length];
     cur.read_exact(&mut data)?;
-    return match String::from_utf8(data) {
+    match String::from_utf8(data) {
         Ok(d) => Ok(d),
         Err(error) => {
-            return Err(Error::new(
+            Err(Error::new(
                 ErrorKind::Other,
                 format!(
                     "Bad UTF-8 string at position {}: {}",
                     cur.position() - 1,
                     error
                 ),
-            ));
+            ))
         }
-    };
+    }
 }
 
 /// Creates a register instance from 5 bytes
