@@ -46,7 +46,7 @@ impl ResurgenceState {
     pub fn get_value_as_string(&mut self) -> Result<String, Error> {
         let constant = &self.args[self.current_arg];
         self.current_arg += 1;
-        match &*constant {
+        match constant {
             Constant::Int(ref val) => Result::Ok(val.to_string()),
             Constant::Double(ref val) => Result::Ok(val.to_string()),
             Constant::String(ref val) => Result::Ok(val.to_string()),
