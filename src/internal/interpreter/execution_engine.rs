@@ -9,7 +9,10 @@ impl ExecutionEngine for Interpreter {
     /// Execute Resurgence Instructions
     fn execute_instruction(&mut self, start_index: usize) -> Result<(), Error> {
         if !self.imports_resolved {
-            self.resolve_imports()?;
+            let res = self.resolve_imports();
+            if let Err(err) = res {
+                return Err(err);
+            }
             self.imports_resolved = true;
         }
         let mut index = start_index;
@@ -52,43 +55,55 @@ impl ExecutionEngine for Interpreter {
                     if index < max_length {
                         self.code_holder.instructions[index] = Some(operation);
                     }
-                    return Result::Ok(())
+                    return Result::Ok(());
                 },
 
                 Instruction::Mov(ref dst_reg, ref dst_reg_ref, ref src_reg, ref src_reg_ref) => {
-                    self.mov_registers(dst_reg, dst_reg_ref, src_reg, src_reg_ref)?
+                    let res = self.mov_registers(dst_reg, dst_reg_ref, src_reg, src_reg_ref);
+                    if let Err(err) = res {
+                        return Err(err);
+                    }
                 }
                 Instruction::Cpy(ref dst_reg, ref dst_reg_ref, ref src_reg, ref src_reg_ref) => {
-                    self.cpy_registers(dst_reg, dst_reg_ref, src_reg, src_reg_ref)?
+                    let res = self.cpy_registers(dst_reg, dst_reg_ref, src_reg, src_reg_ref);
+                    if let Err(err) = res {
+                        return Err(err);
+                    }
                 }
                 Instruction::Ref(ref dst_reg, ref dst_reg_ref, ref src_reg, ref src_reg_ref) => {
-                    self.ref_registers(dst_reg, dst_reg_ref, src_reg, src_reg_ref)?
+                    let res = self.ref_registers(dst_reg, dst_reg_ref, src_reg, src_reg_ref);
+                    if let Err(err) = res {
+                        return Err(err);
+                    }
                 }
 
                 Instruction::StackPush(ref register, ref reference) => {
                     self.push_on_stack(register, reference)
                 }
                 Instruction::StackMov(ref register, ref reference) => {
-                    self.stack_mov(register, reference)?
+                    let res = self.stack_mov(register, reference);
+                    if let Err(err) = res {
+                        return Err(err);
+                    }
                 }
                 Instruction::StackPop => {
                     self.stack.pop();
                 } // We have the braces around this call to make the Rust compiler happy
 
                 Instruction::Add(ref dst_reg, ref reg_1, ref reg_2) => {
-                    self.add(dst_reg, reg_1, reg_2)
+                    self.add(dst_reg, reg_1, reg_2);
                 }
                 Instruction::Sub(ref dst_reg, ref reg_1, ref reg_2) => {
-                    self.sub(dst_reg, reg_1, reg_2)
+                    self.sub(dst_reg, reg_1, reg_2);
                 }
                 Instruction::Mul(ref dst_reg, ref reg_1, ref reg_2) => {
-                    self.mul(dst_reg, reg_1, reg_2)
+                    self.mul(dst_reg, reg_1, reg_2);
                 }
                 Instruction::Div(ref dst_reg, ref reg_1, ref reg_2) => {
-                    self.div(dst_reg, reg_1, reg_2)
+                    self.div(dst_reg, reg_1, reg_2);
                 }
                 Instruction::Mod(ref dst_reg, ref reg_1, ref reg_2) => {
-                    self.modlo(dst_reg, reg_1, reg_2)
+                    self.modlo(dst_reg, reg_1, reg_2);
                 }
 
                 Instruction::Equal(ref reg_1, ref reg_2) => {
