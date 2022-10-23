@@ -13,8 +13,8 @@ use crate::api::ext_func::resurgence_state::ResurgenceState;
 use crate::objects::codeholder::CodeHolder;
 use crate::objects::stackframe::StackFrame;
 
-// API exports
-pub mod resolve_imports;
+pub(crate) mod resolve_imports; // Resurgence already handles this at runtime, so it's only public to the crate
+
 /// `Interpreter`: Built-in Register Virtual Machine
 pub struct Interpreter {
     /// Special register used for fast math
