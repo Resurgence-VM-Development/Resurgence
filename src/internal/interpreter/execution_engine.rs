@@ -18,7 +18,11 @@ impl ExecutionEngine for Interpreter {
         let mut index = start_index;
         let max_length = self.code_holder.instructions.len();
         while index != max_length {
-            let operation = self.code_holder.instructions[index].take().unwrap();
+            let operation: Instruction;
+            unsafe {
+                operation = self.code_holder.instructions.get_unchecked_mut(index).take().unwrap();
+            }
+            let ins_index = index;
             match operation {
                 Instruction::Alloc(ref register_amount) => {
                     self.call_stack.push(StackFrame::from(*register_amount))
@@ -41,11 +45,10 @@ impl ExecutionEngine for Interpreter {
                     }
                 }
                 Instruction::Jump(ref jmp_amount) => {
-                    let cloned_jmp_amount = *jmp_amount;
+                    index = (index as i64 + jmp_amount) as usize;
                     if index < max_length {
-                        self.code_holder.instructions[index] = Some(operation);
+                        self.code_holder.instructions[ins_index] = Some(operation);
                     }
-                    index = (index as i64 + cloned_jmp_amount) as usize;
                     continue;
                 }
 
@@ -53,7 +56,7 @@ impl ExecutionEngine for Interpreter {
                 Instruction::ExtCall(ref func_reg) => self.ext_call(*func_reg)?,
                 Instruction::Ret => {
                     if index < max_length {
-                        self.code_holder.instructions[index] = Some(operation);
+                        self.code_holder.instructions[ins_index] = Some(operation);
                     }
                     return Result::Ok(());
                 },
@@ -123,64 +126,38 @@ impl ExecutionEngine for Interpreter {
 
                 Instruction::Equal(ref reg_1, ref reg_2) => {
                     if self.equal(reg_1, reg_2) {
-                        if index < max_length {
-                            self.code_holder.instructions[index] = Some(operation);
-                        }
-                        index += 2;
-                        continue;
+                        index += 1;
                     }
                 }
                 Instruction::NotEqual(ref reg_1, ref reg_2) => {
                     if self.not_equal(reg_1, reg_2) {
-                        if index < max_length {
-                            self.code_holder.instructions[index] = Some(operation);
-                        }
-                        index += 2;
-                        continue;
+                        index += 1;
                     }
                 }
                 Instruction::Greater(ref reg_1, ref reg_2) => {
                     if self.greater_than(reg_1, reg_2) {
-                        if index < max_length {
-                            self.code_holder.instructions[index] = Some(operation);
-                        }
-                        index += 2;
-                        continue;
+                        index += 1;
                     }
                 }
                 Instruction::Less(ref reg_1, ref reg_2) => {
                     if self.less_than(reg_1, reg_2) {
-                        if index < max_length {
-                            self.code_holder.instructions[index] = Some(operation);
-                        }
-                        index += 2;
-                        continue;
+                        index += 1;
                     }
                 }
                 Instruction::GreaterEqual(ref reg_1, ref reg_2) => {
                     if self.greater_or_equal(reg_1, reg_2) {
-                        if index < max_length {
-                            self.code_holder.instructions[index] = Some(operation);
-                        }
-                        index += 2;
-                        continue;
+                        index += 1;
                     }
                 }
                 Instruction::LessEqual(ref reg_1, ref reg_2) => {
                     if self.less_or_equal(reg_1, reg_2) {
-                        if index < max_length {
-                            self.code_holder.instructions[index] = Some(operation);
-                        }
-                        index += 2;
-                        continue;
+                        index += 1;
                     }
                 }
             }
 
             // Store instruction back into memory and increment index
-            if index < max_length {
-                self.code_holder.instructions[index] = Some(operation);
-            }
+            self.code_holder.instructions[ins_index] = Some(operation);
             index += 1;
         }
         Result::Ok(())
