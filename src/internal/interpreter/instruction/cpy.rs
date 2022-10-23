@@ -37,7 +37,7 @@ impl Interpreter {
                     Constant::Double(src_double) => {
                         self.accumulator = src_double;
                     }
-                    _ => return Err(Error::new(ErrorKind::InvalidInput, "Invalid copy to the accumulator!".to_string())),
+                    _ => return Err(Error::new(ErrorKind::InvalidInput, "Invalid copy to the accumulator!")),
                 }
         },
             (RegisterLocation::Accumulator, RegisterLocation::Local) => {
@@ -49,7 +49,7 @@ impl Interpreter {
                     Constant::Double(src_double) => {
                         self.accumulator = src_double;
                     }
-                    _ => return Err(Error::new(ErrorKind::InvalidInput, "Invalid copy to the accumulator!".to_string())),
+                    _ => return Err(Error::new(ErrorKind::InvalidInput, "Invalid copy to the accumulator!")),
                 }
             },
 
@@ -86,7 +86,7 @@ impl Interpreter {
                 stack_frame.registers[dst_index_usize] = Some(stack_frame.cpy_register(src_index_usize));
             },
 
-            _ => return Err(Error::new(ErrorKind::InvalidInput, "Invalid cpy operation!".to_string()))
+            _ => return Err(Error::new(ErrorKind::InvalidInput, "Invalid cpy operation!"))
         }
         Result::Ok(())
     }

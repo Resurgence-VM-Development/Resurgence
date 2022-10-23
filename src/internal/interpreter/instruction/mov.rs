@@ -37,7 +37,7 @@ impl Interpreter {
                     Constant::Double(src_double) => {
                         self.accumulator = src_double;
                     }
-                    _ => return Err(Error::new(ErrorKind::InvalidInput, "Invalid move to accumulator register!".to_string()))
+                    _ => return Err(Error::new(ErrorKind::InvalidInput, "Invalid move to accumulator register!"))
                 }
             },
             (RegisterLocation::Accumulator, RegisterLocation::Local) => {
@@ -49,7 +49,7 @@ impl Interpreter {
                     Constant::Double(src_double) => {
                         self.accumulator = src_double;
                     }
-                    _ => return Err(Error::new(ErrorKind::InvalidInput, "Invalid move to accumulator register!".to_string())),
+                    _ => return Err(Error::new(ErrorKind::InvalidInput, "Invalid move to accumulator register!")),
                 }
             },
     
@@ -71,7 +71,7 @@ impl Interpreter {
                 let stack_frame = self.ref_stack_frame();
                 stack_frame.registers[dst_index_usize] = Some(stack_frame.mov_register(src_index_usize));
             },
-            _ => return Err(Error::new(ErrorKind::InvalidInput, "Invalid mov operation".to_string())),
+            _ => return Err(Error::new(ErrorKind::InvalidInput, "Invalid mov operation")),
         }
         Result::Ok(())
     }
@@ -89,7 +89,7 @@ impl Interpreter {
 
         // Check if the stack is empty
         if self.stack.is_empty() {
-            return Err(Error::new(ErrorKind::Other, "Stack empty; can't move from the stack!".to_string()))
+            return Err(Error::new(ErrorKind::Other, "Stack empty; can't move from the stack!"))
         }
         let object = self.stack.remove(self.stack.len() - 1); // We do self.stack.len() - 1 to get the true index. For example, if the vector has a size of 1, the true index is 0
         match dst_loc {
@@ -99,7 +99,7 @@ impl Interpreter {
                     Constant::Int(val) => self.accumulator = val as f64,
                     Constant::Double(val) => self.accumulator = val,
                     _ => {
-                        return Err(Error::new(ErrorKind::InvalidInput, "Can only write integers and doubles to the accumulator register".to_string()));
+                        return Err(Error::new(ErrorKind::InvalidInput, "Can only write integers and doubles to the accumulator register"));
                     }
                 }
             },
