@@ -20,7 +20,7 @@ impl ExecutionEngine for Interpreter {
         while index != max_length {
             let operation: Instruction;
             unsafe {
-                operation = self.code_holder.instructions.get_unchecked_mut(index).take().unwrap();
+                operation = self.code_holder.instructions.get_unchecked_mut(index).take().unwrap_unchecked();
             }
             let ins_index = index;
             match operation {
@@ -46,18 +46,14 @@ impl ExecutionEngine for Interpreter {
                 }
                 Instruction::Jump(ref jmp_amount) => {
                     index = (index as i64 + jmp_amount) as usize;
-                    if index < max_length {
-                        self.code_holder.instructions[ins_index] = Some(operation);
-                    }
+                    self.code_holder.instructions[ins_index] = Some(operation);
                     continue;
                 }
 
                 Instruction::Call(ref func_index) => self.execute_instruction(*func_index as usize)?,
                 Instruction::ExtCall(ref func_reg) => self.ext_call(*func_reg)?,
                 Instruction::Ret => {
-                    if index < max_length {
-                        self.code_holder.instructions[ins_index] = Some(operation);
-                    }
+                    self.code_holder.instructions[ins_index] = Some(operation);
                     return Result::Ok(());
                 },
 
