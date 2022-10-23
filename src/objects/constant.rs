@@ -1,3 +1,5 @@
+use std::io::{Error, ErrorKind};
+
 use super::register::Register;
 
 /// `Constant`: Represents a constant in the backend
@@ -18,11 +20,11 @@ pub enum Constant {
 }
 
 impl Constant {
-    fn check_overflow(&self, value: Option<i64>) -> i64 {
+    fn check_overflow(&self, value: Option<i64>) -> Result<i64, Error> {
         if value.is_none() {
-            panic!("Overflow!");
+            return Err(Error::new(ErrorKind::OutOfMemory, "Overflowed integer!".to_string()));
         }
-        value.unwrap()
+        Ok(value.unwrap())
     }
     /// Adds 2 numerical Constants together
     /// 
@@ -32,21 +34,30 @@ impl Constant {
     /// ```no_run
     /// let int_const = create_constant_int(&5);
     /// let res = int_const.add(&create_constant_int(&5));
-    /// assert_eq!(res, Constant::Int(10));
+    /// if let Err(err) = res {
+    ///     panic!("{}", err);
+    /// }
+    ///
+    /// assert_eq!(res.unwrap(), Constant::Int(10));
     /// ```
-    pub fn add(&self, constant: &Constant) -> Constant {
+    pub fn add(&self, constant: &Constant) -> Result<Constant, Error> {
         match (self.clone(), (*constant).clone()) {
             (Constant::Int(val_1), Constant::Int(val_2)) => {
-                Constant::Int(self.check_overflow(val_1.checked_add(val_2)))
+                let res = self.check_overflow(val_1.checked_add(val_2));
+                if let Err(err) = res {
+                    return Err(err);
+                } else {
+                    return Ok(Constant::Int(res.unwrap()));
+                }
             },
             (Constant::Double(val_1), Constant::Double(val_2)) => {
-                Constant::Double(val_1 + val_2)
+                return Ok(Constant::Double(val_1 + val_2));
             },
             (Constant::Int(val_1), Constant::Double(val_2)) | (Constant::Double(val_2), Constant::Int(val_1)) => {
-                Constant::Double(val_1 as f64 + val_2)
+                return Ok(Constant::Double(val_1 as f64 + val_2))
             },
             _ => {
-                panic!("Can't add non-numerical types");
+                return Err(Error::new(ErrorKind::InvalidData, "Can not add non-numerical types!".to_string()));
             }
         }
     }
@@ -58,21 +69,30 @@ impl Constant {
     /// ```no_run
     /// let int_const = create_constant_int(&5);
     /// let res = int_const.sub(&create_constant_int(&5));
-    /// assert_eq!(res, Constant::Int(0));
+    /// if let Err(err) = res {
+    ///     panic!("{}", err);
+    /// }
+    /// 
+    /// assert_eq!(res.unwrap(), Constant::Int(0));
     /// ```
-    pub fn sub(&self, constant: &Constant) -> Constant {
+    pub fn sub(&self, constant: &Constant) -> Result<Constant, Error> {
         match (self.clone(), (*constant).clone()) {
             (Constant::Int(val_1), Constant::Int(val_2)) => {
-                Constant::Int(self.check_overflow(val_1.checked_sub(val_2)))
+                let res = self.check_overflow(val_1.checked_sub(val_2));
+                if let Err(err) = res {
+                    return Err(err);
+                } else {
+                    return Ok(Constant::Int(res.unwrap()));
+                }
             },
             (Constant::Double(val_1), Constant::Double(val_2)) => {
-                Constant::Double(val_1 - val_2)
+                return Ok(Constant::Double(val_1 - val_2))
             },
             (Constant::Int(val_1), Constant::Double(val_2)) | (Constant::Double(val_2), Constant::Int(val_1)) => {
-                Constant::Double(val_1 as f64 - val_2)
+                return Ok(Constant::Double(val_1 as f64 - val_2))
             },
             _ => {
-                panic!("Can't subtract non-numerical types");
+                return Err(Error::new(ErrorKind::InvalidData, "Can not subtract non-numerical types!"));
             }
         }
     }
@@ -85,21 +105,30 @@ impl Constant {
     /// ```no_run
     /// let int_const = create_constant_int(&5);
     /// let res = int_const.mul(&create_constant_int(&5));
-    /// assert_eq!(res, Constant::Int(25));
+    /// if let Err(err) = res {
+    ///     panic!("{}", err);
+    /// }
+    /// 
+    /// assert_eq!(res.unwrap(), Constant::Int(25));
     /// ```
-    pub fn mul(&self, constant: &Constant) -> Constant {
+    pub fn mul(&self, constant: &Constant) -> Result<Constant, Error> {
         match (self.clone(), (*constant).clone()) {
             (Constant::Int(val_1), Constant::Int(val_2)) => {
-                Constant::Int(self.check_overflow(val_1.checked_mul(val_2)))
+                let res = self.check_overflow(val_1.checked_mul(val_2));
+                if let Err(err) = res {
+                    return Err(err);
+                } else {
+                    return Ok(Constant::Int(res.unwrap()));
+                }
             },
             (Constant::Double(val_1), Constant::Double(val_2)) => {
-                Constant::Double(val_1 * val_2)
+                return Ok(Constant::Double(val_1 * val_2));
             },
             (Constant::Int(val_1), Constant::Double(val_2)) | (Constant::Double(val_2), Constant::Int(val_1)) => {
-                Constant::Double(val_1 as f64 * val_2)
+                return Ok(Constant::Double(val_1 as f64 * val_2));
             },
             _ => {
-                panic!("Can't multiply non-numerical types");
+                return Err(Error::new(ErrorKind::InvalidData, "Can not multiply non-numerical types!"))
             }
         }
     }
@@ -112,21 +141,30 @@ impl Constant {
     /// ```no_run
     /// let int_const = create_constant_int(&5);
     /// let res = int_const.div(&create_constant_int(&5));
-    /// assert_eq!(res, Constant::Int(1));
+    /// if let Err(err) = res {
+    ///     panic!("{}", err);
+    /// }
+    /// 
+    /// assert_eq!(res.unwrap(), Constant::Int(1));
     /// ```
-    pub fn div(&self, constant: &Constant) -> Constant {
+    pub fn div(&self, constant: &Constant) -> Result<Constant, Error> {
         match (self.clone(), (*constant).clone()) {
             (Constant::Int(val_1), Constant::Int(val_2)) => {
-                Constant::Int(self.check_overflow(val_1.checked_div(val_2)))
+                let res = self.check_overflow(val_1.checked_div(val_2));
+                if let Err(err) = res {
+                    return Err(err);
+                } else {
+                    return Ok(Constant::Int(res.unwrap()));
+                }
             },
             (Constant::Double(val_1), Constant::Double(val_2)) => {
-                Constant::Double(val_1 / val_2)
+                return Ok(Constant::Double(val_1 / val_2));
             },
             (Constant::Int(val_1), Constant::Double(val_2)) | (Constant::Double(val_2), Constant::Int(val_1)) => {
-                Constant::Double(val_1 as f64 / val_2)
+                return Ok(Constant::Double(val_1 as f64 / val_2));
             },
             _ => {
-                panic!("Can't subtract non-numerical types");
+                return Err(Error::new(ErrorKind::InvalidData, "Can't divide non-numerical types!"))
             }
         }
     }
@@ -139,21 +177,25 @@ impl Constant {
     /// ```no_run
     /// let int_const = create_constant_int(&5);
     /// let res = int_const.modlo(&create_constant_int(&5));
-    /// assert_eq!(res, Constant::Int(1));
+    /// if let Err(err) = res {
+    ///     panic!("{}", err);
+    /// }
+    /// 
+    /// assert_eq!(res.unwrap(), Constant::Int(1));
     /// ```
-    pub fn modlo(&self, constant: &Constant) -> Constant {
+    pub fn modlo(&self, constant: &Constant) -> Result<Constant, Error> {
         match (self.clone(), (*constant).clone()) {
             (Constant::Int(val_1), Constant::Int(val_2)) => {
-                Constant::Int(val_1 % val_2)
+                return Ok(Constant::Int(val_1 % val_2));
             },
             (Constant::Double(val_1), Constant::Double(val_2)) => {
-                Constant::Double(val_1 % val_2)
+                return Ok(Constant::Double(val_1 % val_2));
             },
             (Constant::Int(val_1), Constant::Double(val_2)) | (Constant::Double(val_2), Constant::Int(val_1)) => {
-                Constant::Double(val_1 as f64 % val_2)
+                return Ok(Constant::Double(val_1 as f64 % val_2));
             },
             _ => {
-                panic!("Can't subtract non-numerical types");
+                return Err(Error::new(ErrorKind::InvalidData, "Can not perform division and return the remainder of non-numerical types!"));
             }
         }
     }
@@ -168,14 +210,17 @@ impl Constant {
     /// 
     /// let (hello, world) = (create_constant_string("Hello "), create_constant_string("World!"));
     /// let hello_world = hello.concat(&world);
-    /// assert_eq!(hello_world, create_constant_string("Hello World!"));
+    /// if let Err(err) = hello_world {
+    ///     panic!("{}", err);
+    /// }
+    /// assert_eq!(hello_world.unwrap(), create_constant_string("Hello World!"));
     /// ```
-    pub fn concat(&self, constant: &Constant) -> Constant {
+    pub fn concat(&self, constant: &Constant) -> Result<Constant, Error> {
         if let (Constant::String(str_1), Constant::String(str_2)) = (self.clone(), constant) {
-            Constant::String(str_1 + str_2)
+            return Ok(Constant::String(str_1 + str_2));
         } 
         else {
-            panic!("Concat only works for strings!");
+            return Err(Error::new(ErrorKind::InvalidData, "Concat only accepts strings!"));
         }
     }
 }
@@ -276,16 +321,16 @@ mod const_impl_tests {
         let mul_constant = int_const.mul(&double_const);
         let div_constant = int_const.div(&double_const);
 
-        if let Constant::Double(res) = add_constant {
+        if let Constant::Double(res) = add_constant.unwrap() {
             assert_eq!(res, 99.0 + 1.5);
         }
-        if let Constant::Double(res) = sub_constant {
+        if let Constant::Double(res) = sub_constant.unwrap() {
             assert_eq!(res, 99.0 - 1.5);
         }
-        if let Constant::Double(res) = mul_constant {
+        if let Constant::Double(res) = mul_constant.unwrap() {
             assert_eq!(res, 99.0 * 1.5);
         }
-        if let Constant::Double(res) = div_constant {
+        if let Constant::Double(res) = div_constant.unwrap() {
             assert_eq!(res, 99.0 / 1.5);
         }
     }
@@ -294,6 +339,9 @@ mod const_impl_tests {
     fn concat_test() {
         let (hello, world) = (create_constant_string("Hello "), create_constant_string("World!"));
         let hello_world = hello.concat(&world);
-        assert_eq!(hello_world, create_constant_string("Hello World!"));
+        if let Err(err) = hello_world {
+            panic!("{}", err);
+        }
+        assert_eq!(hello_world.unwrap(), create_constant_string("Hello World!"));
     }
 }

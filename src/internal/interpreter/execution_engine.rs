@@ -91,19 +91,34 @@ impl ExecutionEngine for Interpreter {
                 } // We have the braces around this call to make the Rust compiler happy
 
                 Instruction::Add(ref dst_reg, ref reg_1, ref reg_2) => {
-                    self.add(dst_reg, reg_1, reg_2);
+                    let res = self.add(dst_reg, reg_1, reg_2);
+                    if let Err(err) = res {
+                        return Err(err);
+                    }
                 }
                 Instruction::Sub(ref dst_reg, ref reg_1, ref reg_2) => {
-                    self.sub(dst_reg, reg_1, reg_2);
+                    let res = self.sub(dst_reg, reg_1, reg_2);
+                    if let Err(err) = res {
+                        return Err(err);
+                    }
                 }
                 Instruction::Mul(ref dst_reg, ref reg_1, ref reg_2) => {
-                    self.mul(dst_reg, reg_1, reg_2);
+                    let res = self.mul(dst_reg, reg_1, reg_2);
+                    if let Err(err) = res {
+                        return Err(err);
+                    }
                 }
                 Instruction::Div(ref dst_reg, ref reg_1, ref reg_2) => {
-                    self.div(dst_reg, reg_1, reg_2);
+                    let res = self.div(dst_reg, reg_1, reg_2);
+                    if let Err(err) = res {
+                        return Err(err);
+                    }
                 }
                 Instruction::Mod(ref dst_reg, ref reg_1, ref reg_2) => {
-                    self.modlo(dst_reg, reg_1, reg_2);
+                    let res = self.modlo(dst_reg, reg_1, reg_2);
+                    if let Err(err) = res {
+                        return Err(err);
+                    }
                 }
 
                 Instruction::Equal(ref reg_1, ref reg_2) => {
