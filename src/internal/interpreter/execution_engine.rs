@@ -8,21 +8,21 @@ use crate::objects::{
 impl ExecutionEngine for Interpreter {
     /// Execute Resurgence Instructions
     fn execute_instruction(&mut self, start_index: usize) -> Result<(), Error> {
-        if !self.imports_resolved {
+        if !self.code_holder.resolved_imports {
             let res = self.resolve_imports();
             if let Err(err) = res {
                 return Err(err);
             }
-            self.imports_resolved = true;
+            self.code_holder.resolved_imports = true;
         }
         let mut index = start_index;
         let max_length = self.code_holder.instructions.len();
         while index != max_length {
-            let operation: Instruction;
-            unsafe {
-                operation = self.code_holder.instructions.get_unchecked_mut(index).take().unwrap_unchecked();
-            }
+            // The loop does bounds checking for us, so we don't need the extra bounds check
+            assert!(index < max_length);
+            let operation = self.code_holder.instructions[index].take().unwrap();
             let ins_index = index;
+            assert!(ins_index < max_length);
             match operation {
                 Instruction::Alloc(ref register_amount) => {
                     self.call_stack.push(StackFrame::from(*register_amount))
