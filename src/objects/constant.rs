@@ -24,7 +24,11 @@ impl Constant {
         if value.is_none() {
             return Err(Error::new(ErrorKind::OutOfMemory, "Overflowed integer!".to_string()));
         }
-        Ok(value.unwrap())
+
+        // We know there was no error, so we don't need unwrap to check for us again
+        unsafe {
+            Ok(value.unwrap_unchecked())
+        }
     }
     /// Adds 2 numerical Constants together
     /// 
@@ -45,19 +49,20 @@ impl Constant {
             (Constant::Int(val_1), Constant::Int(val_2)) => {
                 let res = self.check_overflow(val_1.checked_add(val_2));
                 if let Err(err) = res {
-                    return Err(err);
+                    Err(err)
                 } else {
-                    return Ok(Constant::Int(res.unwrap()));
+                    // If no error was returned, then we don't need to use the checked version of unwrap
+                    unsafe { Ok(Constant::Int(res.unwrap_unchecked())) }
                 }
             },
             (Constant::Double(val_1), Constant::Double(val_2)) => {
-                return Ok(Constant::Double(val_1 + val_2));
+                Ok(Constant::Double(val_1 + val_2))
             },
             (Constant::Int(val_1), Constant::Double(val_2)) | (Constant::Double(val_2), Constant::Int(val_1)) => {
-                return Ok(Constant::Double(val_1 as f64 + val_2))
+                Ok(Constant::Double(val_1 as f64 + val_2))
             },
             _ => {
-                return Err(Error::new(ErrorKind::InvalidData, "Can not add non-numerical types!".to_string()));
+                Err(Error::new(ErrorKind::InvalidData, "Can not add non-numerical types!".to_string()))
             }
         }
     }
@@ -80,19 +85,20 @@ impl Constant {
             (Constant::Int(val_1), Constant::Int(val_2)) => {
                 let res = self.check_overflow(val_1.checked_sub(val_2));
                 if let Err(err) = res {
-                    return Err(err);
+                    Err(err)
                 } else {
-                    return Ok(Constant::Int(res.unwrap()));
+                    // We know there was no error, then we don't need to use the checked version of unwrap
+                    unsafe { Ok(Constant::Int(res.unwrap_unchecked())) }
                 }
             },
             (Constant::Double(val_1), Constant::Double(val_2)) => {
-                return Ok(Constant::Double(val_1 - val_2))
+                Ok(Constant::Double(val_1 - val_2))
             },
             (Constant::Int(val_1), Constant::Double(val_2)) | (Constant::Double(val_2), Constant::Int(val_1)) => {
-                return Ok(Constant::Double(val_1 as f64 - val_2))
+                Ok(Constant::Double(val_1 as f64 - val_2))
             },
             _ => {
-                return Err(Error::new(ErrorKind::InvalidData, "Can not subtract non-numerical types!"));
+                Err(Error::new(ErrorKind::InvalidData, "Can not subtract non-numerical types!"))
             }
         }
     }
@@ -116,19 +122,20 @@ impl Constant {
             (Constant::Int(val_1), Constant::Int(val_2)) => {
                 let res = self.check_overflow(val_1.checked_mul(val_2));
                 if let Err(err) = res {
-                    return Err(err);
+                    Err(err)
                 } else {
-                    return Ok(Constant::Int(res.unwrap()));
+                    // We know there was no error, so we don't need to use the checked version of unwrap
+                    unsafe { Ok(Constant::Int(res.unwrap_unchecked())) }
                 }
             },
             (Constant::Double(val_1), Constant::Double(val_2)) => {
-                return Ok(Constant::Double(val_1 * val_2));
+                Ok(Constant::Double(val_1 * val_2))
             },
             (Constant::Int(val_1), Constant::Double(val_2)) | (Constant::Double(val_2), Constant::Int(val_1)) => {
-                return Ok(Constant::Double(val_1 as f64 * val_2));
+                Ok(Constant::Double(val_1 as f64 * val_2))
             },
             _ => {
-                return Err(Error::new(ErrorKind::InvalidData, "Can not multiply non-numerical types!"))
+                Err(Error::new(ErrorKind::InvalidData, "Can not multiply non-numerical types!"))
             }
         }
     }
@@ -152,19 +159,20 @@ impl Constant {
             (Constant::Int(val_1), Constant::Int(val_2)) => {
                 let res = self.check_overflow(val_1.checked_div(val_2));
                 if let Err(err) = res {
-                    return Err(err);
+                    Err(err)
                 } else {
-                    return Ok(Constant::Int(res.unwrap()));
+                    // We know there was no error, so we don't need to use the checked version of unwrap
+                    unsafe { Ok(Constant::Int(res.unwrap_unchecked())) }
                 }
             },
             (Constant::Double(val_1), Constant::Double(val_2)) => {
-                return Ok(Constant::Double(val_1 / val_2));
+                Ok(Constant::Double(val_1 / val_2))
             },
             (Constant::Int(val_1), Constant::Double(val_2)) | (Constant::Double(val_2), Constant::Int(val_1)) => {
-                return Ok(Constant::Double(val_1 as f64 / val_2));
+                Ok(Constant::Double(val_1 as f64 / val_2))
             },
             _ => {
-                return Err(Error::new(ErrorKind::InvalidData, "Can't divide non-numerical types!"))
+                Err(Error::new(ErrorKind::InvalidData, "Can't divide non-numerical types!"))
             }
         }
     }
@@ -186,16 +194,16 @@ impl Constant {
     pub fn modlo(&self, constant: &Constant) -> Result<Constant, Error> {
         match (self.clone(), (*constant).clone()) {
             (Constant::Int(val_1), Constant::Int(val_2)) => {
-                return Ok(Constant::Int(val_1 % val_2));
+                Ok(Constant::Int(val_1 % val_2))
             },
             (Constant::Double(val_1), Constant::Double(val_2)) => {
-                return Ok(Constant::Double(val_1 % val_2));
+                Ok(Constant::Double(val_1 % val_2))
             },
             (Constant::Int(val_1), Constant::Double(val_2)) | (Constant::Double(val_2), Constant::Int(val_1)) => {
-                return Ok(Constant::Double(val_1 as f64 % val_2));
+                Ok(Constant::Double(val_1 as f64 % val_2))
             },
             _ => {
-                return Err(Error::new(ErrorKind::InvalidData, "Can not perform division and return the remainder of non-numerical types!"));
+                Err(Error::new(ErrorKind::InvalidData, "Can not perform division and return the remainder of non-numerical types!"))
             }
         }
     }
@@ -217,10 +225,10 @@ impl Constant {
     /// ```
     pub fn concat(&self, constant: &Constant) -> Result<Constant, Error> {
         if let (Constant::String(str_1), Constant::String(str_2)) = (self.clone(), constant) {
-            return Ok(Constant::String(str_1 + str_2));
+            Ok(Constant::String(str_1 + str_2))
         } 
         else {
-            return Err(Error::new(ErrorKind::InvalidData, "Concat only accepts strings!"));
+            Err(Error::new(ErrorKind::InvalidData, "Concat only accepts strings!"))
         }
     }
 }

@@ -183,5 +183,4 @@ pub enum Instruction {
     /// LessEqual 0, 1 // Check if 0 is less than or equal to 1 and jumps one operation if it is
     /// ```
     LessEqual(Register, Register),
-
 }
