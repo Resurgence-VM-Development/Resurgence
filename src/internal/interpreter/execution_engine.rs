@@ -14,6 +14,9 @@ impl ExecutionEngine for Interpreter {
                 return Err(err);
             }
         }
+        if !self.seal.untampered_runtime {
+           return Err(Error(ErrorKind::PermissionDenied, "Runtime has been tampered with"));
+        }
         let mut index = start_index;
         let max_length = self.code_holder.instructions.len();
         while index != max_length {
@@ -160,6 +163,7 @@ impl ExecutionEngine for Interpreter {
 
     // Execute an exported function.
     fn execute_function(&mut self, func_name: &str) -> Result<(), Error> {
+        self.seal.set_runtime();
         match self.code_holder.exports.get(func_name) {
             Some(inst) => self.execute_instruction(*inst as usize),
             None => {

@@ -11,6 +11,7 @@ use super::super::constant::Constant;
 use crate::api::codereader;
 use crate::objects::codeholder::CodeHolder;
 use crate::objects::stackframe::StackFrame;
+use crate::internal::runtime_seal::RunTimeSeal;
 
 pub(crate) mod resolve_imports; // Resurgence already handles this at runtime, so it's only public to the crate
 
@@ -31,11 +32,14 @@ pub struct Interpreter {
     /// Holds global variables
     global: Vec<Option<Constant>>,
 
-    // Converts bytecode indices into internal indicies
+    /// Converts bytecode indices into internal indicies
     byte_to_interal: Vec<u64>,
 
     /// All Rust functions registered before runtime
     rust_functions: Vec<RustFunc>,
+    
+    /// Helps with validating the runtime
+    seal: RunTimeSeal,
 }
 
 impl Interpreter {
@@ -50,6 +54,7 @@ impl Interpreter {
             global: Vec::new(),
             rust_functions: Vec::new(),
             byte_to_interal: Vec::new(),
+            seal: RunTimeSeal::new(),
         }
     }
 

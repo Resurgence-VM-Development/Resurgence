@@ -20,6 +20,11 @@ impl Interpreter {
         function: fn(&mut ResurgenceState) -> Result<(), Error>,
         func_name: String,
     ) {
+        // If the runtime variable is set to true, then execution has begun
+        // and the runtime can no longer be trusted
+        if self.seal.untampered_runtime {
+            self.seal.runtime_tampered();
+        }
         self.rust_functions.push(RustFunc {
             name: func_name,
             func: Some(function),
@@ -33,6 +38,11 @@ impl Interpreter {
         function: extern "C" fn(&mut ResurgenceState) -> u8,
         func_name: String,
     ) {
+        // If the runtime variable is set to true, then execution has begun
+        // and the runtime can no longer be trusted
+        if self.seal.untampered_runtime {
+            self.seal.runtime_tampered();
+        }
         self.rust_functions.push(RustFunc {
             name: func_name,
             func: None,
