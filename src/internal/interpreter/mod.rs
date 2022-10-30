@@ -49,6 +49,7 @@ impl Interpreter {
             code_holder: ch,
             global: Vec::new(),
             rust_functions: Vec::new(),
+            byte_to_interal: Vec::new(),
         }
     }
 
