@@ -19,11 +19,10 @@ impl ExecutionEngine for Interpreter {
         }
         let mut index = start_index;
         let max_length = self.code_holder.instructions.len();
-        while index != max_length {
-            // The loop does bounds checking for us, so we don't need the extra bounds check
-            assert!(index < max_length);
+        while index < max_length {
             let operation = self.code_holder.instructions[index].take().unwrap();
             let ins_index = index;
+            // To encourage the compiler to optimze extra bounds checks
             assert!(ins_index < max_length);
             match operation {
                 Instruction::Alloc(ref register_amount) => {
