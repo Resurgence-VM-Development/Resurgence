@@ -22,3 +22,5 @@ pub use internal::execution_engine::ExecutionEngine;
 pub use internal::interpreter::Interpreter;
 
 pub mod api;
+
+pub mod ffi;
