@@ -32,9 +32,6 @@ pub struct Interpreter {
     /// Holds global variables
     global: Vec<Option<Constant>>,
 
-    /// Converts bytecode indices into internal indicies
-    byte_to_interal: Vec<u64>,
-
     /// All Rust functions registered before runtime
     rust_functions: Vec<RustFunc>,
     
@@ -53,7 +50,6 @@ impl Interpreter {
             code_holder: ch,
             global: Vec::new(),
             rust_functions: Vec::new(),
-            byte_to_interal: Vec::new(),
             seal: RunTimeSeal::new(),
         }
     }
