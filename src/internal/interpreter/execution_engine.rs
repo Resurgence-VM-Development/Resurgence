@@ -52,8 +52,18 @@ impl ExecutionEngine for Interpreter {
                     continue;
                 }
 
-                Instruction::Call(ref func_index) => self.execute_instruction(*func_index as usize)?,
-                Instruction::ExtCall(ref func_reg) => self.ext_call(*func_reg)?,
+                Instruction::Call(ref func_index) => {
+                    let res = self.execute_instruction(*func_index as usize);
+                    if let Err(err) = res {
+                        return Err(err);
+                    }
+                },
+                Instruction::ExtCall(ref func_reg) => {
+                    let res = self.ext_call(*func_reg);
+                    if let Err(err) = res {
+                        return Err(err);
+                    }
+                },
                 Instruction::Ret => {
                     self.code_holder.instructions[ins_index] = Some(operation);
                     return Result::Ok(());
