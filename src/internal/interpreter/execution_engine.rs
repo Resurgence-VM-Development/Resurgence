@@ -15,7 +15,7 @@ impl ExecutionEngine for Interpreter {
             }
         }
         if !self.seal.untampered_runtime {
-           return Err(Error(ErrorKind::PermissionDenied, "Runtime has been tampered with"));
+           return Err(Error::new(ErrorKind::PermissionDenied, "Runtime has been tampered with"));
         }
         let mut index = start_index;
         let max_length = self.code_holder.instructions.len();
