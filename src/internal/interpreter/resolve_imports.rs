@@ -22,7 +22,8 @@ impl Interpreter {
                     format!("Can not find function '{}' internally!", *name),
                 ));
             }
-        }
+        } 
+        self.code_holder.resolved_imports = true;
         Result::Ok(())
     }
 }

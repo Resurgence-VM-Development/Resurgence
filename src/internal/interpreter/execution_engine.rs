@@ -13,7 +13,6 @@ impl ExecutionEngine for Interpreter {
             if let Err(err) = res {
                 return Err(err);
             }
-            self.code_holder.resolved_imports = true;
         }
         let mut index = start_index;
         let max_length = self.code_holder.instructions.len();
