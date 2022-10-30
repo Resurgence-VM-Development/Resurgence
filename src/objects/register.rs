@@ -6,7 +6,7 @@
 /// * `LastStackFrame`: Register is in the last stack frame
 /// * `Global`: Global scope
 /// * `Local`: Local scope
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum RegisterLocation {
     ConstantPool,
     Accumulator,
@@ -18,7 +18,7 @@ pub enum RegisterLocation {
 ///
 /// `u32`: Location of the virtual register in an array
 /// `RegisterLocation`: The scope of a register
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Register(pub u32, pub RegisterLocation);
 
 /// `RegisterReference`: Defines how we refer to a register in Instruction
@@ -26,7 +26,7 @@ pub struct Register(pub u32, pub RegisterLocation);
 /// Possible Values:
 /// * `AsIs`: Register in memory location holds a value
 /// * `Dereference`: Register in memory location holds an address to another location
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub enum RegisterReference {
     AsIs,
     Dereference,

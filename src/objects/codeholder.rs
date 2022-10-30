@@ -16,6 +16,12 @@ pub struct CodeHolder {
 
     /// A list of calls that the code exports and makes available to the application at runtime.
     pub(crate) exports: HashMap<String, u64>,
+
+    /// Have imports been resolved?
+    pub resolved_imports: bool,
+
+     // Converts bytecode indices into internal indicies
+    pub(crate) byte_to_interal: Vec<u64>,
 }
 
 impl CodeHolder {
@@ -26,6 +32,8 @@ impl CodeHolder {
             constant_pool: Vec::new(),
             imports: Vec::new(),
             exports: HashMap::new(),
+            resolved_imports: false,
+            byte_to_interal: Vec::new(),
         }
     }
 

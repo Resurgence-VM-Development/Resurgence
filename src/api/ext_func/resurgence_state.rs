@@ -1,12 +1,12 @@
 use crate::objects::constant::Constant;
 use std::io::{Error, ErrorKind};
-pub struct ResurgenceState {
-    args: Vec<Constant>,
+pub struct ResurgenceState<'s> {
+    args: &'s[Constant],
     current_arg: usize
 }
 
-impl From<Vec<Constant>> for ResurgenceState {
-    fn from(args: Vec<Constant>) -> ResurgenceState {
+impl ResurgenceState<'_> {
+    pub fn new(args: &[Constant]) -> ResurgenceState {
         ResurgenceState { 
             args,
             current_arg: 0 
@@ -14,7 +14,7 @@ impl From<Vec<Constant>> for ResurgenceState {
     }
 }
 
-impl ResurgenceState {
+impl ResurgenceState<'_> {
     pub fn get_i64(&mut self) -> Result<i64, Error> { 
         if let Constant::Int(res) = self.args[self.current_arg] {
             self.current_arg += 1;
@@ -46,10 +46,10 @@ impl ResurgenceState {
     pub fn get_value_as_string(&mut self) -> Result<String, Error> {
         let constant = &self.args[self.current_arg];
         self.current_arg += 1;
-        match &*constant {
+        match constant {
             Constant::Int(ref val) => Result::Ok(val.to_string()),
             Constant::Double(ref val) => Result::Ok(val.to_string()),
-            Constant::String(ref val) => Result::Ok(val.to_string()),
+            Constant::String(ref val) => Result::Ok(val.clone()),
             Constant::Boolean(ref val) => Result::Ok(val.to_string()),
             _ => Err(Error::new(ErrorKind::Other, String::from("Invalid type"))),
         }

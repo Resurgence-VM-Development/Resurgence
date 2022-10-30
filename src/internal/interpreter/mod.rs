@@ -12,8 +12,8 @@ use crate::api::codereader;
 use crate::objects::codeholder::CodeHolder;
 use crate::objects::stackframe::StackFrame;
 
-// API exports
-pub mod resolve_imports;
+pub(crate) mod resolve_imports; // Resurgence already handles this at runtime, so it's only public to the crate
+
 /// `Interpreter`: Built-in Register Virtual Machine
 pub struct Interpreter {
     /// Special register used for fast math
@@ -36,7 +36,6 @@ pub struct Interpreter {
 
     /// All Rust functions registered before runtime
     rust_functions: Vec<RustFunc>,
-    imports_resolved: bool,
 }
 
 impl Interpreter {
@@ -49,9 +48,7 @@ impl Interpreter {
             stack: Vec::new(),
             code_holder: ch,
             global: Vec::new(),
-            byte_to_interal: Vec::new(),
             rust_functions: Vec::new(),
-            imports_resolved: false,
         }
     }
 
