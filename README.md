@@ -12,7 +12,7 @@ Join the Discord server!
 
 Resurgence aims to be an embeddable virtual machine with an easy-to-use API for projects like:
 * Game engines
-* Language interpreters
+* Interpreters for programming languages
 * Applications that want custom scripting behavior
 * Applications that want to execute custom user code securely
 
@@ -31,7 +31,11 @@ Note: Resurgence is just a virtual machine. This allows us to focus on making it
 ![Application Stack](images/application_stack.png)
 
 ## Security
-Code running inside of a Resurgence VM is secure and sandboxed by default. The embedding application must explicitly register functions for any instructions to call external code. This essentially sandboxes code running inside of a VM to have a limited ability to access system features. Resurgence is also written using safe Rust code, which makes it extremely difficult to escape this sandbox. This design makes Resurgence suitable for executing untrusted user code without compromising security.
+Code running inside of a Resurgence VM is secure and sandboxed by default. The embedding application must explicitly register functions for any instructions to call external code. This essentially sandboxes code running inside of a VM to have a limited ability to access system features. Resurgence is also written using mostly safe Rust code, which makes it extremely difficult to escape this sandbox. This design makes Resurgence suitable for executing untrusted user code without compromising security.
+
+Resurgence also doesn't provide a standard library of functions to use in programs, so by default Resurgence can't even modify stuff like files without a function defined to do so.
+
+However, Resurgence's security ends at the programmer. It is the programmer's responsibility to maintain security on their end. That means making sure Rust API functions are also secure, bytecode isn't foing anything suspicious, etc.
 
 Note: Dynamic loading is not supported by Resurgence. However, it could be implemented by the embedding application.
 
