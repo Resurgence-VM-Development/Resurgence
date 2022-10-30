@@ -13,4 +13,5 @@ repository = "https://github.com/Resurgence-VM-Development/Resurgence"
 byteorder = "1.4.3"
 
 [lib]
+crate-type = ["cdylib", "lib"]
 doctest = false

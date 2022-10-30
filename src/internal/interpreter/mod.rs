@@ -2,14 +2,13 @@ use std::io::Error;
 use std::result::Result;
 
 pub(crate) mod execution_engine;
+pub(crate) mod imports;
 mod instruction;
-pub(crate) mod rust_func;
 mod utils;
 
-use self::rust_func::RustFunc;
+use self::imports::RustFunc;
 use super::super::constant::Constant;
 use crate::api::codereader;
-use crate::api::ext_func::resurgence_state::ResurgenceState;
 use crate::objects::codeholder::CodeHolder;
 use crate::objects::stackframe::StackFrame;
 
@@ -35,7 +34,7 @@ pub struct Interpreter {
     // Converts bytecode indices into internal indicies
     byte_to_interal: Vec<u64>,
 
-    // All Rust functions registered before runtime
+    /// All Rust functions registered before runtime
     rust_functions: Vec<RustFunc>,
     imports_resolved: bool,
 }
@@ -62,19 +61,5 @@ impl Interpreter {
     /// behaves the same way.
     pub fn from_file(path: &str) -> Result<Interpreter, Error> {
         Ok(Self::from(codereader::read_bytecode_file(path)?))
-    }
-
-    /// Registers a single function to the interpreter instance
-    ///
-    /// `function` (`)
-    pub fn register_function(
-        &mut self,
-        function: fn(&mut ResurgenceState) -> Result<(), Error>,
-        func_name: String,
-    ) {
-        self.rust_functions.push(RustFunc {
-            name: func_name,
-            func: function,
-        });
     }
 }
