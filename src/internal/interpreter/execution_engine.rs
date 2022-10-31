@@ -8,12 +8,6 @@ use crate::objects::{
 impl ExecutionEngine for Interpreter {
     /// Execute Resurgence Instructions
     fn execute_instruction(&mut self, start_index: usize) -> Result<(), Error> {
-        if !self.code_holder.resolved_imports {
-            let res = self.resolve_imports();
-            if let Err(err) = res {
-                return Err(err);
-            }
-        }
         if !self.seal.untampered_runtime {
            return Err(Error::new(ErrorKind::PermissionDenied, "Runtime has been tampered with"));
         }
