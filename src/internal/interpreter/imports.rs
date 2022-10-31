@@ -14,7 +14,7 @@ pub struct RustFunc {
 impl Interpreter {
     /// Registers a single function to the interpreter instance
     ///
-    /// `function` (`)
+    /// `function` (`fn(&mut ResurgenceState) -> Result<(), Error>`)
     pub fn register_function(
         &mut self,
         function: fn(&mut ResurgenceState) -> Result<(), Error>,
