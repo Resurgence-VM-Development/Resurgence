@@ -37,7 +37,7 @@ impl Interpreter {
     /*
         All of the actual math functions used in the execution engine
     */
-    pub fn add(&mut self, dst: &Register, reg_1: &Register, reg_2: &Register) -> Result<(), Error> {
+    pub(crate) fn add(&mut self, dst: &Register, reg_1: &Register, reg_2: &Register) -> Result<(), Error> {
         let (constant_1, constant_2) = self.get_constants(reg_1, reg_2);
         let res = constant_1.add(constant_2);
         if let Err(err) = res {
@@ -47,7 +47,7 @@ impl Interpreter {
         Ok(())
     }
 
-    pub fn sub(&mut self, dst: &Register, reg_1: &Register, reg_2: &Register) -> Result<(), Error> {
+    pub(crate) fn sub(&mut self, dst: &Register, reg_1: &Register, reg_2: &Register) -> Result<(), Error> {
         let (constant_1, constant_2) = self.get_constants(reg_1, reg_2);
         let res = constant_1.sub(constant_2);
         if let Err(err) = res {
@@ -57,7 +57,7 @@ impl Interpreter {
         Ok(())
     }
 
-    pub fn mul(&mut self, dst: &Register, reg_1: &Register, reg_2: &Register) -> Result<(), Error> {
+    pub(crate) fn mul(&mut self, dst: &Register, reg_1: &Register, reg_2: &Register) -> Result<(), Error> {
         let (constant_1, constant_2) = self.get_constants(reg_1, reg_2);
         let res = constant_1.mul(constant_2);
         if let Err(err) = res {
@@ -67,7 +67,7 @@ impl Interpreter {
         Ok(())
     }
 
-    pub fn div(&mut self, dst: &Register, reg_1: &Register, reg_2: &Register)-> Result<(), Error> {
+    pub(crate) fn div(&mut self, dst: &Register, reg_1: &Register, reg_2: &Register)-> Result<(), Error> {
         let (constant_1, constant_2) = self.get_constants(reg_1, reg_2);
         let res = constant_1.div(constant_2);
         if let Err(err) = res {
@@ -77,7 +77,7 @@ impl Interpreter {
         Ok(())
     }
 
-    pub fn modlo(&mut self, dst: &Register, reg_1: &Register, reg_2: &Register) -> Result<(), Error> {
+    pub(crate) fn modlo(&mut self, dst: &Register, reg_1: &Register, reg_2: &Register) -> Result<(), Error> {
         let (constant_1, constant_2) = self.get_constants(reg_1, reg_2);
         let res = constant_1.modlo(constant_2);
         if let Err(err) = res {

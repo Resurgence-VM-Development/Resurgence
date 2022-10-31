@@ -5,7 +5,7 @@ impl Interpreter {
     /// 
     /// `reg_1` (`&Register`): first register
     /// `reg_2` (`&Register`): second register
-    pub fn equal(&mut self, reg_1: &Register, reg_2: &Register) -> bool {
+    pub(crate) fn equal(&mut self, reg_1: &Register, reg_2: &Register) -> bool {
         let (const_1, const_2) = self.get_constants(reg_1, reg_2);
         match (const_1, const_2) {
             (Constant::Int(val_1), Constant::Int(val_2)) => *val_1 == *val_2,
@@ -23,7 +23,7 @@ impl Interpreter {
     /// 
     /// `reg_1` (`&Register`): first register
     /// `reg_2` (`&Register`): second register
-    pub fn not_equal(&mut self, reg_1: &Register, reg_2: &Register) -> bool {
+    pub(crate) fn not_equal(&mut self, reg_1: &Register, reg_2: &Register) -> bool {
         let (const_1, const_2) = self.get_constants(reg_1, reg_2);
         match (const_1, const_2) {
             (Constant::Int(val_1), Constant::Int(val_2)) => *val_1 != *val_2,
@@ -41,7 +41,7 @@ impl Interpreter {
     /// 
     /// `reg_1` (`&Register`): first register
     /// `reg_2` (`&Register`): second register
-    pub fn greater_than(&mut self, reg_1: &Register, reg_2: &Register) -> bool {
+    pub(crate) fn greater_than(&mut self, reg_1: &Register, reg_2: &Register) -> bool {
         let (const_1, const_2) = self.get_constants(reg_1, reg_2);
         match (const_1, const_2) {
             (Constant::Int(val_1), Constant::Int(val_2)) => *val_1 > *val_2,
@@ -56,7 +56,7 @@ impl Interpreter {
     /// 
     /// `reg_1` (`&Register`): first register
     /// `reg_2` (`&Register`): second register
-    pub fn less_than(&mut self, reg_1: &Register, reg_2: &Register) -> bool {
+    pub(crate) fn less_than(&mut self, reg_1: &Register, reg_2: &Register) -> bool {
         let (const_1, const_2) = self.get_constants(reg_1, reg_2);
         match (const_1, const_2) {
             (Constant::Int(val_1), Constant::Int(val_2)) => *val_1 < *val_2,
@@ -72,7 +72,7 @@ impl Interpreter {
     /// 
     /// `reg_1` (`&Register`): first register
     /// `reg_2` (`&Register`): second register
-    pub fn greater_or_equal(&mut self, reg_1: &Register, reg_2: &Register) -> bool {
+    pub(crate) fn greater_or_equal(&mut self, reg_1: &Register, reg_2: &Register) -> bool {
         let (const_1, const_2) = self.get_constants(reg_1, reg_2);
         match (const_1, const_2) {
             (Constant::Int(val_1), Constant::Int(val_2)) => *val_1 >= *val_2,
@@ -87,7 +87,7 @@ impl Interpreter {
     /// 
     /// `reg_1` (`&Register`): first register
     /// `reg_2` (`&Register`): second register
-    pub fn less_or_equal(&mut self, reg_1: &Register, reg_2: &Register) -> bool {
+    pub(crate) fn less_or_equal(&mut self, reg_1: &Register, reg_2: &Register) -> bool {
         let (const_1, const_2) = self.get_constants(reg_1, reg_2);
         match (const_1, const_2) {
             (Constant::Int(val_1), Constant::Int(val_2)) => *val_1 <= *val_2,

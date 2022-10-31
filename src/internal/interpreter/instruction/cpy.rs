@@ -5,7 +5,7 @@ use crate::objects::constant::{Constant, create_constant_double};
 use crate::objects::register::{Register, RegisterLocation, RegisterReference};
 
 impl Interpreter {
-    pub fn cpy_registers(&mut self, dst_reg: &Register, dst_reg_ref: &RegisterReference, src_reg: &Register, src_reg_ref: &RegisterReference) -> Result<(), Error> {
+    pub(crate) fn cpy_registers(&mut self, dst_reg: &Register, dst_reg_ref: &RegisterReference, src_reg: &Register, src_reg_ref: &RegisterReference) -> Result<(), Error> {
         // Destination register
         let Register(mut dst_index, mut dst_loc) = dst_reg;
         let mut dst_index_usize = dst_index as usize;

@@ -2,7 +2,7 @@ use crate::{objects::{register::{Register, RegisterReference, RegisterLocation},
 
 
 impl Interpreter {
-    pub fn push_on_stack(&mut self, register: &Register, reference: &RegisterReference) {
+    pub(crate) fn push_on_stack(&mut self, register: &Register, reference: &RegisterReference) {
         let Register(mut reg_index, mut reg_loc) = register; let mut reg_index_usize = reg_index as usize;
         if *reference == RegisterReference::Dereference {
             Register(reg_index, reg_loc) = self.dereference_register(reg_index_usize, &reg_loc); reg_index_usize = reg_index as usize;

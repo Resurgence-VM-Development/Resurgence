@@ -4,7 +4,7 @@ use super::super::super::{interpreter::Interpreter};
 use crate::objects::{register::{Register, RegisterLocation, RegisterReference}, constant::Constant};
 
 impl Interpreter {
-    pub fn ref_registers(&mut self, dst_reg: &Register, dst_reg_ref: &RegisterReference, src_reg: &Register, src_reg_ref: &RegisterReference) -> Result<(), Error> {
+    pub(crate) fn ref_registers(&mut self, dst_reg: &Register, dst_reg_ref: &RegisterReference, src_reg: &Register, src_reg_ref: &RegisterReference) -> Result<(), Error> {
         let Register(mut dst_index, mut dst_loc) = dst_reg;
         let mut dst_index_usize = dst_index as usize;
 
