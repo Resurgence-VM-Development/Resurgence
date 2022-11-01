@@ -22,10 +22,22 @@ impl ExecutionEngine for Interpreter {
                 Instruction::Alloc(ref register_amount) => {
                     self.call_stack.push(StackFrame::from(*register_amount))
                 }
-                Instruction::FrameAlloc(ref register_amount) => {
-                    let stackframe = self.call_stack.last_mut().unwrap();
-                    for _ in 0..*register_amount {
-                        stackframe.registers.push(Option::None);
+                Instruction::FrameAlloc(ref register_amount, ref location) => {
+                    match *location {
+                        crate::objects::register::RegisterLocation::Global => {
+                            for _ in 0..*register_amount {
+                                self.global.push(Option::None);
+                            }
+                        },
+                        crate::objects::register::RegisterLocation::Local => {
+                            let stackframe = self.call_stack.last_mut().unwrap();
+                            for _ in 0..*register_amount {
+                                stackframe.registers.push(Option::None);
+                            }
+                        },
+                        _ => {
+                            return Err(Error::new(ErrorKind::InvalidData, "Can not allocate more memory outside of local and global memory."))
+                        }
                     }
                 }
                 Instruction::Free(ref block_amount) => {
@@ -33,10 +45,22 @@ impl ExecutionEngine for Interpreter {
                         self.call_stack.pop();
                     }
                 }
-                Instruction::FrameFree(ref register_amount) => {
-                    let stackframe = self.call_stack.last_mut().unwrap();
-                    for _ in 0..*register_amount {
-                        stackframe.registers.pop();
+                Instruction::FrameFree(ref register_amount, ref location) => {
+                    match *location {
+                        crate::objects::register::RegisterLocation::Global => {
+                            for _ in 0..*register_amount {
+                                self.global.pop();
+                            }
+                        },
+                        crate::objects::register::RegisterLocation::Local => {
+                            let stackframe = self.call_stack.last_mut().unwrap();
+                            for _ in 0..*register_amount {
+                                stackframe.registers.pop();
+                            }
+                        },
+                        _ => {
+                            return Err(Error::new(ErrorKind::InvalidData, "Can not allocate more memory outside of local and global memory."))
+                        }
                     }
                 }
                 Instruction::Jump(ref jmp_amount) => {

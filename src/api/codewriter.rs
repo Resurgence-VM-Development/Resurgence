@@ -43,6 +43,16 @@ fn write_register(buf: &mut Vec<u8>, r: &Register) -> Result<(), Error> {
     Ok(())
 }
 
+fn write_reg_loc(buf: &mut Vec<u8>, rl: &RegisterLocation) -> Result<(), Error> {
+    buf.push(match *rl {
+        RegisterLocation::ConstantPool => pc::LOC_CONSTANT, 
+        RegisterLocation::Accumulator => pc::LOC_ACCUMULATOR,
+        RegisterLocation::Global => pc::LOC_GLOBAL,
+        RegisterLocation::Local => pc::LOC_LOCAL,
+    });
+    Ok(())
+}
+
 fn write_reg_ref(buf: &mut Vec<u8>, rref: &RegisterReference) {
     buf.push(match rref {
         RegisterReference::AsIs => pc::REF_AS_IS,
@@ -120,17 +130,19 @@ pub fn write_bytecode(code: &CodeHolder) -> Result<Vec<u8>, Error> {
                 buf.push(pc::INST_ALLOC);
                 buf.write_u32::<BigEndian>(*size)?;
             }
-            Instruction::FrameAlloc(size) => {
+            Instruction::FrameAlloc(size, location) => {
                 buf.push(pc::INST_FRAME_ALLOC);
                 buf.write_u32::<BigEndian>(*size)?;
+                write_reg_loc(&mut buf, location);
             }
             Instruction::Free(size) => {
                 buf.push(pc::INST_FREE);
                 buf.write_u32::<BigEndian>(*size)?;
             }
-            Instruction::FrameFree(size) => {
+            Instruction::FrameFree(size, location) => {
                 buf.push(pc::INST_FRAME_FREE);
                 buf.write_u32::<BigEndian>(*size)?;
+                write_reg_loc(&mut buf, location);
             }
             Instruction::Jump(addr) => {
                 buf.push(pc::INST_JUMP);

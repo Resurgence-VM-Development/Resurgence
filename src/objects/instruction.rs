@@ -1,4 +1,4 @@
-use super::register::{Register, RegisterReference};
+use super::register::{Register, RegisterReference, RegisterLocation};
 
 /// `Instruction`: Represents instructions the built in Resurgence VM can use (this can be reused for any VM)
 pub enum Instruction {
@@ -15,7 +15,7 @@ pub enum Instruction {
     /// 0 Alloc 5 // Stack frame containing 5 registers
     /// 1 FrameAlloc 5 // Stack frame now contains 10 registers
     /// ```
-    FrameAlloc(u32),
+    FrameAlloc(u32, RegisterLocation),
 
     /// Pops n amount of `StackFrame` objects
     /// 
@@ -31,7 +31,7 @@ pub enum Instruction {
     /// 0 Alloc 5 // Stack frame containing 5 registers
     /// 1 FrameFree 2 // Stack frame now contains 3 registers
     /// ```
-    FrameFree(u32),
+    FrameFree(u32, RegisterLocation),
 
     /// Jumps n amount of operations
     /// 
