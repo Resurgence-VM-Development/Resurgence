@@ -1,19 +1,26 @@
 use std::io::{Error, ErrorKind};
 
 use super::super::{execution_engine::ExecutionEngine, interpreter::Interpreter};
-use crate::objects::{
+use crate::{objects::{
     instruction::Instruction, stackframe::StackFrame,
-};
+}, internal::runtime_seal::Status};
 
 impl ExecutionEngine for Interpreter {
     /// Execute Resurgence Instructions
     fn execute_instruction(&mut self, start_index: usize) -> Result<(), Error> {
-        if !self.seal.untampered_runtime {
-           return Err(Error::new(ErrorKind::PermissionDenied, "Runtime has been tampered with"));
+        
+         if !self.code_holder.resolved_imports {
+            let res = self.resolve_imports();
+            if let Err(err) = res {
+                return Err(err);
+            }
         }
         let mut index = start_index;
         let max_length = self.code_holder.instructions.len();
         while index < max_length {
+            if self.seal.runtime_security_status() == Status::TAMPERED {
+                return Err(Error::new(ErrorKind::PermissionDenied, "Runtime has been tampered with"));
+            }
             let operation = self.code_holder.instructions[index].take().unwrap();
             let ins_index = index;
             // To encourage the compiler to optimze extra bounds checks
@@ -116,7 +123,7 @@ impl ExecutionEngine for Interpreter {
                 }
                 Instruction::StackPop => {
                     self.stack.pop();
-                } // We have the braces around this call to make the Rust compiler happy
+                } 
 
                 Instruction::Add(ref dst_reg, ref reg_1, ref reg_2) => {
                     let res = self.add(dst_reg, reg_1, reg_2);
