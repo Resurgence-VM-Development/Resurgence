@@ -22,5 +22,5 @@ pub use internal::execution_engine::ExecutionEngine;
 pub use internal::interpreter::Interpreter;
 
 pub mod api;
-
+pub use api::ext_func::resurgence_state::ResurgenceState;
 pub mod ffi;
