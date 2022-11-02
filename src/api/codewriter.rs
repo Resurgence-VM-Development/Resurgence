@@ -133,7 +133,7 @@ pub fn write_bytecode(code: &CodeHolder) -> Result<Vec<u8>, Error> {
             Instruction::FrameAlloc(size, location) => {
                 buf.push(pc::INST_FRAME_ALLOC);
                 buf.write_u32::<BigEndian>(*size)?;
-                write_reg_loc(&mut buf, location);
+                write_reg_loc(&mut buf, location)?;
             }
             Instruction::Free(size) => {
                 buf.push(pc::INST_FREE);
@@ -142,7 +142,7 @@ pub fn write_bytecode(code: &CodeHolder) -> Result<Vec<u8>, Error> {
             Instruction::FrameFree(size, location) => {
                 buf.push(pc::INST_FRAME_FREE);
                 buf.write_u32::<BigEndian>(*size)?;
-                write_reg_loc(&mut buf, location);
+                write_reg_loc(&mut buf, location)?;
             }
             Instruction::Jump(addr) => {
                 buf.push(pc::INST_JUMP);
