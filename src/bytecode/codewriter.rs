@@ -2,15 +2,6 @@
 # Bytecode Writer API
 This module provides functions for writing a [`crate::CodeHolder`] into bytecode. This is not
 particularly useful for a pure virtual machine, but is useful for compilers and interpreters.
-
-# Examples
-Convert a [`crate::CodeHolder`] to bytecode and write it to a file:
-```no_run
-use resurgence::{api::codewriter, CodeHolder};
-
-let holder = CodeHolder::new();
-codewriter::write_bytecode_file(&holder, "path/to/destination.rvm").unwrap();
-```
 */
 
 use byteorder::{BigEndian, WriteBytesExt};
@@ -34,18 +25,13 @@ fn write_string(buf: &mut Vec<u8>, val: &str) -> Result<(), Error> {
 
 fn write_register(buf: &mut Vec<u8>, r: &Register) -> Result<(), Error> {
     buf.write_u32::<BigEndian>(r.0)?;
-    buf.push(match r.1 {
-        RegisterLocation::ConstantPool => pc::LOC_CONSTANT,
-        RegisterLocation::Accumulator => pc::LOC_ACCUMULATOR,
-        RegisterLocation::Global => pc::LOC_GLOBAL,
-        RegisterLocation::Local => pc::LOC_LOCAL,
-    });
+    write_reg_loc(buf, &r.1)?;
     Ok(())
 }
 
 fn write_reg_loc(buf: &mut Vec<u8>, rl: &RegisterLocation) -> Result<(), Error> {
     buf.push(match *rl {
-        RegisterLocation::ConstantPool => pc::LOC_CONSTANT, 
+        RegisterLocation::ConstantPool => pc::LOC_CONSTANT,
         RegisterLocation::Accumulator => pc::LOC_ACCUMULATOR,
         RegisterLocation::Global => pc::LOC_GLOBAL,
         RegisterLocation::Local => pc::LOC_LOCAL,

@@ -2,14 +2,6 @@
 # Bytecode Reader API
 This module provides functions for reading raw bytecode data into a [`crate::CodeHolder`]
 instance.
-
-# Examples
-Read a bytecode file:
-```no_run
-use resurgence::api::codereader;
-
-let holder = codereader::read_bytecode_file("path/to/bytecode.rvm").unwrap();
-```
 */
 
 use byteorder::{BigEndian, ReadBytesExt};
@@ -31,44 +23,27 @@ fn read_string(cur: &mut Cursor<&Vec<u8>>) -> Result<String, Error> {
     cur.read_exact(&mut data)?;
     match String::from_utf8(data) {
         Ok(d) => Ok(d),
-        Err(error) => {
-            Err(Error::new(
-                ErrorKind::Other,
-                format!(
-                    "Bad UTF-8 string at position {}: {}",
-                    cur.position() - 1,
-                    error
-                ),
-            ))
-        }
+        Err(error) => Err(Error::new(
+            ErrorKind::Other,
+            format!(
+                "Bad UTF-8 string at position {}: {}",
+                cur.position() - 1,
+                error
+            ),
+        )),
     }
 }
 
 /// Creates a register instance from 5 bytes
 fn read_register(cur: &mut Cursor<&Vec<u8>>) -> Result<Register, Error> {
     let reg = cur.read_u32::<BigEndian>()?;
-    let locval = cur.read_u8()?;
 
-    let regloc = match locval {
-        pc::LOC_CONSTANT => RegisterLocation::ConstantPool,
-        pc::LOC_ACCUMULATOR => RegisterLocation::Accumulator,
-        pc::LOC_GLOBAL => RegisterLocation::Global,
-        pc::LOC_LOCAL => RegisterLocation::Local,
-        _ => {
-            return Err(Error::new(
-                ErrorKind::Other,
-                format!(
-                    "Invalid RegisterLocation value {} at position {}",
-                    locval,
-                    cur.position() - 1
-                ),
-            ));
-        }
-    };
+    let regloc = read_reg_loc(cur)?;
 
     Ok(Register(reg, regloc))
 }
 
+// Creates a register location value from a single byte
 fn read_reg_loc(cur: &mut Cursor<&Vec<u8>>) -> Result<RegisterLocation, Error> {
     let locval = cur.read_u8()?;
 
@@ -88,7 +63,7 @@ fn read_reg_loc(cur: &mut Cursor<&Vec<u8>>) -> Result<RegisterLocation, Error> {
             ));
         }
     };
-    Ok(regloc) 
+    Ok(regloc)
 }
 
 /// Creates a register reference
@@ -229,7 +204,9 @@ pub fn read_bytecode(buf: &Vec<u8>) -> Result<CodeHolder, Error> {
             pc::INST_FRAME_ALLOC => {
                 // FrameAlloc
                 let size = cur.read_u32::<BigEndian>()?;
-                holder.instructions.push(Some(Instruction::FrameAlloc(size, read_reg_loc(&mut cur)?)));
+                holder
+                    .instructions
+                    .push(Some(Instruction::FrameAlloc(size, read_reg_loc(&mut cur)?)));
             }
             pc::INST_FREE => {
                 // Free
@@ -239,7 +216,9 @@ pub fn read_bytecode(buf: &Vec<u8>) -> Result<CodeHolder, Error> {
             pc::INST_FRAME_FREE => {
                 // FrameFree
                 let size = cur.read_u32::<BigEndian>()?;
-                holder.instructions.push(Some(Instruction::FrameFree(size, read_reg_loc(&mut cur)?)));
+                holder
+                    .instructions
+                    .push(Some(Instruction::FrameFree(size, read_reg_loc(&mut cur)?)));
             }
             pc::INST_JUMP => {
                 // Jump
@@ -294,13 +273,17 @@ pub fn read_bytecode(buf: &Vec<u8>) -> Result<CodeHolder, Error> {
                 // StackPush
                 let reg = read_register(&mut cur)?;
                 let rref = read_reg_ref(&mut cur)?;
-                holder.instructions.push(Some(Instruction::StackPush(reg, rref)));
+                holder
+                    .instructions
+                    .push(Some(Instruction::StackPush(reg, rref)));
             }
             pc::INST_STACK_MOV => {
                 // StackMov
                 let reg = read_register(&mut cur)?;
                 let rref = read_reg_ref(&mut cur)?;
-                holder.instructions.push(Some(Instruction::StackMov(reg, rref)));
+                holder
+                    .instructions
+                    .push(Some(Instruction::StackMov(reg, rref)));
             }
             pc::INST_STACK_POP => {
                 // StackPop
@@ -351,7 +334,9 @@ pub fn read_bytecode(buf: &Vec<u8>) -> Result<CodeHolder, Error> {
                 // NotEqual
                 let ra = read_register(&mut cur)?;
                 let rb = read_register(&mut cur)?;
-                holder.instructions.push(Some(Instruction::NotEqual(ra, rb)));
+                holder
+                    .instructions
+                    .push(Some(Instruction::NotEqual(ra, rb)));
             }
             pc::INST_GREATER => {
                 // Greater
@@ -369,13 +354,17 @@ pub fn read_bytecode(buf: &Vec<u8>) -> Result<CodeHolder, Error> {
                 // GreaterEqual
                 let ra = read_register(&mut cur)?;
                 let rb = read_register(&mut cur)?;
-                holder.instructions.push(Some(Instruction::GreaterEqual(ra, rb)));
+                holder
+                    .instructions
+                    .push(Some(Instruction::GreaterEqual(ra, rb)));
             }
             pc::INST_LESS_EQUAL => {
                 // LessEqual
                 let ra = read_register(&mut cur)?;
                 let rb = read_register(&mut cur)?;
-                holder.instructions.push(Some(Instruction::LessEqual(ra, rb)));
+                holder
+                    .instructions
+                    .push(Some(Instruction::LessEqual(ra, rb)));
             }
             _ => {
                 // catch-all for invalid instructions
