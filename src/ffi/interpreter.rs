@@ -1,4 +1,4 @@
-use crate::api::ext_func::resurgence_state::ResurgenceState;
+use crate::ext_func::resurgence_state::ResurgenceState;
 use crate::internal::execution_engine::ExecutionEngine;
 use crate::internal::interpreter::Interpreter;
 use crate::CodeHolder;

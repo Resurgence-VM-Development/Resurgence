@@ -1,4 +1,4 @@
-use crate::api::ext_func::resurgence_state::ResurgenceState;
+use crate::ext_func::resurgence_state::ResurgenceState;
 use std::ffi::CString;
 use std::os::raw::c_char;
 

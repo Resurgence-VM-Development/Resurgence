@@ -1,6 +1,6 @@
 use std::io::{Error, ErrorKind};
 
-use crate::{api::ext_func::resurgence_state::ResurgenceState, Interpreter};
+use crate::{ext_func::resurgence_state::ResurgenceState, Interpreter};
 
 impl Interpreter {
     pub(crate) fn ext_call(&mut self, index: u64) -> Result<(), Error> {

@@ -1,4 +1,4 @@
-use crate::api::codereader;
+use crate::bytecode::codereader;
 use crate::CodeHolder;
 use std::boxed::Box;
 use std::ffi::CStr;

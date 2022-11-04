@@ -21,6 +21,11 @@ pub(crate) mod internal;
 pub use internal::execution_engine::ExecutionEngine;
 pub use internal::interpreter::Interpreter;
 
-pub mod api;
-pub use api::ext_func::resurgence_state::ResurgenceState;
+pub(crate) mod ext_func;
+pub use ext_func::resurgence_state::ResurgenceState;
+
+pub mod bytecode;
+
+pub mod codegen;
+
 pub mod ffi;

@@ -8,10 +8,10 @@ mod utils;
 
 use self::imports::RustFunc;
 use super::super::constant::Constant;
-use crate::api::codereader;
+use crate::bytecode::codereader;
+use crate::internal::runtime_seal::RunTimeSeal;
 use crate::objects::codeholder::CodeHolder;
 use crate::objects::stackframe::StackFrame;
-use crate::internal::runtime_seal::RunTimeSeal;
 
 pub(crate) mod resolve_imports; // Resurgence already handles this at runtime, so it's only public to the crate
 
@@ -34,7 +34,7 @@ pub struct Interpreter {
 
     /// All Rust functions registered before runtime
     rust_functions: Vec<RustFunc>,
-    
+
     /// Helps with validating the runtime
     seal: RunTimeSeal,
 }
