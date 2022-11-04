@@ -1,38 +1,50 @@
 use std::io::{Error, ErrorKind};
 
 use super::super::{execution_engine::ExecutionEngine, interpreter::Interpreter};
-use crate::objects::{
+use crate::{objects::{
     instruction::Instruction, stackframe::StackFrame,
-};
+}, internal::runtime_seal::Status};
 
 impl ExecutionEngine for Interpreter {
     /// Execute Resurgence Instructions
     fn execute_instruction(&mut self, start_index: usize) -> Result<(), Error> {
-        if !self.code_holder.resolved_imports {
+        
+         if !self.code_holder.resolved_imports {
             let res = self.resolve_imports();
             if let Err(err) = res {
                 return Err(err);
             }
         }
-        if !self.seal.untampered_runtime {
-           return Err(Error::new(ErrorKind::PermissionDenied, "Runtime has been tampered with"));
-        }
         let mut index = start_index;
         let max_length = self.code_holder.instructions.len();
-        while index != max_length {
-            // The loop does bounds checking for us, so we don't need the extra bounds check
-            assert!(index < max_length);
+        while index < max_length {
+            if self.seal.runtime_security_status() == Status::TAMPERED {
+                return Err(Error::new(ErrorKind::PermissionDenied, "Runtime has been tampered with"));
+            }
             let operation = self.code_holder.instructions[index].take().unwrap();
             let ins_index = index;
+            // To encourage the compiler to optimze extra bounds checks
             assert!(ins_index < max_length);
             match operation {
                 Instruction::Alloc(ref register_amount) => {
                     self.call_stack.push(StackFrame::from(*register_amount))
                 }
-                Instruction::FrameAlloc(ref register_amount) => {
-                    let stackframe = self.call_stack.last_mut().unwrap();
-                    for _ in 0..*register_amount {
-                        stackframe.registers.push(Option::None);
+                Instruction::FrameAlloc(ref register_amount, ref location) => {
+                    match *location {
+                        crate::objects::register::RegisterLocation::Global => {
+                            for _ in 0..*register_amount {
+                                self.global.push(Option::None);
+                            }
+                        },
+                        crate::objects::register::RegisterLocation::Local => {
+                            let stackframe = self.call_stack.last_mut().unwrap();
+                            for _ in 0..*register_amount {
+                                stackframe.registers.push(Option::None);
+                            }
+                        },
+                        _ => {
+                            return Err(Error::new(ErrorKind::InvalidData, "Can not allocate more memory outside of local and global memory."))
+                        }
                     }
                 }
                 Instruction::Free(ref block_amount) => {
@@ -40,10 +52,22 @@ impl ExecutionEngine for Interpreter {
                         self.call_stack.pop();
                     }
                 }
-                Instruction::FrameFree(ref register_amount) => {
-                    let stackframe = self.call_stack.last_mut().unwrap();
-                    for _ in 0..*register_amount {
-                        stackframe.registers.pop();
+                Instruction::FrameFree(ref register_amount, ref location) => {
+                    match *location {
+                        crate::objects::register::RegisterLocation::Global => {
+                            for _ in 0..*register_amount {
+                                self.global.pop();
+                            }
+                        },
+                        crate::objects::register::RegisterLocation::Local => {
+                            let stackframe = self.call_stack.last_mut().unwrap();
+                            for _ in 0..*register_amount {
+                                stackframe.registers.pop();
+                            }
+                        },
+                        _ => {
+                            return Err(Error::new(ErrorKind::InvalidData, "Can not allocate more memory outside of local and global memory."))
+                        }
                     }
                 }
                 Instruction::Jump(ref jmp_amount) => {
@@ -52,8 +76,18 @@ impl ExecutionEngine for Interpreter {
                     continue;
                 }
 
-                Instruction::Call(ref func_index) => self.execute_instruction(*func_index as usize)?,
-                Instruction::ExtCall(ref func_reg) => self.ext_call(*func_reg)?,
+                Instruction::Call(ref func_index) => {
+                    let res = self.execute_instruction(*func_index as usize);
+                    if let Err(err) = res {
+                        return Err(err);
+                    }
+                },
+                Instruction::ExtCall(ref func_reg) => {
+                    let res = self.ext_call(*func_reg);
+                    if let Err(err) = res {
+                        return Err(err);
+                    }
+                },
                 Instruction::Ret => {
                     self.code_holder.instructions[ins_index] = Some(operation);
                     return Result::Ok(());
@@ -89,7 +123,7 @@ impl ExecutionEngine for Interpreter {
                 }
                 Instruction::StackPop => {
                     self.stack.pop();
-                } // We have the braces around this call to make the Rust compiler happy
+                } 
 
                 Instruction::Add(ref dst_reg, ref reg_1, ref reg_2) => {
                     let res = self.add(dst_reg, reg_1, reg_2);

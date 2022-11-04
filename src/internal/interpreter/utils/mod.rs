@@ -11,28 +11,28 @@ impl Interpreter {
     /// Moves the value of a global register
     ///
     /// `index` (`usize`): index of register
-    pub fn mov_global(&mut self, index: usize) -> Constant {
+    pub(crate) fn mov_global(&mut self, index: usize) -> Constant {
         self.global[index].take().expect("Non-existant register!")
     }
 
     /// Returns a copy of a global register
     ///
     /// `index` (`usize`): index of register
-    pub fn cpy_global(&mut self, index: usize) -> Constant {
+    pub(crate) fn cpy_global(&mut self, index: usize) -> Constant {
         self.global[index].clone().expect("Non-existant register!")
     }
 
     /// Returns a reference to a global register
     ///
     /// `index` (`usize`): index of register
-    pub fn ref_global(&self, index: usize) -> &Constant {
+    pub(crate) fn ref_global(&self, index: usize) -> &Constant {
         self.global[index].as_ref().expect("Non-existant register!")
     }
 
     /// Moves a local register
     ///
     /// `index` (`usize`): index of register
-    pub fn mov_local(&mut self, index: usize) -> Constant {
+    pub(crate) fn mov_local(&mut self, index: usize) -> Constant {
         let stack_frame = self.ref_stack_frame();
         stack_frame.mov_register(index)
     }
@@ -40,7 +40,7 @@ impl Interpreter {
     /// Copies a local register
     ///
     /// `index` (`usize`): index of register
-    pub fn cpy_local(&mut self, index: usize) -> Constant {
+    pub(crate) fn cpy_local(&mut self, index: usize) -> Constant {
         let stack_frame = self.ref_stack_frame();
         stack_frame.cpy_register(index)
     }
@@ -48,7 +48,7 @@ impl Interpreter {
     /// References a local register
     ///
     /// `index` (`usize`): index of register
-    pub fn ref_local(&self, index: usize) -> &Constant {
+    pub(crate) fn ref_local(&self, index: usize) -> &Constant {
         let stack_frame = self.ref_stack_frame_imut();
         stack_frame.ref_register(index)
     }
@@ -56,7 +56,7 @@ impl Interpreter {
     /// Copies a constant from the constant pool
     ///
     /// `index` (`usize`): index of the constant
-    pub fn cpy_constant(&self, index: usize) -> Constant {
+    pub(crate) fn cpy_constant(&self, index: usize) -> Constant {
         unsafe {
             self.code_holder.constant_pool.get_unchecked(index).clone()
         }
@@ -65,7 +65,7 @@ impl Interpreter {
     /// References a constant from the constant pool
     /// 
     /// `index` (`usize`): index of the constant
-    pub fn ref_constant(&self, index: usize) -> &Constant {
+    pub(crate) fn ref_constant(&self, index: usize) -> &Constant {
         /*
             Since the constant pool is a fixed size, the Resurgence code generator should never allow any non-existant constants
         */
@@ -75,15 +75,15 @@ impl Interpreter {
     }
 
     /// Returns a reference to the last stackframe
-    pub fn ref_stack_frame(&mut self) -> &mut StackFrame {
+    pub(crate) fn ref_stack_frame(&mut self) -> &mut StackFrame {
         self.call_stack.last_mut().unwrap()
     }
 
-    pub fn ref_stack_frame_imut(&self) -> &StackFrame {
+    pub(crate) fn ref_stack_frame_imut(&self) -> &StackFrame {
         self.call_stack.last().unwrap()
     }
 
-    pub fn accu_const(&mut self) {
+    pub(crate) fn accu_const(&mut self) {
         let val = match self.accumulator_as_const {
                     Constant::Double(ref mut val) => val,
                     _ => unreachable!(),
@@ -91,7 +91,7 @@ impl Interpreter {
         *val = self.accumulator
     }
 
-    pub fn dereference_register(&mut self, index: usize, reg_loc: &RegisterLocation) -> Register {
+    pub(crate) fn dereference_register(&mut self, index: usize, reg_loc: &RegisterLocation) -> Register {
         match reg_loc {
             RegisterLocation::Global => {
                 let register = self.ref_global(index); // get the register that stores the address
@@ -115,7 +115,7 @@ impl Interpreter {
     }
 
     /// Takes 2 `Register` objects, and returns 2 `Constant` objects
-    pub fn get_constants(&mut self, reg_1: &Register, reg_2: &Register) -> (&Constant, &Constant) {
+    pub(crate) fn get_constants(&mut self, reg_1: &Register, reg_2: &Register) -> (&Constant, &Constant) {
         let Register(index_1, loc_1) = reg_1;
         let Register(index_2, loc_2) = reg_2;
         let index_1_usize = *index_1 as usize;

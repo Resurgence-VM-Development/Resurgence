@@ -1,5 +1,5 @@
 use super::Interpreter;
-use crate::api::ext_func::resurgence_state::ResurgenceState;
+use crate::{api::ext_func::resurgence_state::ResurgenceState, internal::runtime_seal::Status};
 use std::io::Error;
 
 pub struct RustFunc {
@@ -14,7 +14,7 @@ pub struct RustFunc {
 impl Interpreter {
     /// Registers a single function to the interpreter instance
     ///
-    /// `function` (`)
+    /// `function` (`fn(&mut ResurgenceState) -> Result<(), Error>`)
     pub fn register_function(
         &mut self,
         function: fn(&mut ResurgenceState) -> Result<(), Error>,
@@ -22,7 +22,7 @@ impl Interpreter {
     ) {
         // If the runtime variable is set to true, then execution has begun
         // and the runtime can no longer be trusted
-        if self.seal.untampered_runtime {
+        if self.seal.runtime_security_status() == Status::UNTAMPERED {
             self.seal.runtime_tampered();
         }
         self.rust_functions.push(RustFunc {
@@ -40,7 +40,7 @@ impl Interpreter {
     ) {
         // If the runtime variable is set to true, then execution has begun
         // and the runtime can no longer be trusted
-        if self.seal.untampered_runtime {
+        if self.seal.runtime_security_status() == Status::TAMPERED {
             self.seal.runtime_tampered();
         }
         self.rust_functions.push(RustFunc {

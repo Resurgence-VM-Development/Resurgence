@@ -69,6 +69,28 @@ fn read_register(cur: &mut Cursor<&Vec<u8>>) -> Result<Register, Error> {
     Ok(Register(reg, regloc))
 }
 
+fn read_reg_loc(cur: &mut Cursor<&Vec<u8>>) -> Result<RegisterLocation, Error> {
+    let locval = cur.read_u8()?;
+
+    let regloc = match locval {
+        pc::LOC_CONSTANT => RegisterLocation::ConstantPool,
+        pc::LOC_ACCUMULATOR => RegisterLocation::Accumulator,
+        pc::LOC_GLOBAL => RegisterLocation::Global,
+        pc::LOC_LOCAL => RegisterLocation::Local,
+        _ => {
+            return Err(Error::new(
+                ErrorKind::Other,
+                format!(
+                    "Invalid RegisterLocation value {} at position {}",
+                    locval,
+                    cur.position() - 1
+                ),
+            ));
+        }
+    };
+    Ok(regloc) 
+}
+
 /// Creates a register reference
 fn read_reg_ref(cur: &mut Cursor<&Vec<u8>>) -> Result<RegisterReference, Error> {
     let v = cur.read_u8()?;
@@ -207,7 +229,7 @@ pub fn read_bytecode(buf: &Vec<u8>) -> Result<CodeHolder, Error> {
             pc::INST_FRAME_ALLOC => {
                 // FrameAlloc
                 let size = cur.read_u32::<BigEndian>()?;
-                holder.instructions.push(Some(Instruction::Alloc(size)));
+                holder.instructions.push(Some(Instruction::FrameAlloc(size, read_reg_loc(&mut cur)?)));
             }
             pc::INST_FREE => {
                 // Free
@@ -217,7 +239,7 @@ pub fn read_bytecode(buf: &Vec<u8>) -> Result<CodeHolder, Error> {
             pc::INST_FRAME_FREE => {
                 // FrameFree
                 let size = cur.read_u32::<BigEndian>()?;
-                holder.instructions.push(Some(Instruction::FrameFree(size)));
+                holder.instructions.push(Some(Instruction::FrameFree(size, read_reg_loc(&mut cur)?)));
             }
             pc::INST_JUMP => {
                 // Jump
