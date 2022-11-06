@@ -211,7 +211,7 @@ pub fn generate_not_equal(holder: &mut CodeHolder, register_1: RVMRegister, regi
     holder.instructions.push(Some(Instruction::NotEqual(real_register(register_1), real_register(register_2))));
 }
 
-/// generates a Greater instruction
+/// Generates a Greater instruction
 ///
 /// register_1 (`rvmregister`): the register to check
 /// register_2 (`rvmregister`): the register to check against
@@ -219,7 +219,7 @@ pub fn generate_greater(holder: &mut CodeHolder, register_1: RVMRegister, regist
     holder.instructions.push(Some(Instruction::Greater(real_register(register_1), real_register(register_2))));
 }
 
-/// generates a Less instruction
+/// Generates a Less instruction
 ///
 /// register_1 (`rvmregister`): the register to check
 /// register_2 (`rvmregister`): the register to check against
@@ -227,7 +227,7 @@ pub fn generate_less(holder: &mut CodeHolder, register_1: RVMRegister, register_
     holder.instructions.push(Some(Instruction::Less(real_register(register_1), real_register(register_2))));
 }
 
-/// generates a GreaterEqual instruction
+/// Generates a GreaterEqual instruction
 ///
 /// register_1 (`rvmregister`): the register to check
 /// register_2 (`rvmregister`): the register to check against
@@ -235,7 +235,7 @@ pub fn generate_greater_equal(holder: &mut CodeHolder, register_1: RVMRegister, 
     holder.instructions.push(Some(Instruction::GreaterEqual(real_register(register_1), real_register(register_2))));
 }
 
-/// generates a LessEqual instruction
+/// Generates a LessEqual instruction
 ///
 /// register_1 (`rvmregister`): the register to check
 /// register_2 (`rvmregister`): the register to check against
