@@ -12,7 +12,6 @@ pub enum RVMReference {
     DEREFERENCE
 }
 
-
 /// Represents a register in RVM
 pub struct RVMRegister(u32, RVMLocation);
 
