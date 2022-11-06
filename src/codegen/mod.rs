@@ -91,3 +91,57 @@ pub fn generate_stack_push(holder: &mut CodeHolder, register: (RVMRegister, RVMR
     let real_reg = real_register(register.0);
     holder.instructions.push(Some(Instruction::StackPush(real_reg, reference)));
 }
+
+pub fn generate_stack_pop(holder: &mut CodeHolder) {
+    holder.instructions.push(Some(Instruction::StackPop));
+} 
+
+pub fn generate_stack_mov(holder: &mut CodeHolder, register: (RVMRegister, RVMReference)) {
+    let reference = real_reference(register.1);
+    let real_reg = real_register(register.0);
+    holder.instructions.push(Some(Instruction::StackMov(real_reg, reference)));
+}
+
+pub fn generate_add(holder: &mut CodeHolder, register_1: RVMRegister, register_2: RVMRegister, register_3: RVMRegister) {
+    holder.instructions.push(Some(Instruction::Add(real_register(register_1), real_register(register_2), real_register(register_3))));
+}
+
+pub fn generate_sub(holder: &mut CodeHolder, register_1: RVMRegister, register_2: RVMRegister, register_3: RVMRegister) {
+    holder.instructions.push(Some(Instruction::Sub(real_register(register_1), real_register(register_2), real_register(register_3))));
+}
+
+pub fn generate_mul(holder: &mut CodeHolder, register_1: RVMRegister, register_2: RVMRegister, register_3: RVMRegister) {
+    holder.instructions.push(Some(Instruction::Mul(real_register(register_1), real_register(register_2), real_register(register_3))));
+}
+
+pub fn generate_div(holder: &mut CodeHolder, register_1: RVMRegister, register_2: RVMRegister, register_3: RVMRegister) {
+    holder.instructions.push(Some(Instruction::Div(real_register(register_1), real_register(register_2), real_register(register_3))));
+}
+
+pub fn generate_mod(holder: &mut CodeHolder, register_1: RVMRegister, register_2: RVMRegister, register_3: RVMRegister) {
+    holder.instructions.push(Some(Instruction::Mod(real_register(register_1), real_register(register_2), real_register(register_3))));
+}
+
+pub fn generate_equal(holder: &mut CodeHolder, register_1: RVMRegister, register_2: RVMRegister) {
+    holder.instructions.push(Some(Instruction::Equal(real_register(register_1), real_register(register_2))));
+}
+
+pub fn generate_not_equal(holder: &mut CodeHolder, register_1: RVMRegister, register_2: RVMRegister) {
+    holder.instructions.push(Some(Instruction::NotEqual(real_register(register_1), real_register(register_2))));
+}
+
+pub fn generate_greater(holder: &mut CodeHolder, register_1: RVMRegister, register_2: RVMRegister) {
+    holder.instructions.push(Some(Instruction::Greater(real_register(register_1), real_register(register_2))));
+}
+
+pub fn generate_less(holder: &mut CodeHolder, register_1: RVMRegister, register_2: RVMRegister) {
+    holder.instructions.push(Some(Instruction::Less(real_register(register_1), real_register(register_2))));
+}
+
+pub fn generate_greater_equal(holder: &mut CodeHolder, register_1: RVMRegister, register_2: RVMRegister) {
+    holder.instructions.push(Some(Instruction::GreaterEqual(real_register(register_1), real_register(register_2))));
+}
+
+pub fn generate_less_equal(holder: &mut CodeHolder, register_1: RVMRegister, register_2: RVMRegister) {
+    holder.instructions.push(Some(Instruction::LessEqual(real_register(register_1), real_register(register_2))));
+}
