@@ -27,4 +27,18 @@ pub fn generate_frame_free(holder: &mut CodeHolder, amount: u32, location: RVMLo
     }
 }
 
+pub fn generate_jump(holder: &mut CodeHolder, instructions: i64) {
+    holder.instructions.push(Some(Instruction::Jump(instructions)));
+}
 
+pub fn generate_call(holder: &mut CodeHolder, loc: u32) {
+    holder.instructions.push(Some(Instruction::Call(loc)));
+}
+
+pub fn generate_ext_call(holder: &mut CodeHolder, instruction_id: u32) {
+    holder.instructions.push(Some(Instruction::ExtCall(instruction_id)));
+}
+
+pub fn generate_return(holder: &mut CodeHolder) {
+    holder.instructions.push(Some(Instruction::Ret));
+}
