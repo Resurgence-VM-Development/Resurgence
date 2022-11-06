@@ -69,3 +69,25 @@ pub fn generate_mov(holder: &mut CodeHolder, register_1: (RVMRegister, RVMRefere
     let real_reg_2 = real_register(register_2.0);
     holder.instructions.push(Some(Instruction::Mov(real_reg_1, reference_1, real_reg_2, reference_2)));
 }
+
+pub fn generate_cpy(holder: &mut CodeHolder, register_1: (RVMRegister, RVMReference), register_2: (RVMRegister, RVMReference)) {
+    let reference_1 = real_reference(register_1.1);
+    let reference_2 = real_reference(register_2.1);
+    let real_reg_1 = real_register(register_1.0);
+    let real_reg_2 = real_register(register_2.0);
+    holder.instructions.push(Some(Instruction::Cpy(real_reg_1, reference_1, real_reg_2, reference_2)));
+}
+
+pub fn generate_ref(holder: &mut CodeHolder, register_1: (RVMRegister, RVMReference), register_2: (RVMRegister, RVMReference)) {
+    let reference_1 = real_reference(register_1.1);
+    let reference_2 = real_reference(register_2.1);
+    let real_reg_1 = real_register(register_1.0);
+    let real_reg_2 = real_register(register_2.0);
+    holder.instructions.push(Some(Instruction::Ref(real_reg_1, reference_1, real_reg_2, reference_2)));
+}
+
+pub fn generate_stack_push(holder: &mut CodeHolder, register: (RVMRegister, RVMReference)) {
+    let reference = real_reference(register.1);
+    let real_reg = real_register(register.0);
+    holder.instructions.push(Some(Instruction::StackPush(real_reg, reference)));
+}
