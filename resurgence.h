@@ -121,7 +121,7 @@ uint8_t rvm_state_get_float(struct RVMState* state, double* out_value);
  * NOT be freed directly by the calling application. Free this string using
  * rvm_string_free!
  */
-uint8_t* rvm_state_get_string(struct RVMState* state, char** out_value);
+uint8_t rvm_state_get_string(struct RVMState* state, char** out_value);
 
 /**
  * Retrieve a boolean value from an RVMState. Outputs the value as a uint8_t.
@@ -129,7 +129,32 @@ uint8_t* rvm_state_get_string(struct RVMState* state, char** out_value);
  * Please note, this does not return the actual value, but the success state.
  * If this function fails, it returns 1. Otherwise, it always returns 0.
  */
-uint8_t* rvm_state_get_bool(struct RVMState* state, uint8_t* out_value);
+uint8_t rvm_state_get_bool(struct RVMState* state, uint8_t* out_value);
+
+/**
+ * Push an integer value onto the stack of an RVMState instance.
+ * Returns 0 if successful. Returns 1 if it fails.
+ */
+uint8_t rvm_state_push_integer(struct RVMState* state, int64_t value);
+
+/**
+ * Push a floating point value onto the stack of an RVMState instance.
+ * Returns 0 if successful. Returns 1 if it fails.
+ */
+uint8_t rvm_state_push_float(struct RVMState* state, double value);
+
+/**
+ * Push a string value onto the stack of an RVMState instance.
+ * The string is not consumed and must be manually freed through normal means.
+ * Returns 0 if successful. Returns 1 if it fails.
+ */
+uint8_t rvm_state_push_string(struct RVMState* state, const char* value);
+
+/**
+ * Push a boolean value onto the stack of an RVMState instance.
+ * Returns 0 if successful. Returns 1 if it fails.
+ */
+uint8_t rvm_state_push_bool(struct RVMState* state, uint8_t value);
 
 /**
  * Frees a string (char*) that was allocated by another Resurgence function.

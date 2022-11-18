@@ -1,5 +1,5 @@
 use crate::ext_func::resurgence_state::ResurgenceState;
-use std::ffi::{CString, CStr};
+use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
 
 #[no_mangle]
@@ -85,7 +85,7 @@ pub extern "C" fn rvm_state_get_bool(state: *mut ResurgenceState, out_value: *mu
 }
 
 #[no_mangle]
-pub extern "C" fn rvm_state_push_i64(state: *mut ResurgenceState, value: i64) -> u8 {
+pub extern "C" fn rvm_state_push_integer(state: *mut ResurgenceState, value: i64) -> u8 {
     if state.is_null() {
         return 1;
     }
@@ -96,7 +96,7 @@ pub extern "C" fn rvm_state_push_i64(state: *mut ResurgenceState, value: i64) ->
 }
 
 #[no_mangle]
-pub extern "C" fn rvm_state_push_f64(state: *mut ResurgenceState, value: f64) -> u8 {
+pub extern "C" fn rvm_state_push_float(state: *mut ResurgenceState, value: f64) -> u8 {
     if state.is_null() {
         return 1;
     }
@@ -106,11 +106,24 @@ pub extern "C" fn rvm_state_push_f64(state: *mut ResurgenceState, value: f64) ->
     return 0;
 }
 
-// Dynafide please figure this out since I don't understand C
-// - StandingPad
 #[no_mangle]
-pub extern  "C" fn rvm_state_push_string(state: *mut ResurgenceState) -> u8 { 
-    return 1;
+pub extern "C" fn rvm_state_push_string(state: *mut ResurgenceState, value: *const c_char) -> u8 {
+    if state.is_null() || value.is_null() {
+        return 1;
+    }
+    let state = unsafe { &mut *state };
+
+    let v_str: &CStr = unsafe { CStr::from_ptr(value) };
+    let v_slice: &str = match v_str.to_str() {
+        Ok(v) => v,
+        Err(_) => {
+            return 1;
+        }
+    };
+
+    state.push_string(v_slice.clone().to_owned());
+
+    return 0;
 }
 
 #[no_mangle]
@@ -123,11 +136,10 @@ pub extern "C" fn rvm_state_push_bool(state: *mut ResurgenceState, value: u8) ->
         0 => {
             state.push_bool(false);
             return 0;
-        },
-        1 => {
+        }
+        _ => {
             state.push_bool(true);
             return 0;
-        },
-        _ => return 1
+        }
     }
 }
