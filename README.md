@@ -61,7 +61,6 @@ fn main() {
 
 ## Architecture
 ![Architecture](images/architecture.png)
-![Application Stack](images/application_stack.png)
 
 ## Security
 Code running inside of a Resurgence VM is secure and sandboxed by default. The embedding application must explicitly register functions for any instructions to call external code. This essentially sandboxes code running inside of a VM to have a limited ability to access system features. Resurgence is also written using mostly safe Rust code, which makes it extremely difficult to escape this sandbox. This design makes Resurgence suitable for executing untrusted user code without compromising security.
