@@ -14,8 +14,9 @@ A VM backend library that makes developing interpreters easy. Can be used either
     SOFTWARE.
 */
 pub(crate) mod objects;
-pub use objects::codeholder::CodeHolder;
 pub(crate) use objects::constant;
+pub use objects::codeholder::CodeHolder;
+pub use objects::resurgence_error::ResurgenceError;
 
 pub(crate) mod internal;
 pub use internal::execution_engine::ExecutionEngine;
@@ -29,3 +30,4 @@ pub mod bytecode;
 pub mod codegen;
 
 pub mod ffi;
+
