@@ -1,6 +1,6 @@
 use std::io::{Error, ErrorKind};
 
-use super::register::Register;
+use super::register::{Register, RegisterLocation};
 
 /// `Constant`: Represents a constant in the backend
 /// 
@@ -207,30 +207,23 @@ impl Constant {
             }
         }
     }
-
-    /// Combines 2 `Constant::String`s together
-    /// 
-    /// `constant` (`&Constant::String`): String you want to combine with the self
-    /// 
-    /// # Examples
-    /// ```no_run
-    /// use smartstring::alias::String;
-    /// 
-    /// let (hello, world) = (create_constant_string("Hello "), create_constant_string("World!"));
-    /// let hello_world = hello.concat(&world);
-    /// if let Err(err) = hello_world {
-    ///     panic!("{}", err);
-    /// }
-    /// assert_eq!(hello_world.unwrap(), create_constant_string("Hello World!"));
-    /// ```
-    pub fn concat(&self, constant: &Constant) -> Result<Constant, Error> {
-        if let (Constant::String(str_1), Constant::String(str_2)) = (self.clone(), constant) {
-            Ok(Constant::String(str_1 + str_2))
-        } 
-        else {
-            Err(Error::new(ErrorKind::InvalidData, "Concat only accepts strings!"))
+    
+    /// Returns the type as `String` for error handling reasons
+    #[inline]
+    pub fn type_as_string(&self) -> String {
+        match &*self {
+            Constant::Int(ref int_val) => format!("i64 Constant: {}", *int_val),
+            Constant::Double(ref double_val) => format!("f64 Constant: {}", *double_val),
+            Constant::String(ref string_val) => format!("String Constant: {}", *string_val),
+            Constant::Boolean(ref bool_val) => format!("bool Constant: {}", if *bool_val {"true"} else {"false"}),
+            Constant::Address(ref address_value) => format!("Register constant: index({}) location({})", address_value.0, match address_value.1 {
+                RegisterLocation::ConstantPool => "Constant Pool",
+                RegisterLocation::Accumulator => "Accumulator",
+                RegisterLocation::Global => "Global",
+                RegisterLocation::Local => "Local"
+            }),
         }
-    }
+    } 
 }
 
 /// Creates a `Constant::Int`

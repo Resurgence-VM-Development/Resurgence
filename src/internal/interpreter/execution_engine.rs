@@ -2,24 +2,30 @@ use std::io::{Error, ErrorKind};
 
 use super::super::{execution_engine::ExecutionEngine, interpreter::Interpreter};
 use crate::{objects::{
-    instruction::Instruction, stackframe::StackFrame,
-}, internal::runtime_seal::Status};
+    instruction::Instruction, stackframe::StackFrame, resurgence_error::{ResurgenceError, ResurgenceErrorKind}
+}, internal::runtime_seal::{Status, Permissions}};
 
 impl ExecutionEngine for Interpreter {
     /// Execute Resurgence Instructions
-    fn execute_instruction(&mut self, start_index: usize) -> Result<(), Error> {
+    fn execute_instruction(&mut self, start_index: usize) -> Result<(), ResurgenceError> {
         
          if !self.code_holder.resolved_imports {
             let res = self.resolve_imports();
             if let Err(err) = res {
-                return Err(err);
+                let new_err = ResurgenceError::from(ResurgenceErrorKind::MISSING_IMPORTS, &err.to_string());
+                new_err.set_ip(0);
+                new_err.set_call_stack(self.call_stack);
+                new_err.set_constant_stack(self.stack);
+                new_err.set_recursion_depth(self.current_recursion_depth);
+                new_err.set_functions(self.rust_functions);
+                return Err(new_err);
             }
         }
         let mut index = start_index;
         let max_length = self.code_holder.instructions.len();
         while index < max_length {
             if self.seal.runtime_security_status() == Status::TAMPERED {
-                return Err(Error::new(ErrorKind::PermissionDenied, "Runtime has been tampered with"));
+                return Err(ResurgenceError::from(ResurgenceErrorKind::RUNTIME_SEAL_TAMPERED, "Runtime has been tampered with"));
             }
             let operation = self.code_holder.instructions[index].take().unwrap();
             let ins_index = index;
@@ -43,7 +49,13 @@ impl ExecutionEngine for Interpreter {
                             }
                         },
                         _ => {
-                            return Err(Error::new(ErrorKind::InvalidData, "Can not allocate more memory outside of local and global memory."))
+                            let err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Attempted to add more memory to an invalid location!");
+                            err.set_ip(index);
+                            err.set_call_stack(self.call_stack);
+                            err.set_constant_stack(self.stack);
+                            err.set_recursion_depth(self.current_recursion_depth);
+                            err.set_functions(self.rust_functions);
+                            return Err(err);
                         }
                     }
                 }
