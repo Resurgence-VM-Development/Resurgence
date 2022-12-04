@@ -32,11 +32,7 @@ Resurgence also does not provide a standard library interface. This allows appli
 
 ## Example Usage in an Application
 ```rust
-use resurgence::bytecode;
-use resurgence::CodeHolder;
-use resurgence::ExecutionEngine;
-use resurgence::Interpreter;
-use resurgence::ResurgenceState;
+use resurgence::{bytecode, CodeHolder, Interpreter, ResurgenceState};
 use std::io::Error;
 
 fn print_string(state: &mut ResurgenceState) -> Result<(), Error> {
