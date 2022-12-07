@@ -335,14 +335,4 @@ mod const_impl_tests {
             assert_eq!(res, 99.0 / 1.5);
         }
     }
-
-    #[test]
-    fn concat_test() {
-        let (hello, world) = (create_constant_string("Hello "), create_constant_string("World!"));
-        let hello_world = hello.concat(&world);
-        if let Err(err) = hello_world {
-            panic!("{}", err);
-        }
-        assert_eq!(hello_world.unwrap(), create_constant_string("Hello World!"));
-    }
 }

@@ -1,5 +1,5 @@
 use super::Interpreter;
-use crate::{ext_func::resurgence_state::ResurgenceState, internal::runtime_seal::Status};
+use crate::{ext_func::resurgence_state::ResurgenceState, internal::cardinal::Status};
 use std::io::Error;
 
 pub struct RustFunc {

@@ -8,7 +8,7 @@ mod utils;
 use self::imports::RustFunc;
 use super::super::constant::Constant;
 use crate::bytecode::codereader;
-use crate::internal::runtime_seal::RunTimeSeal;
+use crate::internal::cardinal::Cardinal;
 use crate::objects::codeholder::CodeHolder;
 use crate::objects::stackframe::StackFrame;
 
@@ -30,7 +30,7 @@ pub struct Interpreter {
     /// All Rust functions registered before runtime
     rust_functions: Vec<RustFunc>,
     /// Helps with validating the runtime
-    seal: RunTimeSeal,
+    seal: Cardinal,
     /// Defines how many times we've recursed
     current_recursion_depth: usize,
     /// Defines the recursion limit
@@ -48,7 +48,7 @@ impl Interpreter {
             code_holder: ch,
             global: Vec::new(),
             rust_functions: Vec::new(),
-            seal: RunTimeSeal::new(),
+            seal: Cardinal::new(),
             current_recursion_depth: 0,
             max_recursion_depth: 1000
         }
