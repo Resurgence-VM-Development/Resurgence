@@ -12,12 +12,6 @@ impl ExecutionEngine for Interpreter {
          if !self.code_holder.resolved_imports {
             let res = self.resolve_imports();
             if let Err(err) = res {
-                let new_err = ResurgenceError::from(ResurgenceErrorKind::MISSING_IMPORTS, &err.to_string());
-                new_err.set_ip(0);
-                new_err.set_call_stack(self.call_stack);
-                new_err.set_constant_stack(self.stack);
-                new_err.set_recursion_depth(self.current_recursion_depth);
-                new_err.set_functions(self.rust_functions);
                 return Err(new_err);
             }
         }
