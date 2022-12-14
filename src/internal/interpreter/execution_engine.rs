@@ -2,8 +2,30 @@ use std::io::{Error, ErrorKind};
 
 use super::super::{execution_engine::ExecutionEngine, interpreter::Interpreter};
 use crate::{objects::{
-    instruction::Instruction, stackframe::StackFrame, resurgence_error::{ResurgenceError, ResurgenceErrorKind}
-}, internal::runtime_seal::{Status, Permissions}};
+    instruction::Instruction, stackframe::StackFrame, resurgence_error::{ResurgenceError, ResurgenceErrorKind, ResurgenceContext}
+}, internal::runtime_seal::Status};
+
+/// Creates a `ResurgenceContext` object
+/// 
+/// ```
+/// let context = create_context(instance, instruction, instruction_pointer, recursion_depth);
+/// ```
+macro_rules! create_context {
+    ($self:expr, $ins:expr, $ip:expr, $recur_depth:expr)=>
+    {
+        {
+            let context = ResurgenceContext {
+                call_stack: $self.call_stack, 
+                constant_stack: $self.stack,
+                rust_and_native_fns: $self.rust_functions,
+                instruction: $ins,
+                instruction_pointer: $ip,
+                recursion_depth: $recur_depth,
+            };
+            context
+        }
+    }
+}
 
 impl ExecutionEngine for Interpreter {
     /// Execute Resurgence Instructions
@@ -12,7 +34,8 @@ impl ExecutionEngine for Interpreter {
          if !self.code_holder.resolved_imports {
             let res = self.resolve_imports();
             if let Err(err) = res {
-                return Err(new_err);
+                let context = create_context!(self, Instruction::Ret, 0, 1);
+                return Err(ResurgenceError::from(ResurgenceErrorKind::MISSING_IMPORTS, &err.to_string(), context));
             }
         }
         let mut index = start_index;

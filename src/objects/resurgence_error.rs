@@ -27,7 +27,7 @@ pub struct ResurgenceError {
     /// Error message 
     error_message: String,
     /// Context of the error
-    context: ResurgenceContext,
+    pub context: ResurgenceContext,
 }
 
 impl ResurgenceError {
