@@ -10,8 +10,10 @@ use crate::{objects::{
 /// ```
 /// let context = create_context(instance, instruction, instruction_pointer, recursion_depth);
 /// ```
+///
+/// This assumes whoever is using this knows what to input as the parameters
 macro_rules! create_context {
-    ($self:expr, $ins:expr, $ip:expr, $recur_depth:expr)=>
+    ($self:expr, $ins:expr, $ip:expr) =>
     {
         {
             let context = ResurgenceContext {
@@ -20,7 +22,7 @@ macro_rules! create_context {
                 rust_and_native_fns: $self.rust_functions,
                 instruction: $ins,
                 instruction_pointer: $ip,
-                recursion_depth: $recur_depth,
+                recursion_depth: $self.current_recursion_depth,
             };
             context
         }
@@ -34,7 +36,7 @@ impl ExecutionEngine for Interpreter {
          if !self.code_holder.resolved_imports {
             let res = self.resolve_imports();
             if let Err(err) = res {
-                let context = create_context!(self, Instruction::Ret, 0, 1);
+                let context = create_context!(self, Instruction::Ret, 0);
                 return Err(ResurgenceError::from(ResurgenceErrorKind::MISSING_IMPORTS, &err.to_string(), context));
             }
         }
