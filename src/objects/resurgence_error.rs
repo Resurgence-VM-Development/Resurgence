@@ -15,6 +15,11 @@ pub(crate) enum ResurgenceErrorKind {
     REGISTER_OUT_OF_BOUNDS,
     /// When imports are not resolved
     MISSING_IMPORTS,
+    /// When a function returns an error
+    FUNCTION_RETURN_ERROR,
+
+    /// When something is so messed up that you don't have the words to describe it
+    I_GOOFED_UP,
 }
 
 /// Represents a exception and stores the current state of the runtime, including callstack,
