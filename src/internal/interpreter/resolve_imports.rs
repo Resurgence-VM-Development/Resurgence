@@ -19,7 +19,7 @@ impl Interpreter {
             if !success {
                 // Failed to find a matching import
                 let err = ResurgenceError::from(ResurgenceErrorKind::MISSING_IMPORTS, &format!("Could not find function {} for it has not been registered", *name));
-                err.add_trace("resolve_imports: line 23");
+                err.add_trace(&format!("resolve_imports: line {}", line!()));
                 return Err(err);
             }
         } 

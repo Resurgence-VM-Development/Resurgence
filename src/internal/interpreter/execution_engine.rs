@@ -38,7 +38,7 @@ impl ExecutionEngine for Interpreter {
             if let Err(err) = res {
                 let context = create_context!(self, Instruction::Ret, 0);
                 err.context = Some(context);
-                err.add_trace("execute_instruction: line 41");
+                err.add_trace(&format!("{}: line {}", file!(), line!()));
                 return Err(err);
             }
         }
@@ -68,7 +68,8 @@ impl ExecutionEngine for Interpreter {
                         }
                         _ => {
                             let context = create_context!(self, operation, index);
-                            let err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Attempted to add more memory to an invalid location!", context);
+                            let err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Attempted to add more memory to an invalid location!");
+                            err.add_trace(&format!("{}: line {}", file!(), line!()));
                             return Err(err);
                         }
                     }
@@ -92,8 +93,10 @@ impl ExecutionEngine for Interpreter {
                             }
                         },
                         _ => {
-                            let context = create_context!(self, operation, index);
-                            return Err(ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Can not allocate more memory outside of local and global memory.", context));
+                            let err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Can not allocate more memory outside of local and global memory.");
+                            err.context = Some(create_context!(self, operation, index));
+                            err.add_trace(&format!("{}: line {}", file!(), line!()));
+                            return Err(err);
                         }
                     }
                 }
@@ -106,6 +109,8 @@ impl ExecutionEngine for Interpreter {
                 Instruction::Call(ref func_index) => {
                     let res = self.execute_instruction(*func_index as usize);
                     if let Err(err) = res {
+                        err.add_trace(&format!("{}: line {}", file!(), line!()));
+                        err.context = Some(create_context!(self, operation, index));
                         return Err(err);
                     }
                 },
