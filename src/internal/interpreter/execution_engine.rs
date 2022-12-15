@@ -43,9 +43,6 @@ impl ExecutionEngine for Interpreter {
         let mut index = start_index;
         let max_length = self.code_holder.instructions.len();
         while index < max_length {
-            if self.seal.runtime_security_status() == Status::TAMPERED {
-                return Err(ResurgenceError::from(ResurgenceErrorKind::RUNTIME_SEAL_TAMPERED, "Runtime has been tampered with"));
-            }
             let operation = self.code_holder.instructions[index].take().unwrap();
             let ins_index = index;
             // To encourage the compiler to optimze extra bounds checks

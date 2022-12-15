@@ -11,8 +11,6 @@ pub(crate) enum ResurgenceErrorKind {
     MEMORY_ADDRESS_NONE,
     /// Integer overflow
     OVERFLOW,
-    /// Runtime safety violated (ex. trying to register a function in a Rust API function)
-    RUNTIME_SEAL_TAMPERED,
     /// Out of bounds when accessing a register
     REGISTER_OUT_OF_BOUNDS,
     /// When imports are not resolved
