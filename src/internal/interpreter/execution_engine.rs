@@ -1,9 +1,9 @@
 use std::io::{Error, ErrorKind};
 
 use super::super::{execution_engine::ExecutionEngine, interpreter::Interpreter};
-use crate::{objects::{
+use crate::objects::{
     instruction::Instruction, stackframe::StackFrame, resurgence_error::{ResurgenceError, ResurgenceErrorKind, ResurgenceContext}
-}, internal::runtime_seal::Status};
+};
 
 /// Creates a `ResurgenceContext` object
 /// 
@@ -32,12 +32,14 @@ macro_rules! create_context {
 impl ExecutionEngine for Interpreter {
     /// Execute Resurgence Instructions
     fn execute_instruction(&mut self, start_index: usize) -> Result<(), ResurgenceError> {
-        
-         if !self.code_holder.resolved_imports {
+        // Resolve imports if the programmer already hasn't done so 
+        if !self.code_holder.resolved_imports {
             let res = self.resolve_imports();
             if let Err(err) = res {
                 let context = create_context!(self, Instruction::Ret, 0);
-                return Err(ResurgenceError::from(ResurgenceErrorKind::MISSING_IMPORTS, &err.to_string(), context));
+                err.context = Some(context);
+                err.add_trace("execute_instruction: line 41");
+                return Err(err);
             }
         }
         let mut index = start_index;
@@ -63,14 +65,10 @@ impl ExecutionEngine for Interpreter {
                             for _ in 0..*register_amount {
                                 stackframe.registers.push(Option::None);
                             }
-                        },
+                        }
                         _ => {
-                            let err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Attempted to add more memory to an invalid location!");
-                            err.set_ip(index);
-                            err.set_call_stack(self.call_stack);
-                            err.set_constant_stack(self.stack);
-                            err.set_recursion_depth(self.current_recursion_depth);
-                            err.set_functions(self.rust_functions);
+                            let context = create_context!(self, operation, index);
+                            let err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Attempted to add more memory to an invalid location!", context);
                             return Err(err);
                         }
                     }
@@ -94,7 +92,8 @@ impl ExecutionEngine for Interpreter {
                             }
                         },
                         _ => {
-                            return Err(Error::new(ErrorKind::InvalidData, "Can not allocate more memory outside of local and global memory."))
+                            let context = create_context!(self, operation, index);
+                            return Err(ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Can not allocate more memory outside of local and global memory.", context));
                         }
                     }
                 }

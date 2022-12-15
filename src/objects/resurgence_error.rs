@@ -25,18 +25,35 @@ pub struct ResurgenceError {
     /// Error message 
     error_message: String,
     /// Context of the error
-    pub context: ResurgenceContext,
+    pub context: Option<ResurgenceContext>,
+    /// Traceback
+    trace_back: Vec<String>
 }
 
 impl ResurgenceError {
-    pub(crate) fn from(error_type: ResurgenceErrorKind, error_message: &str, context: ResurgenceContext) -> ResurgenceError {
+    /// Creates a new `ResurgenceError` object
+    ///
+    /// error_type (`ResurgenceErrorKind`): The type of error
+    /// error_message (`&str`): The message to output
+    /// context (`ResurgenceContext`): The state of the interpreter at the time of the error
+    pub(crate) fn from(error_type: ResurgenceErrorKind, error_message: &str) -> ResurgenceError {
         ResurgenceError {
             error_type,
             error_message: error_message.to_string(),
-            context
+            context: Option::None,
+            trace_back: Vec::new()
         }
     }
+    
+    /// Adds a trace to the traceback
+    ///
+    /// trace (`&str`): The new trace to add
+    pub(crate) fn add_trace(&mut self, trace: &str) {
+        self.trace_back.push(trace.to_string());
+    }
 }
+
+/// Represents the interpreter state at the time of creation
 pub struct ResurgenceContext {
     /// Call stack at the time of exception
     call_stack: Vec<StackFrame>,

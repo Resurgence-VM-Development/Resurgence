@@ -1,10 +1,11 @@
+use crate::{ResurgenceError, objects::resurgence_error::ResurgenceErrorKind};
+
 use super::Interpreter;
-use std::io::{Error, ErrorKind};
 
 impl Interpreter {
     /// Resolves any Rust functions used in the bytecode file by creating a "compatibility layer" based on indicies
     #[inline(never)]
-    pub fn resolve_imports(&mut self) -> Result<(), Error> {
+    pub fn resolve_imports(&mut self) -> Result<(), ResurgenceError> {
         let imports = &self.code_holder.imports;
         self.code_holder.byte_to_interal.reserve(imports.len()); // We know the amount of functions being used, so let's take advantage of that
         for (_, name) in imports.iter().enumerate() {
@@ -17,10 +18,9 @@ impl Interpreter {
             }
             if !success {
                 // Failed to find a matching import
-                return Err(Error::new(
-                    ErrorKind::NotFound,
-                    format!("Can not find function '{}' internally!", *name),
-                ));
+                let err = ResurgenceError::from(ResurgenceErrorKind::MISSING_IMPORTS, &format!("Could not find function {} for it has not been registered", *name));
+                err.add_trace("resolve_imports: line 23");
+                return Err(err);
             }
         } 
         self.code_holder.resolved_imports = true;
