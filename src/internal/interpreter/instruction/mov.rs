@@ -1,11 +1,13 @@
 use std::io::{Error, ErrorKind};
 
-use super::super::super::{interpreter::Interpreter};
+use super::super::super::interpreter::Interpreter;
+use crate::ResurgenceError;
 use crate::objects::constant::{Constant, create_constant_double};
 use crate::objects::register::{Register, RegisterLocation, RegisterReference};
+use crate::objects::resurgence_error::ResurgenceErrorKind;
 
 impl Interpreter {
-    pub(crate) fn mov_registers(&mut self, dst_reg: &Register, dst_reg_ref: &RegisterReference, src_reg: &Register, src_reg_ref: &RegisterReference) -> Result<(), Error> {
+    pub(crate) fn mov_registers(&mut self, dst_reg: &Register, dst_reg_ref: &RegisterReference, src_reg: &Register, src_reg_ref: &RegisterReference) -> Result<(), ResurgenceError> {
         // Destination register
         let Register(mut dst_index, mut dst_loc) = dst_reg; 
         let mut dst_index_usize = dst_index as usize;
@@ -37,7 +39,11 @@ impl Interpreter {
                     Constant::Double(src_double) => {
                         self.accumulator = src_double;
                     }
-                    _ => return Err(Error::new(ErrorKind::InvalidInput, "Invalid move to accumulator register!"))
+                    _ => {
+                        let err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Invalid move to accumulator register!");
+                        err.add_trace(&format!("{}: line {}", file!(), line!()));
+                        return Err(err);
+                    }
                 }
             },
             (RegisterLocation::Accumulator, RegisterLocation::Local) => {
@@ -48,8 +54,12 @@ impl Interpreter {
                     }
                     Constant::Double(src_double) => {
                         self.accumulator = src_double;
+                    },
+                    _ => {
+                        let err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Invalid move to accumulator register!");
+                        err.add_trace(&format!("{}: line {}", file!(), line!()));
+                        return Err(err);
                     }
-                    _ => return Err(Error::new(ErrorKind::InvalidInput, "Invalid move to accumulator register!")),
                 }
             },
     
@@ -71,12 +81,16 @@ impl Interpreter {
                 let stack_frame = self.ref_stack_frame();
                 stack_frame.registers[dst_index_usize] = Some(stack_frame.mov_register(src_index_usize));
             },
-            _ => return Err(Error::new(ErrorKind::InvalidInput, "Invalid mov operation")),
+            _ => {
+                let err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Invalid MOV operation");
+                err.add_trace(&format!("{}: line {}", file!(), line!()));
+                return Err(err);
+            }
         }
         Result::Ok(())
     }
 
-    pub(crate) fn stack_mov(&mut self, dst_reg: &Register, dst_reg_ref: &RegisterReference) -> Result<(), Error> {
+    pub(crate) fn stack_mov(&mut self, dst_reg: &Register, dst_reg_ref: &RegisterReference) -> Result<(), ResurgenceError> {
         // Destination register
         let Register(mut dst_index, mut dst_loc) = dst_reg; 
         let mut dst_index_usize = dst_index as usize;
@@ -89,17 +103,25 @@ impl Interpreter {
 
         // Check if the stack is empty
         if self.stack.is_empty() {
-            return Err(Error::new(ErrorKind::Other, "Stack empty; can't move from the stack!"))
+            let err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Stack emptry; can't move from the stack!");
+            err.add_trace(&format!("{}: line {}", file!(), line!()));
+            return Err(err);
         }
         let object = self.stack.remove(self.stack.len() - 1); // We do self.stack.len() - 1 to get the true index. For example, if the vector has a size of 1, the true index is 0
         match dst_loc {
-            RegisterLocation::ConstantPool => return Err(Error::new(ErrorKind::Other, "Moving to the constant pool is forbidden!")),
+            RegisterLocation::ConstantPool => {
+                let err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Moving to the constant pool is forbidden!");
+                err.add_trace(&format!("{}: line {}", file!(), line!()));
+                return Err(err);
+            },
             RegisterLocation::Accumulator => {
                 match object {
                     Constant::Int(val) => self.accumulator = val as f64,
                     Constant::Double(val) => self.accumulator = val,
                     _ => {
-                        return Err(Error::new(ErrorKind::InvalidInput, "Can only write integers and doubles to the accumulator register"));
+                        let err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Can only write integers and doubles to the accumulator register");
+                        err.add_trace(&format!("{}: line {}", file!(), line!()));
+                        return Err(err);
                     }
                 }
             },

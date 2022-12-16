@@ -128,6 +128,7 @@ impl ExecutionEngine for Interpreter {
                 Instruction::Mov(ref dst_reg, ref dst_reg_ref, ref src_reg, ref src_reg_ref) => {
                     let res = self.mov_registers(dst_reg, dst_reg_ref, src_reg, src_reg_ref);
                     if let Err(err) = res {
+                        err.add_trace(&format!("{}: {}", file!(), line!()));
                         return Err(err);
                     }
                 }
@@ -150,6 +151,7 @@ impl ExecutionEngine for Interpreter {
                 Instruction::StackMov(ref register, ref reference) => {
                     let res = self.stack_mov(register, reference);
                     if let Err(err) = res {
+                        err.add_trace(&format!("{}: {}", file!(), line!()));
                         return Err(err);
                     }
                 }
