@@ -290,36 +290,3 @@ pub fn create_constant_string(init_val: &str) -> Constant {
 pub fn create_constant_bool(init_val: &bool) -> Constant {
     Constant::Boolean(*init_val)
 }
-
-#[cfg(test)]
-mod constant_init_tests {
-    use super::*;
-
-    #[test]
-    fn const_int() {
-        let test_int = 99;
-        let constant = create_constant_int(&test_int);
-        assert_eq!(constant, Constant::Int(test_int));
-    }
-    
-    #[test]
-    fn const_double() {
-        let test_double = std::f64::consts::PI;
-        let constant = create_constant_double(&test_double);
-        assert_eq!(constant, Constant::Double(test_double));
-    }
-
-    #[test]
-    fn const_string() {
-        let test_string = "Hello World";
-        let constant = create_constant_string(test_string);
-        assert_eq!(constant, Constant::String(String::from(test_string)))
-    }
-
-    #[test]
-    fn const_bool() {
-        let test_bool = true;
-        let constant = create_constant_bool(&test_bool);
-        assert_eq!(constant, Constant::Boolean(test_bool));
-    }
-}

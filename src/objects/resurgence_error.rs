@@ -35,7 +35,6 @@ pub(crate) enum ResurgenceErrorKind {
 
 /// Represents a exception and stores the current state of the runtime, including callstack,
 /// current instruction, and the parameters of the instruction in question
-#[derive(Debug)]
 pub struct ResurgenceError {
     /// The type of error
     error_type: ResurgenceErrorKind,
