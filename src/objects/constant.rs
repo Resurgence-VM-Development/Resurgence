@@ -1,6 +1,6 @@
-use std::io::{Error, ErrorKind};
+use crate::{ResurgenceError, create_new_trace};
 
-use super::register::{Register, RegisterLocation};
+use super::{register::{Register, RegisterLocation}, resurgence_error::ResurgenceErrorKind};
 
 /// `Constant`: Represents a constant in the backend
 /// 
@@ -20,9 +20,11 @@ pub enum Constant {
 }
 
 impl Constant {
-    fn check_overflow(&self, value: Option<i64>) -> Result<i64, Error> {
+    fn check_overflow(&self, value: Option<i64>) -> Result<i64, ResurgenceError> {
         if value.is_none() {
-            return Err(Error::new(ErrorKind::OutOfMemory, "Overflowed integer!".to_string()));
+            let err = ResurgenceError::from(ResurgenceErrorKind::OVERFLOW, "Overflow error!");
+            err.add_trace(&format!("{}: line {}", file!(), line!()));
+            return Err(err);
         }
 
         // We know there was no error, so we don't need unwrap to check for us again
@@ -44,11 +46,12 @@ impl Constant {
     ///
     /// assert_eq!(res.unwrap(), Constant::Int(10));
     /// ```
-    pub fn add(&self, constant: &Constant) -> Result<Constant, Error> {
+    pub fn add(&self, constant: &Constant) -> Result<Constant, ResurgenceError> {
         match (self.clone(), (*constant).clone()) {
             (Constant::Int(val_1), Constant::Int(val_2)) => {
                 let res = self.check_overflow(val_1.checked_add(val_2));
                 if let Err(err) = res {
+                    err.add_trace(&format!("{}: line {}", file!(), line!()));
                     Err(err)
                 } else {
                     // If no error was returned, then we don't need to use the checked version of unwrap
@@ -62,7 +65,9 @@ impl Constant {
                 Ok(Constant::Double(val_1 as f64 + val_2))
             },
             _ => {
-                Err(Error::new(ErrorKind::InvalidData, "Can not add non-numerical types!".to_string()))
+                let err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Can not add non-numerical types!");
+                err.add_trace(&format!("{}: line {}", file!(), line!()));
+                Err(err)
             }
         }
     }
@@ -80,11 +85,12 @@ impl Constant {
     /// 
     /// assert_eq!(res.unwrap(), Constant::Int(0));
     /// ```
-    pub fn sub(&self, constant: &Constant) -> Result<Constant, Error> {
+    pub fn sub(&self, constant: &Constant) -> Result<Constant, ResurgenceError> {
         match (self.clone(), (*constant).clone()) {
             (Constant::Int(val_1), Constant::Int(val_2)) => {
                 let res = self.check_overflow(val_1.checked_sub(val_2));
                 if let Err(err) = res {
+                    create_new_trace!(err);
                     Err(err)
                 } else {
                     // We know there was no error, then we don't need to use the checked version of unwrap
@@ -98,7 +104,9 @@ impl Constant {
                 Ok(Constant::Double(val_1 as f64 - val_2))
             },
             _ => {
-                Err(Error::new(ErrorKind::InvalidData, "Can not subtract non-numerical types!"))
+                let err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Can not subtract non-numerical types!");
+                create_new_trace!(err);
+                Err(err)
             }
         }
     }
@@ -117,11 +125,12 @@ impl Constant {
     /// 
     /// assert_eq!(res.unwrap(), Constant::Int(25));
     /// ```
-    pub fn mul(&self, constant: &Constant) -> Result<Constant, Error> {
+    pub fn mul(&self, constant: &Constant) -> Result<Constant, ResurgenceError> {
         match (self.clone(), (*constant).clone()) {
             (Constant::Int(val_1), Constant::Int(val_2)) => {
                 let res = self.check_overflow(val_1.checked_mul(val_2));
                 if let Err(err) = res {
+                    create_new_trace!(err);
                     Err(err)
                 } else {
                     // We know there was no error, so we don't need to use the checked version of unwrap
@@ -135,7 +144,9 @@ impl Constant {
                 Ok(Constant::Double(val_1 as f64 * val_2))
             },
             _ => {
-                Err(Error::new(ErrorKind::InvalidData, "Can not multiply non-numerical types!"))
+                let err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Can only multiply non-numerical types!");
+                create_new_trace!(err);
+                Err(err)
             }
         }
     }
@@ -154,11 +165,12 @@ impl Constant {
     /// 
     /// assert_eq!(res.unwrap(), Constant::Int(1));
     /// ```
-    pub fn div(&self, constant: &Constant) -> Result<Constant, Error> {
+    pub fn div(&self, constant: &Constant) -> Result<Constant, ResurgenceError> {
         match (self.clone(), (*constant).clone()) {
             (Constant::Int(val_1), Constant::Int(val_2)) => {
                 let res = self.check_overflow(val_1.checked_div(val_2));
                 if let Err(err) = res {
+                    create_new_trace!(err);
                     Err(err)
                 } else {
                     // We know there was no error, so we don't need to use the checked version of unwrap
@@ -172,7 +184,9 @@ impl Constant {
                 Ok(Constant::Double(val_1 as f64 / val_2))
             },
             _ => {
-                Err(Error::new(ErrorKind::InvalidData, "Can't divide non-numerical types!"))
+                let err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Can't divide non-numerical types!");
+                create_new_trace!(err);
+                Err(err)
             }
         }
     }
@@ -191,7 +205,7 @@ impl Constant {
     /// 
     /// assert_eq!(res.unwrap(), Constant::Int(1));
     /// ```
-    pub fn modlo(&self, constant: &Constant) -> Result<Constant, Error> {
+    pub fn modlo(&self, constant: &Constant) -> Result<Constant, ResurgenceError> {
         match (self.clone(), (*constant).clone()) {
             (Constant::Int(val_1), Constant::Int(val_2)) => {
                 Ok(Constant::Int(val_1 % val_2))
@@ -203,7 +217,9 @@ impl Constant {
                 Ok(Constant::Double(val_1 as f64 % val_2))
             },
             _ => {
-                Err(Error::new(ErrorKind::InvalidData, "Can not perform division and return the remainder of non-numerical types!"))
+                let err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Can not perform a modlo operation on non-numerical types!");
+                create_new_trace!(err);
+                Err(err)
             }
         }
     }
@@ -305,44 +321,5 @@ mod constant_init_tests {
         let test_bool = true;
         let constant = create_constant_bool(&test_bool);
         assert_eq!(constant, Constant::Boolean(test_bool));
-    }
-}
-
-#[cfg(test)]
-mod const_impl_tests {
-    use super::*;
-
-    #[test]
-    fn math_test() {
-        let int_const = create_constant_int(&99);
-        let double_const = create_constant_double(&1.5);
-
-        let add_constant = int_const.add(&double_const);
-        let sub_constant = int_const.sub(&double_const);
-        let mul_constant = int_const.mul(&double_const);
-        let div_constant = int_const.div(&double_const);
-
-        if let Constant::Double(res) = add_constant.unwrap() {
-            assert_eq!(res, 99.0 + 1.5);
-        }
-        if let Constant::Double(res) = sub_constant.unwrap() {
-            assert_eq!(res, 99.0 - 1.5);
-        }
-        if let Constant::Double(res) = mul_constant.unwrap() {
-            assert_eq!(res, 99.0 * 1.5);
-        }
-        if let Constant::Double(res) = div_constant.unwrap() {
-            assert_eq!(res, 99.0 / 1.5);
-        }
-    }
-
-    #[test]
-    fn concat_test() {
-        let (hello, world) = (create_constant_string("Hello "), create_constant_string("World!"));
-        let hello_world = hello.concat(&world);
-        if let Err(err) = hello_world {
-            panic!("{}", err);
-        }
-        assert_eq!(hello_world.unwrap(), create_constant_string("Hello World!"));
     }
 }

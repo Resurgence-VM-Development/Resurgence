@@ -168,30 +168,35 @@ impl ExecutionEngine for Interpreter {
                 Instruction::Add(ref dst_reg, ref reg_1, ref reg_2) => {
                     let res = self.add(dst_reg, reg_1, reg_2);
                     if let Err(err) = res {
+                        create_new_trace!(err);
                         return Err(err);
                     }
                 }
                 Instruction::Sub(ref dst_reg, ref reg_1, ref reg_2) => {
                     let res = self.sub(dst_reg, reg_1, reg_2);
                     if let Err(err) = res {
+                        create_new_trace!(err);
                         return Err(err);
                     }
                 }
                 Instruction::Mul(ref dst_reg, ref reg_1, ref reg_2) => {
                     let res = self.mul(dst_reg, reg_1, reg_2);
                     if let Err(err) = res {
+                        create_new_trace!(err);
                         return Err(err);
                     }
                 }
                 Instruction::Div(ref dst_reg, ref reg_1, ref reg_2) => {
                     let res = self.div(dst_reg, reg_1, reg_2);
                     if let Err(err) = res {
+                        create_new_trace!(err);
                         return Err(err);
                     }
                 }
                 Instruction::Mod(ref dst_reg, ref reg_1, ref reg_2) => {
                     let res = self.modlo(dst_reg, reg_1, reg_2);
                     if let Err(err) = res {
+                        create_new_trace!(err);
                         return Err(err);
                     }
                 }
