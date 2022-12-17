@@ -1,11 +1,14 @@
+use std::fmt::format;
 use std::io::{Error, ErrorKind};
 
-use super::super::super::{interpreter::Interpreter};
+use super::super::super::interpreter::Interpreter;
+use crate::ResurgenceError;
 use crate::objects::constant::{Constant, create_constant_double};
 use crate::objects::register::{Register, RegisterLocation, RegisterReference};
+use crate::objects::resurgence_error::ResurgenceErrorKind;
 
 impl Interpreter {
-    pub(crate) fn cpy_registers(&mut self, dst_reg: &Register, dst_reg_ref: &RegisterReference, src_reg: &Register, src_reg_ref: &RegisterReference) -> Result<(), Error> {
+    pub(crate) fn cpy_registers(&mut self, dst_reg: &Register, dst_reg_ref: &RegisterReference, src_reg: &Register, src_reg_ref: &RegisterReference) -> Result<(), ResurgenceError> {
         // Destination register
         let Register(mut dst_index, mut dst_loc) = dst_reg;
         let mut dst_index_usize = dst_index as usize;
@@ -37,7 +40,11 @@ impl Interpreter {
                     Constant::Double(src_double) => {
                         self.accumulator = src_double;
                     }
-                    _ => return Err(Error::new(ErrorKind::InvalidInput, "Invalid copy to the accumulator!")),
+                    _ => {
+                        let err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Invalid copy to the accumulator!");
+                        err.add_trace(&format!("{}: line {}", file!(), line!()));
+                        return Err(err);
+                    },
                 }
         },
             (RegisterLocation::Accumulator, RegisterLocation::Local) => {
@@ -49,7 +56,11 @@ impl Interpreter {
                     Constant::Double(src_double) => {
                         self.accumulator = src_double;
                     }
-                    _ => return Err(Error::new(ErrorKind::InvalidInput, "Invalid copy to the accumulator!")),
+                    _ => {
+                        let err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Invalid copy to the accumulator!");
+                        err.add_trace(&format!("{}: line {}", file!(), line!()));
+                        return Err(err);
+                    },
                 }
             },
 
@@ -86,7 +97,11 @@ impl Interpreter {
                 stack_frame.registers[dst_index_usize] = Some(stack_frame.cpy_register(src_index_usize));
             },
 
-            _ => return Err(Error::new(ErrorKind::InvalidInput, "Invalid cpy operation!"))
+            _ => {
+                let err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Invalid CPY operation!");
+                err.add_trace(&format!("{}: line {}", file!(), line!()));
+                return Err(err);
+            }
         }
         Result::Ok(())
     }

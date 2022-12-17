@@ -135,6 +135,7 @@ impl ExecutionEngine for Interpreter {
                 Instruction::Cpy(ref dst_reg, ref dst_reg_ref, ref src_reg, ref src_reg_ref) => {
                     let res = self.cpy_registers(dst_reg, dst_reg_ref, src_reg, src_reg_ref);
                     if let Err(err) = res {
+                        err.add_trace(&format!("{}: line {}", file!(), line!()));
                         return Err(err);
                     }
                 }

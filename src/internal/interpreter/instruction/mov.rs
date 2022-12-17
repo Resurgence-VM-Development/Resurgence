@@ -1,5 +1,3 @@
-use std::io::{Error, ErrorKind};
-
 use super::super::super::interpreter::Interpreter;
 use crate::ResurgenceError;
 use crate::objects::constant::{Constant, create_constant_double};
