@@ -17,6 +17,8 @@ pub(crate) enum ResurgenceErrorKind {
     MISSING_IMPORTS,
     /// When a function returns an error
     FUNCTION_RETURN_ERROR,
+    /// When the programmer tries to call a function that doesn't exist
+    FUNCTION_DOES_NOT_EXIST,
 
     /// When something is so messed up that you don't have the words to describe it
     I_GOOFED_UP,

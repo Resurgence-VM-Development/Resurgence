@@ -236,15 +236,15 @@ impl ExecutionEngine for Interpreter {
     }
 
     // Execute an exported function.
-    fn execute_function(&mut self, func_name: &str) -> Result<(), Error> {
+    fn execute_function(&mut self, func_name: &str) -> Result<(), ResurgenceError> {
         self.seal.set_runtime();
         match self.code_holder.exports.get(func_name) {
             Some(inst) => self.execute_instruction(*inst as usize),
             None => {
-                Err(Error::new(
-                    ErrorKind::Other,
-                    format!("Function {} does not exist", func_name),
-                ))
+                let err = ResurgenceError::from(ResurgenceErrorKind::FUNCTION_DOES_NOT_EXIST, 
+                &format!("Function {} does not exist!", func_name));
+                err.add_trace(&format!("{}: line {}", file!(), line!()));
+                Err(err)
             }
         }
     }
