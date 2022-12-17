@@ -1,8 +1,5 @@
-use std::fmt::format;
-use std::io::{Error, ErrorKind};
-
 use super::super::super::interpreter::Interpreter;
-use crate::ResurgenceError;
+use crate::{ResurgenceError, create_new_trace};
 use crate::objects::constant::{Constant, create_constant_double};
 use crate::objects::register::{Register, RegisterLocation, RegisterReference};
 use crate::objects::resurgence_error::ResurgenceErrorKind;
@@ -42,7 +39,7 @@ impl Interpreter {
                     }
                     _ => {
                         let err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Invalid copy to the accumulator!");
-                        err.add_trace(&format!("{}: line {}", file!(), line!()));
+                        create_new_trace!(err);
                         return Err(err);
                     },
                 }
@@ -58,7 +55,7 @@ impl Interpreter {
                     }
                     _ => {
                         let err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Invalid copy to the accumulator!");
-                        err.add_trace(&format!("{}: line {}", file!(), line!()));
+                        create_new_trace!(err);
                         return Err(err);
                     },
                 }
@@ -99,7 +96,7 @@ impl Interpreter {
 
             _ => {
                 let err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Invalid CPY operation!");
-                err.add_trace(&format!("{}: line {}", file!(), line!()));
+                create_new_trace!(err);
                 return Err(err);
             }
         }

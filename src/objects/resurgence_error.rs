@@ -2,6 +2,15 @@ use crate::internal::interpreter::imports::RustFunc;
 
 use super::{stackframe::StackFrame, instruction::Instruction, constant::Constant};
 
+#[macro_use]
+mod macros {
+    /// Creates a new trace in the format that Resurgence uses
+    #[macro_export] macro_rules! create_new_trace {
+        ($err:expr) => {
+            $err.add_trace(&format!("In file {} on line {}, collum {}", file!(), line!(), column!())); 
+        };
+    }   
+}
 /// All types of errors in Resurgence
 #[allow(non_camel_case_types)]
 pub(crate) enum ResurgenceErrorKind {

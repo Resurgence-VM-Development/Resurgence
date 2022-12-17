@@ -1,5 +1,5 @@
 use super::super::super::interpreter::Interpreter;
-use crate::ResurgenceError;
+use crate::{ResurgenceError, create_new_trace};
 use crate::objects::constant::{Constant, create_constant_double};
 use crate::objects::register::{Register, RegisterLocation, RegisterReference};
 use crate::objects::resurgence_error::ResurgenceErrorKind;
@@ -39,7 +39,7 @@ impl Interpreter {
                     }
                     _ => {
                         let err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Invalid move to accumulator register!");
-                        err.add_trace(&format!("{}: line {}", file!(), line!()));
+                        create_new_trace!(err);
                         return Err(err);
                     }
                 }
@@ -55,7 +55,7 @@ impl Interpreter {
                     },
                     _ => {
                         let err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Invalid move to accumulator register!");
-                        err.add_trace(&format!("{}: line {}", file!(), line!()));
+                        create_new_trace!(err);
                         return Err(err);
                     }
                 }
@@ -81,7 +81,7 @@ impl Interpreter {
             },
             _ => {
                 let err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Invalid MOV operation");
-                err.add_trace(&format!("{}: line {}", file!(), line!()));
+                create_new_trace!(err);
                 return Err(err);
             }
         }
@@ -102,14 +102,14 @@ impl Interpreter {
         // Check if the stack is empty
         if self.stack.is_empty() {
             let err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Stack emptry; can't move from the stack!");
-            err.add_trace(&format!("{}: line {}", file!(), line!()));
+            create_new_trace!(err);
             return Err(err);
         }
         let object = self.stack.remove(self.stack.len() - 1); // We do self.stack.len() - 1 to get the true index. For example, if the vector has a size of 1, the true index is 0
         match dst_loc {
             RegisterLocation::ConstantPool => {
                 let err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Moving to the constant pool is forbidden!");
-                err.add_trace(&format!("{}: line {}", file!(), line!()));
+                create_new_trace!(err);
                 return Err(err);
             },
             RegisterLocation::Accumulator => {
@@ -118,7 +118,7 @@ impl Interpreter {
                     Constant::Double(val) => self.accumulator = val,
                     _ => {
                         let err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Can only write integers and doubles to the accumulator register");
-                        err.add_trace(&format!("{}: line {}", file!(), line!()));
+                        create_new_trace!(err);
                         return Err(err);
                     }
                 }

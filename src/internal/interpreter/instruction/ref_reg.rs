@@ -1,5 +1,5 @@
 use super::super::super::interpreter::Interpreter;
-use crate::{objects::{register::{Register, RegisterLocation, RegisterReference}, constant::Constant, resurgence_error::ResurgenceErrorKind}, ResurgenceError};
+use crate::{objects::{register::{Register, RegisterLocation, RegisterReference}, constant::Constant, resurgence_error::ResurgenceErrorKind}, ResurgenceError, create_new_trace};
 
 impl Interpreter {
     pub(crate) fn ref_registers(&mut self, dst_reg: &Register, dst_reg_ref: &RegisterReference, src_reg: &Register, src_reg_ref: &RegisterReference) -> Result<(), ResurgenceError> {
@@ -30,7 +30,7 @@ impl Interpreter {
             },
             _ => {
                 let err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Invalid register location! Can only reference local or global registers!");
-                err.add_trace(&format!("{}: line {}", file!(), line!()));
+                create_new_trace!(err);
                 return Err(err);
             },
         }

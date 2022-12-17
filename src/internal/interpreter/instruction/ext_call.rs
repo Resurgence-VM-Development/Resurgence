@@ -1,4 +1,4 @@
-use crate::{ext_func::resurgence_state::ResurgenceState, Interpreter, ResurgenceError, objects::resurgence_error::ResurgenceErrorKind};
+use crate::{ext_func::resurgence_state::ResurgenceState, Interpreter, ResurgenceError, objects::resurgence_error::ResurgenceErrorKind, create_new_trace};
 
 impl Interpreter {
     pub(crate) fn ext_call(&mut self, index: u64) -> Result<(), ResurgenceError> {
@@ -13,7 +13,7 @@ impl Interpreter {
             let ec = (func)(&mut state);
             if ec != 0 {
                 let err = ResurgenceError::from(ResurgenceErrorKind::FUNCTION_RETURN_ERROR, &format!("Native function \"{}\" returned nonzero status code {}", function.name, ec));
-                err.add_trace(&format!("{}: line {}", file!(), line!()))
+                create_new_trace!(err);
             }
 
             return Ok(());
@@ -23,7 +23,7 @@ impl Interpreter {
             let res = (func)(&mut state);
             if let Err(err) = res {
                 let err = ResurgenceError::from(ResurgenceErrorKind::FUNCTION_RETURN_ERROR, &err.to_string());
-                err.add_trace(&format!("{}: line {}", file!(), line!()));
+                create_new_trace!(err);
                 return Err(err);
             }
             return Ok(());
