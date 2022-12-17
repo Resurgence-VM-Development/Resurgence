@@ -1,10 +1,8 @@
-use std::io::{Error, ErrorKind};
-
-use super::super::super::{interpreter::Interpreter};
-use crate::objects::{register::{Register, RegisterLocation, RegisterReference}, constant::Constant};
+use super::super::super::interpreter::Interpreter;
+use crate::{objects::{register::{Register, RegisterLocation, RegisterReference}, constant::Constant, resurgence_error::ResurgenceErrorKind}, ResurgenceError};
 
 impl Interpreter {
-    pub(crate) fn ref_registers(&mut self, dst_reg: &Register, dst_reg_ref: &RegisterReference, src_reg: &Register, src_reg_ref: &RegisterReference) -> Result<(), Error> {
+    pub(crate) fn ref_registers(&mut self, dst_reg: &Register, dst_reg_ref: &RegisterReference, src_reg: &Register, src_reg_ref: &RegisterReference) -> Result<(), ResurgenceError> {
         let Register(mut dst_index, mut dst_loc) = dst_reg;
         let mut dst_index_usize = dst_index as usize;
 
@@ -30,7 +28,11 @@ impl Interpreter {
                 let stack_frame = self.ref_stack_frame();
                 stack_frame.registers[dst_index_usize] = Some(Constant::Address(*src_reg));
             },
-            _ => return Err(Error::new(ErrorKind::InvalidInput, "Invalid register location! Can only reference local or global registers!")),
+            _ => {
+                let err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Invalid register location! Can only reference local or global registers!");
+                err.add_trace(&format!("{}: line {}", file!(), line!()));
+                return Err(err);
+            },
         }
         Result::Ok(())
     }

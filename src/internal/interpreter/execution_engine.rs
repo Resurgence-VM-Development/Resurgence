@@ -1,5 +1,3 @@
-use std::io::{Error, ErrorKind};
-
 use super::super::{execution_engine::ExecutionEngine, interpreter::Interpreter};
 use crate::objects::{
     instruction::Instruction, stackframe::StackFrame, resurgence_error::{ResurgenceError, ResurgenceErrorKind, ResurgenceContext}
@@ -117,6 +115,8 @@ impl ExecutionEngine for Interpreter {
                 Instruction::ExtCall(ref func_reg) => {
                     let res = self.ext_call(*func_reg);
                     if let Err(err) = res {
+                        err.add_trace(&format!("{}: line {}", file!(), line!()));
+                        err.context = Some(create_context!(self, operation, index));
                         return Err(err);
                     }
                 },
@@ -128,7 +128,8 @@ impl ExecutionEngine for Interpreter {
                 Instruction::Mov(ref dst_reg, ref dst_reg_ref, ref src_reg, ref src_reg_ref) => {
                     let res = self.mov_registers(dst_reg, dst_reg_ref, src_reg, src_reg_ref);
                     if let Err(err) = res {
-                        err.add_trace(&format!("{}: {}", file!(), line!()));
+                        err.add_trace(&format!("{}: line {}", file!(), line!()));
+                        err.context = Some(create_context!(self, operation, index));
                         return Err(err);
                     }
                 }
@@ -136,12 +137,15 @@ impl ExecutionEngine for Interpreter {
                     let res = self.cpy_registers(dst_reg, dst_reg_ref, src_reg, src_reg_ref);
                     if let Err(err) = res {
                         err.add_trace(&format!("{}: line {}", file!(), line!()));
+                        err.context = Some(create_context!(self, operation, index));
                         return Err(err);
                     }
                 }
                 Instruction::Ref(ref dst_reg, ref dst_reg_ref, ref src_reg, ref src_reg_ref) => {
                     let res = self.ref_registers(dst_reg, dst_reg_ref, src_reg, src_reg_ref);
                     if let Err(err) = res {
+                        err.add_trace(&format!("{}: line {}", file!(), line!()));
+                        err.context = Some(create_context!(self, operation, index));
                         return Err(err);
                     }
                 }
@@ -153,6 +157,7 @@ impl ExecutionEngine for Interpreter {
                     let res = self.stack_mov(register, reference);
                     if let Err(err) = res {
                         err.add_trace(&format!("{}: {}", file!(), line!()));
+                        err.context = Some(create_context!(self, operation, index));
                         return Err(err);
                     }
                 }
