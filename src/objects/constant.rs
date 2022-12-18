@@ -241,18 +241,6 @@ impl Constant {
     } 
 }
 
-/// Creates a `Constant::Int`
-/// 
-/// `init_val` (`&i64`): The value you want to create a Constant with
-/// 
-/// # Examples
-/// ```no_run
-/// let constant = create_constant_int(&10);
-/// ```
-pub fn create_constant_int(init_val: &i64) -> Constant {
-    Constant::Int(*init_val)
-}
-
 /// Creates a `Constant::Double`
 /// 
 /// `init_val` (`&f64`): The value you want to create a Constant with
@@ -263,29 +251,4 @@ pub fn create_constant_int(init_val: &i64) -> Constant {
 /// ```
 pub fn create_constant_double(init_val: &f64) -> Constant {
     Constant::Double(*init_val)
-}
-
-/// Creates a `Constant::String`
-/// 
-/// `init_val` (`&str`): The value you want to create a Constant with
-///
-/// # Examples
-/// ```no_run
-/// use smartstring::alias::String;
-/// let constant = create_constant_string("Hello World!");
-/// ```
-pub fn create_constant_string(init_val: &str) -> Constant {
-    Constant::String(String::from(init_val))
-}
-
-/// Creates a `Constant::Bool`
-/// 
-/// `init_val` (`&bool`): The value you want to create a Constant with
-///
-/// # Examples
-/// ```no_run
-/// let constant = create_constant_bool(&true);
-/// ```
-pub fn create_constant_bool(init_val: &bool) -> Constant {
-    Constant::Boolean(*init_val)
 }
