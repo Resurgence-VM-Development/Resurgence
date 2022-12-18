@@ -1,3 +1,5 @@
+use std::fmt;
+
 use crate::internal::interpreter::imports::RustFunc;
 
 use super::{stackframe::StackFrame, instruction::Instruction, constant::Constant};
@@ -66,6 +68,26 @@ impl ResurgenceError {
     /// trace (`&str`): The new trace to add
     pub(crate) fn add_trace(&mut self, trace: &str) {
         self.trace_back.push(trace.to_string());
+    }
+}
+
+impl fmt::Debug for ResurgenceError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let type_str = match *&self.error_type {
+            ResurgenceErrorKind::INVALID_OPERATION => "INVALID_OPERATION",
+            ResurgenceErrorKind::MEMORY_ADDRESS_NONE => "MEMORY_ADDRESS_NONE",
+            ResurgenceErrorKind::OVERFLOW => "OVERFLOW",
+            ResurgenceErrorKind::REGISTER_OUT_OF_BOUNDS => "REGISTER_OUT_OF_BOUNDS",
+            ResurgenceErrorKind::MISSING_IMPORTS => "MISSING_IMPORTS",
+            ResurgenceErrorKind::FUNCTION_RETURN_ERROR => "FUNCTION_RETURN_ERROR",
+            ResurgenceErrorKind::FUNCTION_DOES_NOT_EXIST => "FUNCTION_DOES_NOT_EXIST",
+            ResurgenceErrorKind::I_GOOFED_UP => "I_GOOFED_UP"
+
+        };
+        f.debug_struct("ResurgenceError")
+            .field("Error Type", &type_str)
+            .field("Error Message", &self.error_message)
+            .finish()
     }
 }
 
