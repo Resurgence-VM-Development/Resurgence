@@ -1,4 +1,4 @@
-use crate::{ResurgenceError, objects::resurgence_error::ResurgenceErrorKind};
+use crate::{ResurgenceError, objects::resurgence_error::ResurgenceErrorKind, create_new_trace};
 
 use super::Interpreter;
 
@@ -18,8 +18,8 @@ impl Interpreter {
             }
             if !success {
                 // Failed to find a matching import
-                let err = ResurgenceError::from(ResurgenceErrorKind::MISSING_IMPORTS, &format!("Could not find function {} for it has not been registered", *name));
-                err.add_trace(&format!("resolve_imports: line {}", line!()));
+                let mut err = ResurgenceError::from(ResurgenceErrorKind::MISSING_IMPORTS, &format!("Could not find function {} for it has not been registered", *name));
+                create_new_trace!(err);
                 return Err(err);
             }
         } 

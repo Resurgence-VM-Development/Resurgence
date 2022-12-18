@@ -13,16 +13,13 @@ use crate::{objects::{
 macro_rules! create_context {
     ($self:expr, $ins:expr, $ip:expr) =>
     {
-        {
-            let context = ResurgenceContext {
-                call_stack: $self.call_stack, 
-                constant_stack: $self.stack,
-                rust_and_native_fns: $self.rust_functions,
-                instruction: $ins,
-                instruction_pointer: $ip,
-                recursion_depth: $self.current_recursion_depth,
-            };
-            context
+        ResurgenceContext {
+            call_stack: $self.call_stack.clone(), 
+            constant_stack: $self.stack.clone(),
+            rust_and_native_fns: $self.rust_functions.clone(),
+            instruction: $ins,
+            instruction_pointer: $ip,
+            recursion_depth: $self.current_recursion_depth,
         }
     }
 }
@@ -33,9 +30,8 @@ impl ExecutionEngine for Interpreter {
         // Resolve imports if the programmer already hasn't done so 
         if !self.code_holder.resolved_imports {
             let res = self.resolve_imports();
-            if let Err(err) = res {
-                let context = create_context!(self, Instruction::Ret, 0);
-                err.context = Some(context);
+            if let Err(mut err) = res {
+                err.context = Some(create_context!(self, Instruction::Ret, 0));
                 err.add_trace(&format!("{}: line {}", file!(), line!()));
                 return Err(err);
             }
@@ -65,8 +61,8 @@ impl ExecutionEngine for Interpreter {
                             }
                         }
                         _ => {
-                            let context = create_context!(self, operation, index);
-                            let err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Attempted to add more memory to an invalid location!");
+                            let mut err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Attempted to add more memory to an invalid location!");
+                            err.context = Some(create_context!(self, operation, index));
                             create_new_trace!(err);
                             return Err(err);
                         }
@@ -91,7 +87,7 @@ impl ExecutionEngine for Interpreter {
                             }
                         },
                         _ => {
-                            let err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Can not allocate more memory outside of local and global memory.");
+                            let mut err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Can not allocate more memory outside of local and global memory.");
                             err.context = Some(create_context!(self, operation, index));
                             create_new_trace!(err);
                             return Err(err);
@@ -106,7 +102,7 @@ impl ExecutionEngine for Interpreter {
 
                 Instruction::Call(ref func_index) => {
                     let res = self.execute_instruction(*func_index as usize);
-                    if let Err(err) = res {
+                    if let Err(mut err) = res {
                         create_new_trace!(err);
                         err.context = Some(create_context!(self, operation, index));
                         return Err(err);
@@ -114,7 +110,7 @@ impl ExecutionEngine for Interpreter {
                 },
                 Instruction::ExtCall(ref func_reg) => {
                     let res = self.ext_call(*func_reg);
-                    if let Err(err) = res {
+                    if let Err(mut err) = res {
                         create_new_trace!(err); 
                         err.context = Some(create_context!(self, operation, index));
                         return Err(err);
@@ -127,7 +123,7 @@ impl ExecutionEngine for Interpreter {
 
                 Instruction::Mov(ref dst_reg, ref dst_reg_ref, ref src_reg, ref src_reg_ref) => {
                     let res = self.mov_registers(dst_reg, dst_reg_ref, src_reg, src_reg_ref);
-                    if let Err(err) = res {
+                    if let Err(mut err) = res {
                         create_new_trace!(err);
                         err.context = Some(create_context!(self, operation, index));
                         return Err(err);
@@ -135,7 +131,7 @@ impl ExecutionEngine for Interpreter {
                 }
                 Instruction::Cpy(ref dst_reg, ref dst_reg_ref, ref src_reg, ref src_reg_ref) => {
                     let res = self.cpy_registers(dst_reg, dst_reg_ref, src_reg, src_reg_ref);
-                    if let Err(err) = res {
+                    if let Err(mut err) = res {
                         create_new_trace!(err);
                         err.context = Some(create_context!(self, operation, index));
                         return Err(err);
@@ -143,7 +139,7 @@ impl ExecutionEngine for Interpreter {
                 }
                 Instruction::Ref(ref dst_reg, ref dst_reg_ref, ref src_reg, ref src_reg_ref) => {
                     let res = self.ref_registers(dst_reg, dst_reg_ref, src_reg, src_reg_ref);
-                    if let Err(err) = res {
+                    if let Err(mut err) = res {
                         create_new_trace!(err);
                         err.context = Some(create_context!(self, operation, index));
                         return Err(err);
@@ -155,7 +151,7 @@ impl ExecutionEngine for Interpreter {
                 }
                 Instruction::StackMov(ref register, ref reference) => {
                     let res = self.stack_mov(register, reference);
-                    if let Err(err) = res {
+                    if let Err(mut err) = res {
                         create_new_trace!(err);
                         err.context = Some(create_context!(self, operation, index));
                         return Err(err);
@@ -167,35 +163,35 @@ impl ExecutionEngine for Interpreter {
 
                 Instruction::Add(ref dst_reg, ref reg_1, ref reg_2) => {
                     let res = self.add(dst_reg, reg_1, reg_2);
-                    if let Err(err) = res {
+                    if let Err(mut err) = res {
                         create_new_trace!(err);
                         return Err(err);
                     }
                 }
                 Instruction::Sub(ref dst_reg, ref reg_1, ref reg_2) => {
                     let res = self.sub(dst_reg, reg_1, reg_2);
-                    if let Err(err) = res {
+                    if let Err(mut err) = res {
                         create_new_trace!(err);
                         return Err(err);
                     }
                 }
                 Instruction::Mul(ref dst_reg, ref reg_1, ref reg_2) => {
                     let res = self.mul(dst_reg, reg_1, reg_2);
-                    if let Err(err) = res {
+                    if let Err(mut err) = res {
                         create_new_trace!(err);
                         return Err(err);
                     }
                 }
                 Instruction::Div(ref dst_reg, ref reg_1, ref reg_2) => {
                     let res = self.div(dst_reg, reg_1, reg_2);
-                    if let Err(err) = res {
+                    if let Err(mut err) = res {
                         create_new_trace!(err);
                         return Err(err);
                     }
                 }
                 Instruction::Mod(ref dst_reg, ref reg_1, ref reg_2) => {
                     let res = self.modlo(dst_reg, reg_1, reg_2);
-                    if let Err(err) = res {
+                    if let Err(mut err) = res {
                         create_new_trace!(err);
                         return Err(err);
                     }
@@ -242,11 +238,10 @@ impl ExecutionEngine for Interpreter {
 
     // Execute an exported function.
     fn execute_function(&mut self, func_name: &str) -> Result<(), ResurgenceError> {
-        self.seal.set_runtime();
         match self.code_holder.exports.get(func_name) {
             Some(inst) => self.execute_instruction(*inst as usize),
             None => {
-                let err = ResurgenceError::from(ResurgenceErrorKind::FUNCTION_DOES_NOT_EXIST, 
+                let mut err = ResurgenceError::from(ResurgenceErrorKind::FUNCTION_DOES_NOT_EXIST, 
                 &format!("Function {} does not exist!", func_name));
                 create_new_trace!(err);
                 Err(err)

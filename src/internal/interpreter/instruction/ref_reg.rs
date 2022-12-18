@@ -29,7 +29,7 @@ impl Interpreter {
                 stack_frame.registers[dst_index_usize] = Some(Constant::Address(*src_reg));
             },
             _ => {
-                let err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Invalid register location! Can only reference local or global registers!");
+                let mut err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Invalid register location! Can only reference local or global registers!");
                 create_new_trace!(err);
                 return Err(err);
             },

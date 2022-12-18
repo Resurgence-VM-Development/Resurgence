@@ -10,7 +10,6 @@ use super::{register::{Register, RegisterLocation}, resurgence_error::Resurgence
 /// * `String(String)`
 /// * `Boolean(bool)`
 #[derive(Clone, Debug, PartialEq)]
-
 pub enum Constant {
     Int(i64),
     Double(f64),
@@ -22,7 +21,7 @@ pub enum Constant {
 impl Constant {
     fn check_overflow(&self, value: Option<i64>) -> Result<i64, ResurgenceError> {
         if value.is_none() {
-            let err = ResurgenceError::from(ResurgenceErrorKind::OVERFLOW, "Overflow error!");
+            let mut err = ResurgenceError::from(ResurgenceErrorKind::OVERFLOW, "Overflow error!");
             err.add_trace(&format!("{}: line {}", file!(), line!()));
             return Err(err);
         }
@@ -50,7 +49,7 @@ impl Constant {
         match (self.clone(), (*constant).clone()) {
             (Constant::Int(val_1), Constant::Int(val_2)) => {
                 let res = self.check_overflow(val_1.checked_add(val_2));
-                if let Err(err) = res {
+                if let Err(mut err) = res {
                     err.add_trace(&format!("{}: line {}", file!(), line!()));
                     Err(err)
                 } else {
@@ -65,7 +64,7 @@ impl Constant {
                 Ok(Constant::Double(val_1 as f64 + val_2))
             },
             _ => {
-                let err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Can not add non-numerical types!");
+                let mut err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Can not add non-numerical types!");
                 err.add_trace(&format!("{}: line {}", file!(), line!()));
                 Err(err)
             }
@@ -89,7 +88,7 @@ impl Constant {
         match (self.clone(), (*constant).clone()) {
             (Constant::Int(val_1), Constant::Int(val_2)) => {
                 let res = self.check_overflow(val_1.checked_sub(val_2));
-                if let Err(err) = res {
+                if let Err(mut err) = res {
                     create_new_trace!(err);
                     Err(err)
                 } else {
@@ -104,7 +103,7 @@ impl Constant {
                 Ok(Constant::Double(val_1 as f64 - val_2))
             },
             _ => {
-                let err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Can not subtract non-numerical types!");
+                let mut err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Can not subtract non-numerical types!");
                 create_new_trace!(err);
                 Err(err)
             }
@@ -129,7 +128,7 @@ impl Constant {
         match (self.clone(), (*constant).clone()) {
             (Constant::Int(val_1), Constant::Int(val_2)) => {
                 let res = self.check_overflow(val_1.checked_mul(val_2));
-                if let Err(err) = res {
+                if let Err(mut err) = res {
                     create_new_trace!(err);
                     Err(err)
                 } else {
@@ -144,7 +143,7 @@ impl Constant {
                 Ok(Constant::Double(val_1 as f64 * val_2))
             },
             _ => {
-                let err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Can only multiply non-numerical types!");
+                let mut err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Can only multiply non-numerical types!");
                 create_new_trace!(err);
                 Err(err)
             }
@@ -169,7 +168,7 @@ impl Constant {
         match (self.clone(), (*constant).clone()) {
             (Constant::Int(val_1), Constant::Int(val_2)) => {
                 let res = self.check_overflow(val_1.checked_div(val_2));
-                if let Err(err) = res {
+                if let Err(mut err) = res {
                     create_new_trace!(err);
                     Err(err)
                 } else {
@@ -184,7 +183,7 @@ impl Constant {
                 Ok(Constant::Double(val_1 as f64 / val_2))
             },
             _ => {
-                let err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Can't divide non-numerical types!");
+                let mut err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Can't divide non-numerical types!");
                 create_new_trace!(err);
                 Err(err)
             }
@@ -217,7 +216,7 @@ impl Constant {
                 Ok(Constant::Double(val_1 as f64 % val_2))
             },
             _ => {
-                let err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Can not perform a modlo operation on non-numerical types!");
+                let mut err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Can not perform a modlo operation on non-numerical types!");
                 create_new_trace!(err);
                 Err(err)
             }

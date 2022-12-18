@@ -8,7 +8,6 @@ mod utils;
 use self::imports::RustFunc;
 use super::super::constant::Constant;
 use crate::bytecode::codereader;
-use crate::internal::runtime_seal::RunTimeSeal;
 use crate::objects::codeholder::CodeHolder;
 use crate::objects::stackframe::StackFrame;
 
@@ -29,8 +28,6 @@ pub struct Interpreter {
     global: Vec<Option<Constant>>,
     /// All Rust functions registered before runtime
     rust_functions: Vec<RustFunc>,
-    /// Helps with validating the runtime
-    seal: RunTimeSeal,
     /// Defines how many times we've recursed
     current_recursion_depth: usize,
     /// Defines the recursion limit
@@ -48,7 +45,6 @@ impl Interpreter {
             code_holder: ch,
             global: Vec::new(),
             rust_functions: Vec::new(),
-            seal: RunTimeSeal::new(),
             current_recursion_depth: 0,
             max_recursion_depth: 1000
         }
@@ -67,23 +63,5 @@ impl Interpreter {
     /// new_depth (`usize`): The new max depth
     pub fn set_max_depth(&mut self, new_depth: usize) {
         self.max_recursion_depth = new_depth;
-    }
-
-    /// Returns the call stack from the runtime - Invalidates the runtime if called
-    pub(crate) fn yoink_call_stack(&self) -> Vec<StackFrame> {
-        self.seal.runtime_tampered();
-        self.call_stack
-    }
-    
-    /// Returns the constant stack - Invalidates the runtime if called
-    pub(crate) fn yoink_stack(&self) -> Vec<Constant> {
-        self.seal.runtime_tampered();
-        self.stack
-    }
-   
-    /// Returns the table of Rust and native functions - Invalidates the runtime if called 
-    pub(crate) fn yoink_rust_c(&self) -> Vec<RustFunc> {
-        self.seal.runtime_tampered();
-        self.rust_functions
     }
 }

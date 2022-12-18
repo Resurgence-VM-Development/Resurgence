@@ -38,7 +38,7 @@ impl Interpreter {
                         self.accumulator = src_double;
                     }
                     _ => {
-                        let err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Invalid copy to the accumulator!");
+                        let mut err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Invalid copy to the accumulator!");
                         create_new_trace!(err);
                         return Err(err);
                     },
@@ -54,7 +54,7 @@ impl Interpreter {
                         self.accumulator = src_double;
                     }
                     _ => {
-                        let err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Invalid copy to the accumulator!");
+                        let mut err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Invalid copy to the accumulator!");
                         create_new_trace!(err);
                         return Err(err);
                     },
@@ -95,7 +95,7 @@ impl Interpreter {
             },
 
             _ => {
-                let err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Invalid CPY operation!");
+                let mut err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Invalid CPY operation!");
                 create_new_trace!(err);
                 return Err(err);
             }

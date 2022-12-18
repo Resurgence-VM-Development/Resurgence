@@ -12,7 +12,7 @@ impl Interpreter {
             let func = unsafe { function.native_func.unwrap_unchecked() };
             let ec = (func)(&mut state);
             if ec != 0 {
-                let err = ResurgenceError::from(ResurgenceErrorKind::FUNCTION_RETURN_ERROR, &format!("Native function \"{}\" returned nonzero status code {}", function.name, ec));
+                let mut err = ResurgenceError::from(ResurgenceErrorKind::FUNCTION_RETURN_ERROR, &format!("Native function \"{}\" returned nonzero status code {}", function.name, ec));
                 create_new_trace!(err);
             }
 
@@ -22,7 +22,7 @@ impl Interpreter {
             let func = unsafe { function.func.unwrap_unchecked() };
             let res = (func)(&mut state);
             if let Err(err) = res {
-                let err = ResurgenceError::from(ResurgenceErrorKind::FUNCTION_RETURN_ERROR, &err.to_string());
+                let mut err = ResurgenceError::from(ResurgenceErrorKind::FUNCTION_RETURN_ERROR, &err.to_string());
                 create_new_trace!(err);
                 return Err(err);
             }

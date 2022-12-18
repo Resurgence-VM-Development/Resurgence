@@ -72,15 +72,15 @@ impl ResurgenceError {
 /// Represents the interpreter state at the time of creation
 pub struct ResurgenceContext {
     /// Call stack at the time of exception
-    call_stack: Vec<StackFrame>,
+    pub(crate) call_stack: Vec<StackFrame>,
     /// Constant stack at the time of exception
-    constant_stack: Vec<Constant>,
+    pub(crate) constant_stack: Vec<Constant>,
     /// All registered functions and their indexes
-    rust_and_native_fns: Vec<RustFunc>,
+    pub(crate) rust_and_native_fns: Vec<RustFunc>,
     /// Instruction at the time of exception
-    instruction: Instruction,
+    pub(crate) instruction: Instruction,
     /// Instruction index at time of exception
-    instruction_pointer: usize,
+    pub(crate) instruction_pointer: usize,
     /// Recursion depth 
-    recursion_depth: usize,
+    pub(crate) recursion_depth: usize,
 }

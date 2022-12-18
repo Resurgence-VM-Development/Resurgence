@@ -1,7 +1,8 @@
 use super::Interpreter;
-use crate::{ext_func::resurgence_state::ResurgenceState, internal::runtime_seal::Status};
+use crate::ext_func::resurgence_state::ResurgenceState;
 use std::io::Error;
 
+#[derive(Clone)]
 pub struct RustFunc {
     pub name: String,
     pub func: Option<fn(&mut ResurgenceState) -> Result<(), Error>>,
@@ -20,11 +21,6 @@ impl Interpreter {
         function: fn(&mut ResurgenceState) -> Result<(), Error>,
         func_name: String,
     ) {
-        // If the runtime variable is set to true, then execution has begun
-        // and the runtime can no longer be trusted
-        if self.seal.runtime_security_status() == Status::UNTAMPERED {
-            self.seal.runtime_tampered();
-        }
         self.rust_functions.push(RustFunc {
             name: func_name,
             func: Some(function),
@@ -38,11 +34,6 @@ impl Interpreter {
         function: extern "C" fn(&mut ResurgenceState) -> u8,
         func_name: String,
     ) {
-        // If the runtime variable is set to true, then execution has begun
-        // and the runtime can no longer be trusted
-        if self.seal.runtime_security_status() == Status::TAMPERED {
-            self.seal.runtime_tampered();
-        }
         self.rust_functions.push(RustFunc {
             name: func_name,
             func: None,

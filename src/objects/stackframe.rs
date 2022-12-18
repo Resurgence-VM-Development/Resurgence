@@ -1,5 +1,6 @@
 use crate::constant::Constant;
 /// `StackFrame`: Represents a stack frame.
+#[derive(Clone)]
 pub struct StackFrame {
     /// Represents the registers of the stack frame
     pub registers: Vec<Option<Constant>>,
