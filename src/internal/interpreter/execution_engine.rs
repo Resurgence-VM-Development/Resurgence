@@ -164,6 +164,7 @@ impl ExecutionEngine for Interpreter {
                 Instruction::Add(ref dst_reg, ref reg_1, ref reg_2) => {
                     let res = self.add(dst_reg, reg_1, reg_2);
                     if let Err(mut err) = res {
+                        err.context = Some(create_context!(self, operation, index));
                         create_new_trace!(err);
                         return Err(err);
                     }
@@ -171,6 +172,7 @@ impl ExecutionEngine for Interpreter {
                 Instruction::Sub(ref dst_reg, ref reg_1, ref reg_2) => {
                     let res = self.sub(dst_reg, reg_1, reg_2);
                     if let Err(mut err) = res {
+                        err.context = Some(create_context!(self, operation, index));
                         create_new_trace!(err);
                         return Err(err);
                     }
@@ -178,6 +180,7 @@ impl ExecutionEngine for Interpreter {
                 Instruction::Mul(ref dst_reg, ref reg_1, ref reg_2) => {
                     let res = self.mul(dst_reg, reg_1, reg_2);
                     if let Err(mut err) = res {
+                        err.context = Some(create_context!(self, operation, index));
                         create_new_trace!(err);
                         return Err(err);
                     }
@@ -185,6 +188,7 @@ impl ExecutionEngine for Interpreter {
                 Instruction::Div(ref dst_reg, ref reg_1, ref reg_2) => {
                     let res = self.div(dst_reg, reg_1, reg_2);
                     if let Err(mut err) = res {
+                        err.context = Some(create_context!(self, operation, index));
                         create_new_trace!(err);
                         return Err(err);
                     }
@@ -192,18 +196,31 @@ impl ExecutionEngine for Interpreter {
                 Instruction::Mod(ref dst_reg, ref reg_1, ref reg_2) => {
                     let res = self.modlo(dst_reg, reg_1, reg_2);
                     if let Err(mut err) = res {
+                        err.context = Some(create_context!(self, operation, index));
                         create_new_trace!(err);
                         return Err(err);
                     }
                 }
 
                 Instruction::Equal(ref reg_1, ref reg_2) => {
-                    if self.equal(reg_1, reg_2) {
+                    let res = self.equal(reg_1, reg_2);
+                    if let Err(mut err) = res {
+                        err.context = Some(create_context!(self, operation, index));
+                        create_new_trace!(err);
+                        return Err(err);
+                    }
+                    if res.unwrap() {
                         index += 1;
                     }
                 }
                 Instruction::NotEqual(ref reg_1, ref reg_2) => {
-                    if self.not_equal(reg_1, reg_2) {
+                    let res = self.not_equal(reg_1, reg_2);
+                    if let Err(mut err) = res {
+                        err.context = Some(create_context!(self, operation, index));
+                        create_new_trace!(err);
+                        return Err(err);
+                    }
+                    if res.unwrap() {
                         index += 1;
                     }
                 }
