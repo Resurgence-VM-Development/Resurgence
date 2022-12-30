@@ -166,11 +166,22 @@ pub fn read_bytecode(buf: &Vec<u8>) -> Result<CodeHolder, Error> {
     }
 
     // check if bytecode version is supported
-    let ver = cur.read_u16::<BigEndian>()?;
-    if ver != pc::VERSION {
+    let vmajor = cur.read_u16::<BigEndian>()?;
+    let vminor = match vmajor {
+        1 | 2 | 3 | 4 | 5 | 6 => 0, // match old formats that don't contain a minor version
+        _ => cur.read_u16::<BigEndian>()?,
+    };
+
+    if vmajor != pc::VER_MAJOR || vminor > pc::VER_MINOR {
         return Err(Error::new(
             ErrorKind::Other,
-            format!("Unsupported bytecode version {}", ver),
+            format!(
+                "Unsupported bytecode version {}.{} ({}.{} supported)",
+                vmajor,
+                vminor,
+                pc::VER_MAJOR,
+                pc::VER_MINOR
+            ),
         ));
     }
 

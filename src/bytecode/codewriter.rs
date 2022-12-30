@@ -97,7 +97,8 @@ pub fn write_bytecode(code: &CodeHolder) -> Result<Vec<u8>, Error> {
     // write magic number
     buf.write_u32::<BigEndian>(pc::MAGIC_NUMBER)?;
     // write version number
-    buf.write_u16::<BigEndian>(pc::VERSION)?;
+    buf.write_u16::<BigEndian>(pc::VER_MAJOR)?;
+    buf.write_u16::<BigEndian>(pc::VER_MINOR)?;
 
     // constants pool
     buf.write_u32::<BigEndian>(code.constant_pool.len() as u32)?;
