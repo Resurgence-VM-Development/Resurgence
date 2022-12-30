@@ -59,13 +59,9 @@ fn main() {
 ![Architecture](images/architecture.png)
 
 ## Security
-Code running inside of a Resurgence VM is secure and sandboxed by default. The embedding application must explicitly register functions for any instructions to call external code. This essentially sandboxes code running inside of a VM to have a limited ability to access system features. Resurgence is also written using mostly safe Rust code, which makes it extremely difficult to escape this sandbox. This design makes Resurgence suitable for executing untrusted user code without compromising security.
+Our goal for security is to make the only vulnerability be the programmer using the crate (in other words, only the code written by programmers using this library should be of any concern, and the programmer should focus on the security of the code they write without having to worry about library side security). That's why we try to minimize the API as much as possible (this also allows for extreme flexibility).
 
-Resurgence also doesn't provide a standard library of functions to use in programs, so by default Resurgence can't even modify stuff like files without a function defined to do so.
-
-However, Resurgence's security ends at the programmer. It is the programmer's responsibility to maintain security on their end. That means making sure Rust API functions are also secure, bytecode isn't doing anything suspicious, etc.
-
-Note: Dynamic loading is not supported by Resurgence. However, it could be implemented by the embedding application.
+Now one can't get rid of security vulnerabilities entirely, so we encourage developers to figure out ways to break security, report them, and help come up with solutions. We believe the best way to minimize security issues is to 1. encourage people to find security flaws, 2. make it easy to report those flaws, and 3. allow community involvement in fixing those issues.
 
 ## Building Docs
 To get basic documentation, run:
