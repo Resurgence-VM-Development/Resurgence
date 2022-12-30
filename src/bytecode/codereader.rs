@@ -88,6 +88,55 @@ fn read_reg_ref(cur: &mut Cursor<&Vec<u8>>) -> Result<RegisterReference, Error> 
     Ok(rref)
 }
 
+fn read_constant(cur: &mut Cursor<&Vec<u8>>) -> Result<Constant, Error> {
+    let ctype = cur.read_u8()?;
+    match ctype {
+        pc::CONST_INT => {
+            // integer
+            let val = cur.read_i64::<BigEndian>()?;
+            return Ok(Constant::Int(val));
+        }
+        pc::CONST_DOUBLE => {
+            // float / double
+            let val = cur.read_f64::<BigEndian>()?;
+            return Ok(Constant::Double(val));
+        }
+        pc::CONST_STRING => {
+            // string
+            let str = read_string(cur)?;
+            return Ok(Constant::String(str));
+        }
+        pc::CONST_BOOLEAN => {
+            // boolean
+            let val = !matches!(cur.read_u8()?, 0x00);
+            return Ok(Constant::Boolean(val));
+        }
+        pc::CONST_ADDRESS => {
+            // address / register
+            let val = read_register(cur)?;
+            return Ok(Constant::Address(val));
+        }
+        pc::CONST_VEC => {
+            let size = cur.read_u8()?;
+            let mut vi = Vec::new();
+            for _ in 0..size {
+                vi.push(read_constant(cur)?);
+            }
+            return Ok(Constant::Vec(vi));
+        }
+        _ => {
+            return Err(Error::new(
+                ErrorKind::Other,
+                format!(
+                    "Unrecognized constant type {} at position {}",
+                    ctype,
+                    cur.position() - 1
+                ),
+            ));
+        }
+    }
+}
+
 /// Opens and reads bytecode from a file and parses it into a usable
 /// CodeHolder.
 pub fn read_bytecode_file(path: &str) -> Result<CodeHolder, Error> {
@@ -128,46 +177,7 @@ pub fn read_bytecode(buf: &Vec<u8>) -> Result<CodeHolder, Error> {
     // constants table
     let clen = cur.read_u32::<BigEndian>()?;
     for _ in 0..clen {
-        let ctype = cur.read_u8()?;
-        match ctype {
-            pc::CONST_INT => {
-                // integer
-                let val = cur.read_i64::<BigEndian>()?;
-                holder.constant_pool.push(Constant::Int(val));
-            }
-            pc::CONST_DOUBLE => {
-                // float / double
-                let val = cur.read_f64::<BigEndian>()?;
-                holder.constant_pool.push(Constant::Double(val));
-            }
-            pc::CONST_STRING => {
-                // string
-                let str = read_string(&mut cur)?;
-                holder.constant_pool.push(Constant::String(str));
-            }
-            pc::CONST_BOOLEAN => {
-                // boolean
-                let val = !matches!(cur.read_u8()?, 0x00);
-                holder.constant_pool.push(Constant::Boolean(val));
-            }
-            pc::CONST_ADDRESS => {
-                // address / register
-                let val = read_register(&mut cur)?;
-                holder.constant_pool.push(Constant::Address(val));
-            }
-            // dynafide please fix this
-            pc::CONST_VEC => panic!("StandingPad got tired of writing bytecode file related code for Vec"),
-            _ => {
-                return Err(Error::new(
-                    ErrorKind::Other,
-                    format!(
-                        "Unrecognized constant type {} at position {}",
-                        ctype,
-                        cur.position() - 1
-                    ),
-                ));
-            }
-        }
+        holder.constant_pool.push(read_constant(&mut cur)?);
     }
 
     // read imports table
