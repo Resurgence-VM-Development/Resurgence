@@ -155,6 +155,8 @@ pub fn read_bytecode(buf: &Vec<u8>) -> Result<CodeHolder, Error> {
                 let val = read_register(&mut cur)?;
                 holder.constant_pool.push(Constant::Address(val));
             }
+            // dynafide please fix this
+            pc::CONST_VEC => panic!("StandingPad got tired of writing bytecode file related code for Vec"),
             _ => {
                 return Err(Error::new(
                     ErrorKind::Other,

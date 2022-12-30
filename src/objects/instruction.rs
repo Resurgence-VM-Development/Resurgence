@@ -183,4 +183,25 @@ pub enum Instruction {
     /// LessEqual 0, 1 // Check if 0 is less than or equal to 1 and jumps one operation if it is
     /// ```
     LessEqual(Register, Register),
+    
+    /*
+        Note that the following instructions under this line are just place holders and have not been implemented. I have
+        yet to think of proper instructions for whatever these are meant to do, so please ignore them. I know these are
+        interesting, but they're just placeholders.
+            - StandingPad implementing a Vector type for Resurgence just before the first alpha
+    */
+    /// Unpacks a Vec to a range of registers to the stack
+    ///
+    /// ```no_run
+    /// Unpack local(0) // Unpack a vector on the stack
+    /// ```
+    Unpack(Register),
+
+    /// Packs a range of registers into a vector object
+    ///
+    /// Note: this is treated as LIFO. if the stack is (from top to bottom) [3, 2, 1], the vector
+    /// will be [1, 2, 3]
+    /// ```no_run
+    /// Pack local(0) // Take the objects on the stack and pack them into a vector
+    Pack(Register),
 }

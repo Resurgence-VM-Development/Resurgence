@@ -46,6 +46,40 @@ fn write_reg_ref(buf: &mut Vec<u8>, rref: &RegisterReference) {
     });
 }
 
+fn write_constant(buf: &mut Vec<u8>, constant: &Constant) -> Result<(), Error> {
+    match constant {
+        Constant::Int(val) => {
+            buf.write_u8(pc::CONST_INT)?;
+            buf.write_i64::<BigEndian>(*val)?;
+        }
+        Constant::Double(val) => {
+            buf.write_u8(pc::CONST_DOUBLE)?;
+            buf.write_f64::<BigEndian>(*val)?;
+        }
+        Constant::String(val) => {
+            buf.write_u8(pc::CONST_STRING)?;
+            write_string(buf, val)?;
+        }
+        Constant::Boolean(val) => {
+            buf.write_u8(pc::CONST_BOOLEAN)?;
+            buf.write_u8(match val {
+                false => 0x00,
+                true => 0x01,
+            })?;
+        }
+        Constant::Address(val) => {
+            buf.write_u8(pc::CONST_ADDRESS)?;
+            write_register(buf, val)?;
+        }
+        Constant::Vec(val) => {
+            buf.write_u8(pc::CONST_VEC)?;
+            for obj in val {
+                write_constant(buf, obj)?;
+            }
+        }
+    }
+    Ok(())
+}
 /// Takes a CodeHolder and generates and writes bytecode to a file.
 pub fn write_bytecode_file(code: &CodeHolder, path: &str) -> Result<(), Error> {
     let mut f = File::create(path)?;
@@ -68,31 +102,7 @@ pub fn write_bytecode(code: &CodeHolder) -> Result<Vec<u8>, Error> {
     // constants pool
     buf.write_u32::<BigEndian>(code.constant_pool.len() as u32)?;
     for i in &(code.constant_pool) {
-        match i {
-            Constant::Int(val) => {
-                buf.write_u8(pc::CONST_INT)?;
-                buf.write_i64::<BigEndian>(*val)?;
-            }
-            Constant::Double(val) => {
-                buf.write_u8(pc::CONST_DOUBLE)?;
-                buf.write_f64::<BigEndian>(*val)?;
-            }
-            Constant::String(val) => {
-                buf.write_u8(pc::CONST_STRING)?;
-                write_string(&mut buf, val)?;
-            }
-            Constant::Boolean(val) => {
-                buf.write_u8(pc::CONST_BOOLEAN)?;
-                buf.write_u8(match val {
-                    false => 0x00,
-                    true => 0x01,
-                })?;
-            }
-            Constant::Address(val) => {
-                buf.write_u8(pc::CONST_ADDRESS)?;
-                write_register(&mut buf, val)?;
-            }
-        }
+        write_constant(&mut buf, i)?;
     }
 
     // imports table
@@ -238,6 +248,9 @@ pub fn write_bytecode(code: &CodeHolder) -> Result<Vec<u8>, Error> {
                 buf.push(pc::INST_LESS_EQUAL);
                 write_register(&mut buf, ra)?;
                 write_register(&mut buf, rb)?;
+            }
+            _ => {
+                panic!(".__. I don't reconize this instruction");
             }
         }
     }

@@ -3,19 +3,20 @@ use crate::{ResurgenceError, create_new_trace};
 use super::{register::{Register, RegisterLocation}, resurgence_error::ResurgenceErrorKind};
 
 /// `Constant`: Represents a constant in the backend
-/// 
-/// Possible Values:
-/// * `Int(i64)`
-/// * `Double(f64)`
-/// * `String(String)`
-/// * `Boolean(bool)`
 #[derive(Clone, Debug, PartialEq)]
 pub enum Constant {
+    /// 64 bit integer
     Int(i64),
+    /// 64 bit float
     Double(f64),
+    /// Rust String type
     String(String),
+    /// bool
     Boolean(bool),
-    Address(Register)
+    /// Represents a register in memory
+    Address(Register),
+    /// Represents a vector
+    Vec(Vec<Constant>)
 }
 
 impl Constant {
@@ -237,6 +238,13 @@ impl Constant {
                 RegisterLocation::Global => "Global",
                 RegisterLocation::Local => "Local"
             }),
+            Constant::Vec(ref vec_val) => {
+                let mut final_string = String::from("");
+                for obj in vec_val {
+                    final_string += &obj.type_as_string();
+                }
+                final_string
+            }
         }
     } 
 }

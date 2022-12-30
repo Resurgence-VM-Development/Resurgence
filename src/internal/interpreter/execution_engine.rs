@@ -227,6 +227,12 @@ impl ExecutionEngine for Interpreter {
                         index += 1;
                     }
                 }
+                _ => {
+                    let mut err = ResurgenceError::from(ResurgenceErrorKind::I_GOOFED_UP, "Either this bytecode operation is from a future version of RVM or God himself because I don't know what to do with it");
+                    err.context = Some(create_context!(self, operation, index));
+                    create_new_trace!(err);
+                    return Err(err);
+                }
             }
 
             // Store instruction back into memory and increment index

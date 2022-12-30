@@ -18,6 +18,7 @@ pub(crate) const CONST_DOUBLE: u8 = 0x02;
 pub(crate) const CONST_STRING: u8 = 0x03;
 pub(crate) const CONST_BOOLEAN: u8 = 0x04;
 pub(crate) const CONST_ADDRESS: u8 = 0x05;
+pub(crate) const CONST_VEC: u8 = 0x06;
 
 /*
  * Register locations
