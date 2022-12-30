@@ -1,6 +1,7 @@
 use crate::{CodeHolder, objects::{instruction::Instruction, register::{RegisterLocation, RegisterReference, Register}, constant::Constant}};
 
 /// Represents a register location in RVM
+#[allow(non_camel_case_types)]
 pub enum RVMLocation {
     CONSTANT_POOL,
     ACCUMULATOR,
@@ -9,8 +10,9 @@ pub enum RVMLocation {
 }
 
 /// Represents a reference symbol in RVM
+#[allow(non_camel_case_types)]
 pub enum RVMReference {
-    AsIs,
+    AS_IS,
     DEREFERENCE
 }
 
@@ -21,16 +23,16 @@ pub struct RVMRegister(u32, RVMLocation);
 fn real_loc(moc_loc: RVMLocation) -> RegisterLocation {
     match moc_loc {
         RVMLocation::CONSTANT_POOL => RegisterLocation::ConstantPool,
-        RVMLocation::ACCUMULATOR => RegisterLocation::Accumulator
+        RVMLocation::ACCUMULATOR => RegisterLocation::Accumulator,
         RVMLocation::GLOBAL => RegisterLocation::Global,
-        RVMLocation::LOCAL => RegisterLocation::Local
+        RVMLocation::LOCAL => RegisterLocation::Local,
     }
 }
 
 /// Converts an abstracted reference to an actual RVM reference
 fn real_reference(moc_ref: RVMReference) -> RegisterReference {
     match moc_ref {
-        RVMReference::AsIs => RegisterReference::AsIs,
+        RVMReference::AS_IS => RegisterReference::AsIs,
         RVMReference::DEREFERENCE => RegisterReference::Dereference
     }
 }
