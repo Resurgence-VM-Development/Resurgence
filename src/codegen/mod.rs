@@ -1,7 +1,9 @@
-use crate::{CodeHolder, objects::{instruction::Instruction, register::{RegisterLocation, RegisterReference, Register}}};
+use crate::{CodeHolder, objects::{instruction::Instruction, register::{RegisterLocation, RegisterReference, Register}, constant::Constant}};
 
 /// Represents a register location in RVM
 pub enum RVMLocation {
+    CONSTANT_POOL,
+    ACCUMULATOR,
     GLOBAL,
     LOCAL
 }
@@ -18,6 +20,8 @@ pub struct RVMRegister(u32, RVMLocation);
 /// Converts an abstracted location to an actual RVM register location
 fn real_loc(moc_loc: RVMLocation) -> RegisterLocation {
     match moc_loc {
+        RVMLocation::CONSTANT_POOL => RegisterLocation::ConstantPool,
+        RVMLocation::ACCUMULATOR => RegisterLocation::Accumulator
         RVMLocation::GLOBAL => RegisterLocation::Global,
         RVMLocation::LOCAL => RegisterLocation::Local
     }
@@ -241,3 +245,45 @@ pub fn generate_greater_equal(holder: &mut CodeHolder, register_1: RVMRegister, 
 pub fn generate_less_equal(holder: &mut CodeHolder, register_1: RVMRegister, register_2: RVMRegister) {
     holder.instructions.push(Some(Instruction::LessEqual(real_register(register_1), real_register(register_2))));
 }
+
+/// Returns the index of the last object in a vector as a u32
+///
+/// $vec: the vector in question
+macro_rules! get_index {
+    ($vec:expr) => {
+        ($vec.len() - 1) as u32
+    };
+}
+
+/// Generates a Integer constant, returns an `RVMRegister` object
+///
+/// value (`i64`): the integer to use in the constant pool
+pub fn generate_int_constant(holder: &mut CodeHolder, value: i64) -> RVMRegister {
+    holder.constant_pool.push(Constant::Int(value));
+    RVMRegister(get_index!(holder.constant_pool), RVMLocation::CONSTANT_POOL)
+}
+
+/// Generates a Double constant, returns an `RVMRegister` object
+///
+/// value (`f64`): the integer to use in the constant pool
+pub fn generate_double_constant(holder: &mut CodeHolder, value: f64) -> RVMRegister {
+    holder.constant_pool.push(Constant::Double(value));
+    RVMRegister(get_index!(holder.constant_pool), RVMLocation::CONSTANT_POOL)
+}
+
+/// Generates a String constant, returns an `RVMRegister` object
+///
+/// value (`String`): the integer to use in the constant pool
+pub fn generate_string_constant(holder: &mut CodeHolder, value: String) -> RVMRegister {
+    holder.constant_pool.push(Constant::String(value));
+    RVMRegister(get_index!(holder.constant_pool), RVMLocation::CONSTANT_POOL)
+}
+
+/// Generates a Boolean constant, returns an `RVMRegister` object
+///
+/// value (`bool`): the integer to use in the constant pool
+pub fn generate_bool_constant(holder: &mut CodeHolder, value: bool) -> RVMRegister {
+    holder.constant_pool.push(Constant::Boolean(value));
+    RVMRegister(get_index!(holder.constant_pool), RVMLocation::CONSTANT_POOL)
+}
+
