@@ -49,14 +49,18 @@ impl Interpreter {
     /// 
     /// `reg_1` (`&Register`): first register
     /// `reg_2` (`&Register`): second register
-    pub(crate) fn greater_than(&mut self, reg_1: &Register, reg_2: &Register) -> bool {
+    pub(crate) fn greater_than(&mut self, reg_1: &Register, reg_2: &Register) -> Result<bool, ResurgenceError> {
         let (const_1, const_2) = self.get_constants(reg_1, reg_2);
         match (const_1, const_2) {
-            (Constant::Int(val_1), Constant::Int(val_2)) => *val_1 > *val_2,
-            (Constant::Int(val_1), Constant::Double(val_2)) => (*val_1) as f64 > *val_2,
-            (Constant::Double(val_1), Constant::Int(val_2)) => *val_1 > (*val_2) as f64,
-            (Constant::Double(val_1), Constant::Double(val_2)) => *val_1 > *val_2,
-            _ => panic!("Invalid comparison!"),
+            (Constant::Int(val_1), Constant::Int(val_2)) => Ok(*val_1 > *val_2),
+            (Constant::Int(val_1), Constant::Double(val_2)) => Ok((*val_1) as f64 > *val_2),
+            (Constant::Double(val_1), Constant::Int(val_2)) => Ok(*val_1 > (*val_2) as f64),
+            (Constant::Double(val_1), Constant::Double(val_2)) => Ok(*val_1 > *val_2),
+            _ => {
+                let mut err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Greater Than not implemented for the given types!");
+                create_new_trace!(err);
+                Err(err)
+            },
         }
     }
 
@@ -64,14 +68,18 @@ impl Interpreter {
     /// 
     /// `reg_1` (`&Register`): first register
     /// `reg_2` (`&Register`): second register
-    pub(crate) fn less_than(&mut self, reg_1: &Register, reg_2: &Register) -> bool {
+    pub(crate) fn less_than(&mut self, reg_1: &Register, reg_2: &Register) -> Result<bool, ResurgenceError>{
         let (const_1, const_2) = self.get_constants(reg_1, reg_2);
         match (const_1, const_2) {
-            (Constant::Int(val_1), Constant::Int(val_2)) => *val_1 < *val_2,
-            (Constant::Int(val_1), Constant::Double(val_2)) => ((*val_1) as f64) < *val_2,
-            (Constant::Double(val_1), Constant::Int(val_2)) => *val_1 < (*val_2) as f64,
-            (Constant::Double(val_1), Constant::Double(val_2)) => *val_1 < *val_2,
-            _ => panic!("Invalid comparison!")
+            (Constant::Int(val_1), Constant::Int(val_2)) => Ok(*val_1 < *val_2),
+            (Constant::Int(val_1), Constant::Double(val_2)) => Ok(((*val_1) as f64) < *val_2),
+            (Constant::Double(val_1), Constant::Int(val_2)) => Ok(*val_1 < (*val_2) as f64),
+            (Constant::Double(val_1), Constant::Double(val_2)) => Ok(*val_1 < *val_2),
+            _ => {
+                let mut err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Less Than not implemented for the given types!");
+                create_new_trace!(err);
+                Err(err)
+            },
         }
     }
 
@@ -80,14 +88,18 @@ impl Interpreter {
     /// 
     /// `reg_1` (`&Register`): first register
     /// `reg_2` (`&Register`): second register
-    pub(crate) fn greater_or_equal(&mut self, reg_1: &Register, reg_2: &Register) -> bool {
+    pub(crate) fn greater_or_equal(&mut self, reg_1: &Register, reg_2: &Register) -> Result<bool, ResurgenceError> {
         let (const_1, const_2) = self.get_constants(reg_1, reg_2);
         match (const_1, const_2) {
-            (Constant::Int(val_1), Constant::Int(val_2)) => *val_1 >= *val_2,
-            (Constant::Int(val_1), Constant::Double(val_2)) => (*val_1) as f64 >= *val_2,
-            (Constant::Double(val_1), Constant::Int(val_2)) => *val_1 >= (*val_2) as f64,
-            (Constant::Double(val_1), Constant::Double(val_2)) => *val_1 >= *val_2,
-            _ => panic!("Invalid comparison!")
+            (Constant::Int(val_1), Constant::Int(val_2)) => Ok(*val_1 >= *val_2),
+            (Constant::Int(val_1), Constant::Double(val_2)) => Ok((*val_1) as f64 >= *val_2),
+            (Constant::Double(val_1), Constant::Int(val_2)) => Ok(*val_1 >= (*val_2) as f64),
+            (Constant::Double(val_1), Constant::Double(val_2)) => Ok(*val_1 >= *val_2),
+            _ => {
+                let mut err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Less Than not implemented for the given types!");
+                create_new_trace!(err);
+                Err(err)
+            },
         }
     }
 
@@ -95,14 +107,18 @@ impl Interpreter {
     /// 
     /// `reg_1` (`&Register`): first register
     /// `reg_2` (`&Register`): second register
-    pub(crate) fn less_or_equal(&mut self, reg_1: &Register, reg_2: &Register) -> bool {
+    pub(crate) fn less_or_equal(&mut self, reg_1: &Register, reg_2: &Register) -> Result<bool, ResurgenceError> {
         let (const_1, const_2) = self.get_constants(reg_1, reg_2);
         match (const_1, const_2) {
-            (Constant::Int(val_1), Constant::Int(val_2)) => *val_1 <= *val_2,
-            (Constant::Int(val_1), Constant::Double(val_2)) => (*val_1) as f64 <= *val_2,
-            (Constant::Double(val_1), Constant::Int(val_2)) => *val_1 <= (*val_2) as f64,
-            (Constant::Double(val_1), Constant::Double(val_2)) => *val_1 <= *val_2,
-            _ => panic!("Invalid comparison!")
+            (Constant::Int(val_1), Constant::Int(val_2)) => Ok(*val_1 <= *val_2),
+            (Constant::Int(val_1), Constant::Double(val_2)) => Ok((*val_1) as f64 <= *val_2),
+            (Constant::Double(val_1), Constant::Int(val_2)) => Ok(*val_1 <= (*val_2) as f64),
+            (Constant::Double(val_1), Constant::Double(val_2)) => Ok(*val_1 <= *val_2),
+            _ => {
+                let mut err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Less Than not implemented for the given types!");
+                create_new_trace!(err);
+                Err(err)
+            },
         }
     }
 }

@@ -225,22 +225,46 @@ impl ExecutionEngine for Interpreter {
                     }
                 }
                 Instruction::Greater(ref reg_1, ref reg_2) => {
-                    if self.greater_than(reg_1, reg_2) {
+                    let res = self.greater_than(reg_1, reg_2);
+                    if let Err(mut err) = res {
+                        err.context = Some(create_context!(self, operation, index));
+                        create_new_trace!(err);
+                        return Err(err);
+                    }
+                    if res.unwrap() {
                         index += 1;
                     }
                 }
                 Instruction::Less(ref reg_1, ref reg_2) => {
-                    if self.less_than(reg_1, reg_2) {
+                    let res = self.less_than(reg_1, reg_2);
+                    if let Err(mut err) = res {
+                        err.context = Some(create_context!(self, operation, index));
+                        create_new_trace!(err);
+                        return Err(err);
+                    }
+                    if res.unwrap() {
                         index += 1;
                     }
                 }
                 Instruction::GreaterEqual(ref reg_1, ref reg_2) => {
-                    if self.greater_or_equal(reg_1, reg_2) {
+                    let res = self.greater_or_equal(reg_1, reg_2);
+                    if let Err(mut err) = res {
+                        err.context = Some(create_context!(self, operation, index));
+                        create_new_trace!(err);
+                        return Err(err);
+                    }
+                    if res.unwrap() {
                         index += 1;
                     }
                 }
                 Instruction::LessEqual(ref reg_1, ref reg_2) => {
-                    if self.less_or_equal(reg_1, reg_2) {
+                    let res = self.less_or_equal(reg_1, reg_2);
+                    if let Err(mut err) = res {
+                        err.context = Some(create_context!(self, operation, index));
+                        create_new_trace!(err);
+                        return Err(err);
+                    }
+                    if res.unwrap() {
                         index += 1;
                     }
                 }
