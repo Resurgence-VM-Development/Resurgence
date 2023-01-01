@@ -92,6 +92,7 @@ impl fmt::Debug for ResurgenceError {
 }
 
 /// Represents the interpreter state at the time of creation
+#[derive(Clone)]
 pub struct ResurgenceContext {
     /// Call stack at the time of exception
     pub(crate) call_stack: Vec<StackFrame>,
@@ -99,10 +100,10 @@ pub struct ResurgenceContext {
     pub(crate) constant_stack: Vec<Constant>,
     /// All registered functions and their indexes
     pub(crate) rust_and_native_fns: Vec<RustFunc>,
-    /// Instruction at the time of exception
-    pub(crate) instruction: Instruction,
-    /// Instruction index at time of exception
-    pub(crate) instruction_pointer: usize,
+    /// Instruction at the time of exception; vector to handle recursion
+    pub(crate) instruction: Vec<Instruction>,
+    /// Instruction index at time of exception; vector to handle recursion
+    pub(crate) instruction_pointer: Vec<usize>,
     /// Recursion depth 
     pub(crate) recursion_depth: usize,
 }

@@ -9,6 +9,7 @@ use self::imports::RustFunc;
 use super::super::constant::Constant;
 use crate::bytecode::codereader;
 use crate::objects::codeholder::CodeHolder;
+use crate::objects::resurgence_error::ResurgenceContext;
 use crate::objects::stackframe::StackFrame;
 
 pub mod resolve_imports; 
@@ -31,7 +32,9 @@ pub struct Interpreter {
     /// Defines how many times we've recursed
     current_recursion_depth: usize,
     /// Defines the recursion limit
-    max_recursion_depth: usize
+    max_recursion_depth: usize,
+    /// Existing context object
+    context: Option<ResurgenceContext>,
 }
 
 impl Interpreter {
@@ -46,7 +49,8 @@ impl Interpreter {
             global: Vec::new(),
             rust_functions: Vec::new(),
             current_recursion_depth: 0,
-            max_recursion_depth: 1000
+            max_recursion_depth: 1000,
+            context: Option::None,
         }
     }
 
