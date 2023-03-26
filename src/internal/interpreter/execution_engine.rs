@@ -26,7 +26,7 @@ macro_rules! create_context {
 
 impl ExecutionEngine for Interpreter {
     /// Execute Resurgence Instructions
-    fn execute_instruction(&mut self, start_index: usize, first_call: bool) -> Result<(), ResurgenceError> {
+    fn execute_instruction(&mut self, start_index: usize) -> Result<(), ResurgenceError> {
         // Resolve imports if the programmer already hasn't done so 
         if !self.code_holder.resolved_imports {
             let res = self.resolve_imports();
@@ -68,11 +68,9 @@ impl ExecutionEngine for Interpreter {
                         }
                         _ => {
                             let mut err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Attempted to add more memory to an invalid location!");
-                            if first_call {
-                                err.context = Some(create_context!(self, vec![operation], vec![index]))
-                            } else {
-                                self.context = Some(create_context!(self, vec![operation], vec![index]))
-                            }
+                            let context = err.context.get_or_insert_with(|| create_context!(self, vec![], vec![]));
+                            context.instruction.push(operation);
+                            context.instruction_pointer.push(index);
                             create_new_trace!(err);
                             return Err(err);
                         }
@@ -98,11 +96,9 @@ impl ExecutionEngine for Interpreter {
                         },
                         _ => {
                             let mut err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Can not allocate more memory outside of local and global memory.");
-                            if first_call {
-                                err.context = Some(create_context!(self, vec![operation], vec![index]))
-                            } else {
-                                self.context = Some(create_context!(self, vec![operation], vec![index]))
-                            }
+                            let context = err.context.get_or_insert_with(|| create_context!(self, vec![], vec![]));
+                            context.instruction.push(operation);
+                            context.instruction_pointer.push(index);
                             create_new_trace!(err);
                             return Err(err);
                         }
@@ -114,25 +110,11 @@ impl ExecutionEngine for Interpreter {
                     continue;
                 }
                 Instruction::Call(ref func_index) => {
-                    let res = self.execute_instruction(*func_index as usize, false);
+                    let res = self.execute_instruction(*func_index as usize);
                     if let Err(mut err) = res {
-                        // If there is no exisiting context
-                        if self.context.is_none() {
-                            if first_call {
-                                err.context = Some(create_context!(self, vec![operation], vec![index]))
-                            } else {
-                                self.context = Some(create_context!(self, vec![operation], vec![index]))
-                            }
-                        }
-                        else {
-                            if let Some(ctx) = &mut self.context {
-                                ctx.instruction.push(operation);
-                                ctx.instruction_pointer.push(index);
-                            }
-                            if first_call {
-                                err.context = self.context.clone();
-                            }
-                        }
+                        let context = err.context.get_or_insert_with(|| create_context!(self, vec![], vec![]));
+                        context.instruction.push(operation);
+                        context.instruction_pointer.push(index);
                         create_new_trace!(err);
                         return Err(err);
                     }
@@ -140,11 +122,9 @@ impl ExecutionEngine for Interpreter {
                 Instruction::ExtCall(ref func_reg) => {
                     let res = self.ext_call(*func_reg);
                     if let Err(mut err) = res {
-                        if first_call {
-                            err.context = Some(create_context!(self, vec![operation], vec![index]))
-                        } else {
-                            self.context = Some(create_context!(self, vec![operation], vec![index]))
-                        }
+                        let context = err.context.get_or_insert_with(|| create_context!(self, vec![], vec![]));
+                        context.instruction.push(operation);
+                        context.instruction_pointer.push(index);
                         create_new_trace!(err); 
                         return Err(err);
                     }
@@ -157,11 +137,9 @@ impl ExecutionEngine for Interpreter {
                 Instruction::Mov(ref dst_reg, ref dst_reg_ref, ref src_reg, ref src_reg_ref) => {
                     let res = self.mov_registers(dst_reg, dst_reg_ref, src_reg, src_reg_ref);
                     if let Err(mut err) = res {
-                        if first_call {
-                            err.context = Some(create_context!(self, vec![operation], vec![index]))
-                        } else {
-                            self.context = Some(create_context!(self, vec![operation], vec![index]))
-                        }
+                        let context = err.context.get_or_insert_with(|| create_context!(self, vec![], vec![]));
+                        context.instruction.push(operation);
+                        context.instruction_pointer.push(index);
                         create_new_trace!(err);
                         return Err(err);
                     }
@@ -169,11 +147,9 @@ impl ExecutionEngine for Interpreter {
                 Instruction::Cpy(ref dst_reg, ref dst_reg_ref, ref src_reg, ref src_reg_ref) => {
                     let res = self.cpy_registers(dst_reg, dst_reg_ref, src_reg, src_reg_ref);
                     if let Err(mut err) = res {
-                        if first_call {
-                            err.context = Some(create_context!(self, vec![operation], vec![index]))
-                        } else {
-                            self.context = Some(create_context!(self, vec![operation], vec![index]))
-                        }
+                        let context = err.context.get_or_insert_with(|| create_context!(self, vec![], vec![]));
+                        context.instruction.push(operation);
+                        context.instruction_pointer.push(index);
                         create_new_trace!(err);
                         return Err(err);
                     }
@@ -181,11 +157,9 @@ impl ExecutionEngine for Interpreter {
                 Instruction::Ref(ref dst_reg, ref dst_reg_ref, ref src_reg, ref src_reg_ref) => {
                     let res = self.ref_registers(dst_reg, dst_reg_ref, src_reg, src_reg_ref);
                     if let Err(mut err) = res {
-                        if first_call {
-                            err.context = Some(create_context!(self, vec![operation], vec![index]))
-                        } else {
-                            self.context = Some(create_context!(self, vec![operation], vec![index]))
-                        }
+                        let context = err.context.get_or_insert_with(|| create_context!(self, vec![], vec![]));
+                        context.instruction.push(operation);
+                        context.instruction_pointer.push(index);
                         create_new_trace!(err);
                         return Err(err);
                     }
@@ -197,11 +171,9 @@ impl ExecutionEngine for Interpreter {
                 Instruction::StackMov(ref register, ref reference) => {
                     let res = self.stack_mov(register, reference);
                     if let Err(mut err) = res {
-                        if first_call {
-                            err.context = Some(create_context!(self, vec![operation], vec![index]))
-                        } else {
-                            self.context = Some(create_context!(self, vec![operation], vec![index]))
-                        }
+                        let context = err.context.get_or_insert_with(|| create_context!(self, vec![], vec![]));
+                        context.instruction.push(operation);
+                        context.instruction_pointer.push(index);
                         create_new_trace!(err);
                         return Err(err);
                     }
@@ -213,11 +185,9 @@ impl ExecutionEngine for Interpreter {
                 Instruction::Add(ref dst_reg, ref reg_1, ref reg_2) => {
                     let res = self.add(dst_reg, reg_1, reg_2);
                     if let Err(mut err) = res {
-                        if first_call {
-                            err.context = Some(create_context!(self, vec![operation], vec![index]))
-                        } else {
-                            self.context = Some(create_context!(self, vec![operation], vec![index]))
-                        }
+                        let context = err.context.get_or_insert_with(|| create_context!(self, vec![], vec![]));
+                        context.instruction.push(operation);
+                        context.instruction_pointer.push(index);
                         create_new_trace!(err);
                         return Err(err);
                     }
@@ -225,11 +195,9 @@ impl ExecutionEngine for Interpreter {
                 Instruction::Sub(ref dst_reg, ref reg_1, ref reg_2) => {
                     let res = self.sub(dst_reg, reg_1, reg_2);
                     if let Err(mut err) = res {
-                        if first_call {
-                            err.context = Some(create_context!(self, vec![operation], vec![index]))
-                        } else {
-                            self.context = Some(create_context!(self, vec![operation], vec![index]))
-                        }
+                        let context = err.context.get_or_insert_with(|| create_context!(self, vec![], vec![]));
+                        context.instruction.push(operation);
+                        context.instruction_pointer.push(index);
                         create_new_trace!(err);
                         return Err(err);
                     }
@@ -237,11 +205,9 @@ impl ExecutionEngine for Interpreter {
                 Instruction::Mul(ref dst_reg, ref reg_1, ref reg_2) => {
                     let res = self.mul(dst_reg, reg_1, reg_2);
                     if let Err(mut err) = res {
-                        if first_call {
-                            err.context = Some(create_context!(self, vec![operation], vec![index]))
-                        } else {
-                            self.context = Some(create_context!(self, vec![operation], vec![index]))
-                        }
+                        let context = err.context.get_or_insert_with(|| create_context!(self, vec![], vec![]));
+                        context.instruction.push(operation);
+                        context.instruction_pointer.push(index);
                         create_new_trace!(err);
                         return Err(err);
                     }
@@ -249,11 +215,9 @@ impl ExecutionEngine for Interpreter {
                 Instruction::Div(ref dst_reg, ref reg_1, ref reg_2) => {
                     let res = self.div(dst_reg, reg_1, reg_2);
                     if let Err(mut err) = res {
-                        if first_call {
-                            err.context = Some(create_context!(self, vec![operation], vec![index]))
-                        } else {
-                            self.context = Some(create_context!(self, vec![operation], vec![index]))
-                        }
+                        let context = err.context.get_or_insert_with(|| create_context!(self, vec![], vec![]));
+                        context.instruction.push(operation);
+                        context.instruction_pointer.push(index);
                         create_new_trace!(err);
                         return Err(err);
                     }
@@ -261,11 +225,9 @@ impl ExecutionEngine for Interpreter {
                 Instruction::Mod(ref dst_reg, ref reg_1, ref reg_2) => {
                     let res = self.modlo(dst_reg, reg_1, reg_2);
                     if let Err(mut err) = res {
-                        if first_call {
-                            err.context = Some(create_context!(self, vec![operation], vec![index]))
-                        } else {
-                            self.context = Some(create_context!(self, vec![operation], vec![index]))
-                        }
+                        let context = err.context.get_or_insert_with(|| create_context!(self, vec![], vec![]));
+                        context.instruction.push(operation);
+                        context.instruction_pointer.push(index);
                         create_new_trace!(err);
                         return Err(err);
                     }
@@ -274,11 +236,9 @@ impl ExecutionEngine for Interpreter {
                 Instruction::Equal(ref reg_1, ref reg_2) => {
                     let res = self.equal(reg_1, reg_2);
                     if let Err(mut err) = res {
-                        if first_call {
-                            err.context = Some(create_context!(self, vec![operation], vec![index]))
-                        } else {
-                            self.context = Some(create_context!(self, vec![operation], vec![index]))
-                        }
+                        let context = err.context.get_or_insert_with(|| create_context!(self, vec![], vec![]));
+                        context.instruction.push(operation);
+                        context.instruction_pointer.push(index);
                         create_new_trace!(err);
                         return Err(err);
                     }
@@ -289,11 +249,9 @@ impl ExecutionEngine for Interpreter {
                 Instruction::NotEqual(ref reg_1, ref reg_2) => {
                     let res = self.not_equal(reg_1, reg_2);
                     if let Err(mut err) = res {
-                        if first_call {
-                            err.context = Some(create_context!(self, vec![operation], vec![index]))
-                        } else {
-                            self.context = Some(create_context!(self, vec![operation], vec![index]))
-                        }
+                        let context = err.context.get_or_insert_with(|| create_context!(self, vec![], vec![]));
+                        context.instruction.push(operation);
+                        context.instruction_pointer.push(index);
                         create_new_trace!(err);
                         return Err(err);
                     }
@@ -304,11 +262,9 @@ impl ExecutionEngine for Interpreter {
                 Instruction::Greater(ref reg_1, ref reg_2) => {
                     let res = self.greater_than(reg_1, reg_2);
                     if let Err(mut err) = res {
-                        if first_call {
-                            err.context = Some(create_context!(self, vec![operation], vec![index]))
-                        } else {
-                            self.context = Some(create_context!(self, vec![operation], vec![index]))
-                        }
+                        let context = err.context.get_or_insert_with(|| create_context!(self, vec![], vec![]));
+                        context.instruction.push(operation);
+                        context.instruction_pointer.push(index);
                         create_new_trace!(err);
                         return Err(err);
                     }
@@ -319,11 +275,9 @@ impl ExecutionEngine for Interpreter {
                 Instruction::Less(ref reg_1, ref reg_2) => {
                     let res = self.less_than(reg_1, reg_2);
                     if let Err(mut err) = res {
-                        if first_call {
-                            err.context = Some(create_context!(self, vec![operation], vec![index]))
-                        } else {
-                            self.context = Some(create_context!(self, vec![operation], vec![index]))
-                        }
+                        let context = err.context.get_or_insert_with(|| create_context!(self, vec![], vec![]));
+                        context.instruction.push(operation);
+                        context.instruction_pointer.push(index);
                         create_new_trace!(err);
                         return Err(err);
                     }
@@ -334,11 +288,9 @@ impl ExecutionEngine for Interpreter {
                 Instruction::GreaterEqual(ref reg_1, ref reg_2) => {
                     let res = self.greater_or_equal(reg_1, reg_2);
                     if let Err(mut err) = res {
-                        if first_call {
-                            err.context = Some(create_context!(self, vec![operation], vec![index]))
-                        } else {
-                            self.context = Some(create_context!(self, vec![operation], vec![index]))
-                        }
+                        let context = err.context.get_or_insert_with(|| create_context!(self, vec![], vec![]));
+                        context.instruction.push(operation);
+                        context.instruction_pointer.push(index);
                         create_new_trace!(err);
                         return Err(err);
                     }
@@ -349,11 +301,9 @@ impl ExecutionEngine for Interpreter {
                 Instruction::LessEqual(ref reg_1, ref reg_2) => {
                     let res = self.less_or_equal(reg_1, reg_2);
                     if let Err(mut err) = res {
-                        if first_call {
-                            err.context = Some(create_context!(self, vec![operation], vec![index]))
-                        } else {
-                            self.context = Some(create_context!(self, vec![operation], vec![index]))
-                        }
+                        let context = err.context.get_or_insert_with(|| create_context!(self, vec![], vec![]));
+                        context.instruction.push(operation);
+                        context.instruction_pointer.push(index);
                         create_new_trace!(err);
                         return Err(err);
                     }
@@ -363,11 +313,9 @@ impl ExecutionEngine for Interpreter {
                 }
                 _ => {
                     let mut err = ResurgenceError::from(ResurgenceErrorKind::I_GOOFED_UP, "Either this bytecode operation is from a future version of RVM or God himself because I don't know what to do with it");
-                    if first_call {
-                        err.context = Some(create_context!(self, vec![operation], vec![index]))
-                    } else {
-                        self.context = Some(create_context!(self, vec![operation], vec![index]))
-                    }
+                    let context = err.context.get_or_insert_with(|| create_context!(self, vec![], vec![]));
+                    context.instruction.push(operation);
+                    context.instruction_pointer.push(index);
                     create_new_trace!(err);
                     return Err(err);
                 }
@@ -384,7 +332,7 @@ impl ExecutionEngine for Interpreter {
     fn execute_function(&mut self, func_name: &str) -> Result<(), ResurgenceError> {
         match self.code_holder.exports.get(func_name) {
             // This call is the first call of the instace
-            Some(inst) => self.execute_instruction(*inst as usize, true),
+            Some(inst) => self.execute_instruction(*inst as usize),
             None => {
                 let mut err = ResurgenceError::from(ResurgenceErrorKind::FUNCTION_DOES_NOT_EXIST, 
                 &format!("Function {} does not exist!", func_name));
