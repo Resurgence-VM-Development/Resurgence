@@ -166,7 +166,14 @@ impl ExecutionEngine for Interpreter {
                 }
 
                 Instruction::StackPush(ref register, ref reference) => {
-                    self.push_on_stack(register, reference)
+                    let res = self.push_on_stack(register, reference);
+                    if let Err(mut err) = res {
+                        let context = err.context.get_or_insert_with(|| create_context!(self, vec![], vec![]));
+                        context.instruction.push(operation);
+                        context.instruction_pointer.push(index);
+                        create_new_trace!(err);
+                        return Err(err);
+                    }
                 }
                 Instruction::StackMov(ref register, ref reference) => {
                     let res = self.stack_mov(register, reference);

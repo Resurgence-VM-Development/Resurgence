@@ -30,7 +30,11 @@ impl Interpreter {
             (RegisterLocation::Accumulator, RegisterLocation::Global) => {
                 // Start doing the move if src_register is not None
                 let src_register = self.mov_global(src_index_usize); // take the value from global memory
-                match src_register {
+                if let Err(mut err) = src_register {
+                    create_new_trace!(err);
+                    return Err(err);
+                }
+                match src_register.unwrap() {
                     Constant::Int(src_int) => {
                         self.accumulator = src_int as f64;
                     }
@@ -62,7 +66,14 @@ impl Interpreter {
             },
     
             (RegisterLocation::Global, RegisterLocation::Accumulator) => self.global[dst_index_usize] = Some(create_constant_double(&self.accumulator)),
-            (RegisterLocation::Global, RegisterLocation::Global) => self.global[dst_index_usize] = Some(self.mov_global(src_index_usize)),
+            (RegisterLocation::Global, RegisterLocation::Global) => {
+                let src_reg = self.mov_global(src_index_usize);
+                if let Err(mut err) = src_reg {
+                    create_new_trace!(err);
+                    return Err(err);
+                }
+                self.global[dst_index_usize] = Some(src_reg.unwrap());
+            }, 
             (RegisterLocation::Global, RegisterLocation::Local) => self.global[dst_index_usize] = Some(self.mov_local(src_index_usize)),
     
             (RegisterLocation::Local, RegisterLocation::Accumulator) => {
@@ -71,9 +82,14 @@ impl Interpreter {
                 stack_frame.registers[dst_index_usize] = Some(create_constant_double(&accumulator));
             },
             (RegisterLocation::Local, RegisterLocation::Global) => {
-                let global_value = Some(self.mov_global(src_index_usize));
+                let global_value = self.mov_global(src_index_usize);
                 let stack_frame = self.ref_stack_frame();
-                stack_frame.registers[dst_index_usize] = global_value;
+
+                if let Err(mut err) = global_value {
+                    create_new_trace!(err);
+                    return Err(err);
+                }
+                stack_frame.registers[dst_index_usize] = Some(global_value.unwrap());
             },
             (RegisterLocation::Local, RegisterLocation::Local) => {
                 let stack_frame = self.ref_stack_frame();

@@ -2,24 +2,46 @@ use crate::{
     objects::{
         constant::Constant,
         register::{Register, RegisterLocation},
-        stackframe::StackFrame,
+        stackframe::StackFrame, resurgence_error::ResurgenceErrorKind,
     },
-    Interpreter,
+    Interpreter, ResurgenceError, create_new_trace,
 };
 
 impl Interpreter {
-    /// Moves the value of a global register
-    ///
-    /// `index` (`usize`): index of register
-    pub(crate) fn mov_global(&mut self, index: usize) -> Constant {
-        self.global[index].take().expect("Non-existant register!")
+    /// Moves a value from a global register and returns that value, or an error if:
+    /// - Register is beyond bounds
+    /// - Register contains a `Option::None` instead of `Option::Some`
+    pub(crate) fn mov_global(&mut self, index: usize) -> Result<Constant, ResurgenceError> {
+        if index >= self.global.len() {
+            let mut err = ResurgenceError::from(ResurgenceErrorKind::REGISTER_OUT_OF_BOUNDS, "Register beyond bounds!");
+            create_new_trace!(err);
+            return Err(err);
+        }
+        let reg = self.global[index].take();
+        if let None = reg {
+            let mut err = ResurgenceError::from(ResurgenceErrorKind::MEMORY_ADDRESS_NONE, "Global register None!");
+            create_new_trace!(err);
+            return Err(err);
+        }
+        Ok(reg.unwrap())
     }
 
-    /// Returns a copy of a global register
-    ///
-    /// `index` (`usize`): index of register
-    pub(crate) fn cpy_global(&mut self, index: usize) -> Constant {
-        self.global[index].clone().expect("Non-existant register!")
+    /// Copies a value from a global register and returns that value, or an error if:
+    /// - Register is beyond bounds
+    /// - Register contains a `Option::None` instead of `Option::Some`
+    pub(crate) fn cpy_global(&mut self, index: usize) -> Result<Constant, ResurgenceError> {
+        if index >= self.global.len() {
+            let mut err = ResurgenceError::from(ResurgenceErrorKind::REGISTER_OUT_OF_BOUNDS, "Register beyond bounds!");
+            create_new_trace!(err);
+            return Err(err);
+        }
+        let reg = self.global[index].clone();
+        if let None = reg {
+            let mut err = ResurgenceError::from(ResurgenceErrorKind::MEMORY_ADDRESS_NONE, "Global register None!");
+            create_new_trace!(err);
+            return Err(err);
+        }
+        Ok(reg.unwrap())
     }
 
     /// Returns a reference to a global register
