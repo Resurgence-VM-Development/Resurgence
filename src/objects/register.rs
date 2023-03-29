@@ -26,7 +26,7 @@ pub struct Register(pub u32, pub RegisterLocation);
 /// Possible Values:
 /// * `AsIs`: Register in memory location holds a value
 /// * `Dereference`: Register in memory location holds an address to another location
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum RegisterReference {
     AsIs,
     Dereference,

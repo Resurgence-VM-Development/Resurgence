@@ -1,7 +1,5 @@
 use std::fmt;
-
 use crate::internal::interpreter::imports::RustFunc;
-
 use super::{stackframe::StackFrame, instruction::Instruction, constant::Constant};
 
 #[macro_use]
@@ -72,7 +70,7 @@ impl ResurgenceError {
 }
 
 impl fmt::Debug for ResurgenceError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let type_str = match *&self.error_type {
             ResurgenceErrorKind::INVALID_OPERATION => "INVALID_OPERATION",
             ResurgenceErrorKind::MEMORY_ADDRESS_NONE => "MEMORY_ADDRESS_NONE",
@@ -84,10 +82,36 @@ impl fmt::Debug for ResurgenceError {
             ResurgenceErrorKind::I_GOOFED_UP => "I_GOOFED_UP"
 
         };
-        f.debug_struct("ResurgenceError")
+        let mut debug_struct = f.debug_struct("ResurgenceError");
+        debug_struct
             .field("Error Type", &type_str)
-            .field("Error Message", &self.error_message)
-            .finish()
+            .field("Error Message", &self.error_message);
+
+        if let Some(ctx) = &self.context {
+            debug_struct
+                .field("Max Recursion Depth", &ctx.recursion_depth)
+                .field("Depth at time of error", &ctx.call_stack.len());
+            
+            // In depth debugging
+            for (i, frame) in ctx.call_stack.iter().enumerate() {
+                debug_struct 
+                    .field(&format!("Register Count of {}", i), &frame.registers.len());
+            }
+            for (i, constant) in ctx.constant_stack.iter().enumerate() {
+                debug_struct 
+                    .field(&format!("Value of constant {}", i), &constant);
+            }
+            for (i, func) in ctx.rust_and_native_fns.iter().enumerate() {
+                debug_struct
+                    .field(&format!("Function Name of function {}", i), &func.name)
+                    .field(&format!("Is function {} a C Function?", i), &func.native);
+            }
+            for (_, ins) in ctx.instruction.iter().enumerate() {
+                debug_struct 
+                    .field("Instruction", &ins);
+            }
+        }
+        Ok(())
     }
 }
 
