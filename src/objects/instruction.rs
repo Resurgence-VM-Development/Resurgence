@@ -2,7 +2,6 @@ use super::register::{Register, RegisterReference, RegisterLocation};
 
 /// `Instruction`: Represents instructions the built in Resurgence VM can use (this can be reused for any VM)
 #[derive(Clone, Debug)]
-#[non_exhaustive]
 pub enum Instruction {
     /// Creates a `StackFrame` object and allocates n amount of registers
     /// 
@@ -190,27 +189,31 @@ pub enum Instruction {
     * These are the beginnings of vectorized instructions, instructions that can operatate on
     * multiple registers at once.
     *
-    * Right now they're not usable in their current state, and will be behind a flag since not
-    * everyone wants or needs them, but hopefully when ready they'll give massive gains.
+    * Right now they're not usable in their current state 
     */
     
-    #[cfg(feature = "vectorized-instructions")]
     /// Add across multiple registers
+    ///
+    /// Should not be used if `vectorized-instructions` is not enabled
     VectorizedAdd(Register, Register, Register),
 
-    #[cfg(feature = "vectorized-instructions")]
     /// Subtract across multiple registers
+    ///
+    /// Should not be used if `vectorized-instructions` is not enabled
     VectorizedSub(Register, Register, Register),
 
-    #[cfg(feature = "vectorized-instructions")]
     /// Multiple across multiple registers
+    ///
+    /// Should not be used if `vectorized-instructions` is not enabled
     VectorizedMul(Register, Register, Register),
 
-    #[cfg(feature = "vectorized-instructions")]
     /// Divide across multiple registers
+    ///
+    /// Should not be used if `vectorized-instructions` is not enabled
     VectorizedDiv(Register, Register, Register),
 
-    #[cfg(feature = "vectorized-instructions")]
     /// Perform modolus across multiple registers
+    ///
+    /// Should not be used if `vectorized-instructions` is not enabled
     VectorizedMod(Register, Register, Register),
 }
