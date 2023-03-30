@@ -2,6 +2,7 @@ use super::register::{Register, RegisterReference, RegisterLocation};
 
 /// `Instruction`: Represents instructions the built in Resurgence VM can use (this can be reused for any VM)
 #[derive(Clone, Debug)]
+#[non_exhaustive]
 pub enum Instruction {
     /// Creates a `StackFrame` object and allocates n amount of registers
     /// 
@@ -186,23 +187,30 @@ pub enum Instruction {
     LessEqual(Register, Register),
     
     /*
-        Note that the following instructions under this line are just place holders and have not been implemented. I have
-        yet to think of proper instructions for whatever these are meant to do, so please ignore them. I know these are
-        interesting, but they're just placeholders.
-            - StandingPad implementing a Vector type for Resurgence just before the first alpha
+    * These are the beginnings of vectorized instructions, instructions that can operatate on
+    * multiple registers at once.
+    *
+    * Right now they're not usable in their current state, and will be behind a flag since not
+    * everyone wants or needs them, but hopefully when ready they'll give massive gains.
     */
-    /// Unpacks a Vec to a range of registers to the stack
-    ///
-    /// ```no_run
-    /// Unpack local(0) // Unpack a vector on the stack
-    /// ```
-    Unpack(Register),
+    
+    #[cfg(feature = "vectorized-instructions")]
+    /// Add across multiple registers
+    VectorizedAdd(Register, Register, Register),
 
-    /// Packs a range of registers into a vector object
-    ///
-    /// Note: this is treated as LIFO. if the stack is (from top to bottom) [3, 2, 1], the vector
-    /// will be [1, 2, 3]
-    /// ```no_run
-    /// Pack local(0) // Take the objects on the stack and pack them into a vector
-    Pack(Register),
+    #[cfg(feature = "vectorized-instructions")]
+    /// Subtract across multiple registers
+    VectorizedSub(Register, Register, Register),
+
+    #[cfg(feature = "vectorized-instructions")]
+    /// Multiple across multiple registers
+    VectorizedMul(Register, Register, Register),
+
+    #[cfg(feature = "vectorized-instructions")]
+    /// Divide across multiple registers
+    VectorizedDiv(Register, Register, Register),
+
+    #[cfg(feature = "vectorized-instructions")]
+    /// Perform modolus across multiple registers
+    VectorizedMod(Register, Register, Register),
 }
