@@ -2,6 +2,7 @@ use crate::{CodeHolder, objects::{instruction::Instruction, register::{RegisterL
 
 /// Represents a register location in RVM
 #[allow(non_camel_case_types)]
+#[derive(Debug)]
 pub enum RVMLocation {
     CONSTANT_POOL,
     ACCUMULATOR,
@@ -11,12 +12,14 @@ pub enum RVMLocation {
 
 /// Represents a reference symbol in RVM
 #[allow(non_camel_case_types)]
+#[derive(Debug)]
 pub enum RVMReference {
     AS_IS,
     DEREFERENCE
 }
 
 /// Represents a register in RVM
+#[derive(Debug)]
 pub struct RVMRegister(u32, RVMLocation);
 
 /// Converts an abstracted location to an actual RVM register location
