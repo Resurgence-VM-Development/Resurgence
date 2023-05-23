@@ -64,6 +64,9 @@ impl Constant {
             (Constant::Int(val_1), Constant::Double(val_2)) | (Constant::Double(val_2), Constant::Int(val_1)) => {
                 Ok(Constant::Double(val_1 as f64 + val_2))
             },
+            (Constant::Address(val_1), Constant::Int(val_2)) | (Constant::Int(val_2), Constant::Address(val_1)) => {
+                Ok(Constant::Address(Register(val_1.0 + val_2 as u32, val_1.1)))
+            },
             _ => {
                 let mut err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Can not add non-numerical types!");
                 err.add_trace(&format!("{}: line {}", file!(), line!()));
@@ -102,6 +105,9 @@ impl Constant {
             },
             (Constant::Int(val_1), Constant::Double(val_2)) | (Constant::Double(val_2), Constant::Int(val_1)) => {
                 Ok(Constant::Double(val_1 as f64 - val_2))
+            },
+            (Constant::Address(val_1), Constant::Int(val_2)) | (Constant::Int(val_2), Constant::Address(val_1)) => {
+                Ok(Constant::Address(Register(val_1.0 - val_2 as u32, val_1.1)))
             },
             _ => {
                 let mut err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Can not subtract non-numerical types!");
