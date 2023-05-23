@@ -34,7 +34,7 @@ impl Constant {
     }
     /// Adds 2 numerical Constants together
     /// 
-    /// `constant` (`&Constant::Int` or `&Constant::Double`): Constant you want to add to self
+    /// `constant` (`&Constant::Int` or `$Constant::Double`): Constant you want to add to self
     /// 
     /// # Examples
     /// ```no_run
@@ -46,26 +46,26 @@ impl Constant {
     ///
     /// assert_eq!(res.unwrap(), Constant::Int(10));
     /// ```
-    pub fn add(&self, constant: &Constant) -> Result<Constant, ResurgenceError> {
+    pub fn add(&self, constant: &Self) -> Result<Self, ResurgenceError> {
         match (self.clone(), (*constant).clone()) {
-            (Constant::Int(val_1), Constant::Int(val_2)) => {
+            (Self::Int(val_1), Self::Int(val_2)) => {
                 let res = self.check_overflow(val_1.checked_add(val_2));
                 if let Err(mut err) = res {
                     err.add_trace(&format!("{}: line {}", file!(), line!()));
                     Err(err)
                 } else {
                     // If no error was returned, then we don't need to use the checked version of unwrap
-                    unsafe { Ok(Constant::Int(res.unwrap_unchecked())) }
+                    unsafe { Ok(Self::Int(res.unwrap_unchecked())) }
                 }
             },
-            (Constant::Double(val_1), Constant::Double(val_2)) => {
-                Ok(Constant::Double(val_1 + val_2))
+            (Self::Double(val_1), Self::Double(val_2)) => {
+                Ok(Self::Double(val_1 + val_2))
             },
-            (Constant::Int(val_1), Constant::Double(val_2)) | (Constant::Double(val_2), Constant::Int(val_1)) => {
-                Ok(Constant::Double(val_1 as f64 + val_2))
+            (Self::Int(val_1), Self::Double(val_2)) | (Self::Double(val_2), Self::Int(val_1)) => {
+                Ok(Self::Double(val_1 as f64 + val_2))
             },
-            (Constant::Address(val_1), Constant::Int(val_2)) | (Constant::Int(val_2), Constant::Address(val_1)) => {
-                Ok(Constant::Address(Register(val_1.0 + val_2 as u32, val_1.1)))
+            (Self::Address(val_1), Self::Int(val_2)) | (Self::Int(val_2), Self::Address(val_1)) => {
+                Ok(Self::Address(Register(val_1.0 + val_2 as u32, val_1.1)))
             },
             _ => {
                 let mut err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Can not add non-numerical types!");
@@ -88,26 +88,26 @@ impl Constant {
     /// 
     /// assert_eq!(res.unwrap(), Constant::Int(0));
     /// ```
-    pub fn sub(&self, constant: &Constant) -> Result<Constant, ResurgenceError> {
+    pub fn sub(&self, constant: &Self) -> Result<Self, ResurgenceError> {
         match (self.clone(), (*constant).clone()) {
-            (Constant::Int(val_1), Constant::Int(val_2)) => {
+            (Self::Int(val_1), Self::Int(val_2)) => {
                 let res = self.check_overflow(val_1.checked_sub(val_2));
                 if let Err(mut err) = res {
                     create_new_trace!(err);
                     Err(err)
                 } else {
                     // We know there was no error, then we don't need to use the checked version of unwrap
-                    unsafe { Ok(Constant::Int(res.unwrap_unchecked())) }
+                    unsafe { Ok(Self::Int(res.unwrap_unchecked())) }
                 }
             },
-            (Constant::Double(val_1), Constant::Double(val_2)) => {
-                Ok(Constant::Double(val_1 - val_2))
+            (Self::Double(val_1), Self::Double(val_2)) => {
+                Ok(Self::Double(val_1 - val_2))
             },
-            (Constant::Int(val_1), Constant::Double(val_2)) | (Constant::Double(val_2), Constant::Int(val_1)) => {
-                Ok(Constant::Double(val_1 as f64 - val_2))
+            (Self::Int(val_1), Self::Double(val_2)) | (Self::Double(val_2), Self::Int(val_1)) => {
+                Ok(Self::Double(val_1 as f64 - val_2))
             },
-            (Constant::Address(val_1), Constant::Int(val_2)) | (Constant::Int(val_2), Constant::Address(val_1)) => {
-                Ok(Constant::Address(Register(val_1.0 - val_2 as u32, val_1.1)))
+            (Self::Address(val_1), Self::Int(val_2)) | (Self::Int(val_2), Self::Address(val_1)) => {
+                Ok(Self::Address(Register(val_1.0 - val_2 as u32, val_1.1)))
             },
             _ => {
                 let mut err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Can not subtract non-numerical types!");
@@ -131,23 +131,23 @@ impl Constant {
     /// 
     /// assert_eq!(res.unwrap(), Constant::Int(25));
     /// ```
-    pub fn mul(&self, constant: &Constant) -> Result<Constant, ResurgenceError> {
+    pub fn mul(&self, constant: &Self) -> Result<Self, ResurgenceError> {
         match (self.clone(), (*constant).clone()) {
-            (Constant::Int(val_1), Constant::Int(val_2)) => {
+            (Self::Int(val_1), Self::Int(val_2)) => {
                 let res = self.check_overflow(val_1.checked_mul(val_2));
                 if let Err(mut err) = res {
                     create_new_trace!(err);
                     Err(err)
                 } else {
                     // We know there was no error, so we don't need to use the checked version of unwrap
-                    unsafe { Ok(Constant::Int(res.unwrap_unchecked())) }
+                    unsafe { Ok(Self::Int(res.unwrap_unchecked())) }
                 }
             },
-            (Constant::Double(val_1), Constant::Double(val_2)) => {
-                Ok(Constant::Double(val_1 * val_2))
+            (Self::Double(val_1), Self::Double(val_2)) => {
+                Ok(Self::Double(val_1 * val_2))
             },
-            (Constant::Int(val_1), Constant::Double(val_2)) | (Constant::Double(val_2), Constant::Int(val_1)) => {
-                Ok(Constant::Double(val_1 as f64 * val_2))
+            (Self::Int(val_1), Self::Double(val_2)) | (Self::Double(val_2), Self::Int(val_1)) => {
+                Ok(Self::Double(val_1 as f64 * val_2))
             },
             _ => {
                 let mut err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Can only multiply non-numerical types!");
@@ -171,23 +171,23 @@ impl Constant {
     /// 
     /// assert_eq!(res.unwrap(), Constant::Int(1));
     /// ```
-    pub fn div(&self, constant: &Constant) -> Result<Constant, ResurgenceError> {
+    pub fn div(&self, constant: &Self) -> Result<Self, ResurgenceError> {
         match (self.clone(), (*constant).clone()) {
-            (Constant::Int(val_1), Constant::Int(val_2)) => {
+            (Self::Int(val_1), Self::Int(val_2)) => {
                 let res = self.check_overflow(val_1.checked_div(val_2));
                 if let Err(mut err) = res {
                     create_new_trace!(err);
                     Err(err)
                 } else {
                     // We know there was no error, so we don't need to use the checked version of unwrap
-                    unsafe { Ok(Constant::Int(res.unwrap_unchecked())) }
+                    unsafe { Ok(Self::Int(res.unwrap_unchecked())) }
                 }
             },
-            (Constant::Double(val_1), Constant::Double(val_2)) => {
-                Ok(Constant::Double(val_1 / val_2))
+            (Self::Double(val_1), Self::Double(val_2)) => {
+                Ok(Self::Double(val_1 / val_2))
             },
-            (Constant::Int(val_1), Constant::Double(val_2)) | (Constant::Double(val_2), Constant::Int(val_1)) => {
-                Ok(Constant::Double(val_1 as f64 / val_2))
+            (Self::Int(val_1), Self::Double(val_2)) | (Self::Double(val_2), Self::Int(val_1)) => {
+                Ok(Self::Double(val_1 as f64 / val_2))
             },
             _ => {
                 let mut err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Can't divide non-numerical types!");
@@ -211,16 +211,16 @@ impl Constant {
     /// 
     /// assert_eq!(res.unwrap(), Constant::Int(1));
     /// ```
-    pub fn modlo(&self, constant: &Constant) -> Result<Constant, ResurgenceError> {
+    pub fn modlo(&self, constant: &Self) -> Result<Self, ResurgenceError> {
         match (self.clone(), (*constant).clone()) {
-            (Constant::Int(val_1), Constant::Int(val_2)) => {
-                Ok(Constant::Int(val_1 % val_2))
+            (Self::Int(val_1), Self::Int(val_2)) => {
+                Ok(Self::Int(val_1 % val_2))
             },
-            (Constant::Double(val_1), Constant::Double(val_2)) => {
-                Ok(Constant::Double(val_1 % val_2))
+            (Self::Double(val_1), Self::Double(val_2)) => {
+                Ok(Self::Double(val_1 % val_2))
             },
-            (Constant::Int(val_1), Constant::Double(val_2)) | (Constant::Double(val_2), Constant::Int(val_1)) => {
-                Ok(Constant::Double(val_1 as f64 % val_2))
+            (Self::Int(val_1), Self::Double(val_2)) | (Self::Double(val_2), Self::Int(val_1)) => {
+                Ok(Self::Double(val_1 as f64 % val_2))
             },
             _ => {
                 let mut err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Can not perform a modlo operation on non-numerical types!");
@@ -234,17 +234,17 @@ impl Constant {
     #[inline]
     pub fn type_as_string(&self) -> String {
         match &*self {
-            Constant::Int(ref int_val) => format!("i64 Constant: {}", *int_val),
-            Constant::Double(ref double_val) => format!("f64 Constant: {}", *double_val),
-            Constant::String(ref string_val) => format!("String Constant: {}", *string_val),
-            Constant::Boolean(ref bool_val) => format!("bool Constant: {}", if *bool_val {"true"} else {"false"}),
-            Constant::Address(ref address_value) => format!("Register constant: index({}) location({})", address_value.0, match address_value.1 {
+            Self::Int(ref int_val) => format!("i64 Constant: {}", *int_val),
+            Self::Double(ref double_val) => format!("f64 Constant: {}", *double_val),
+            Self::String(ref string_val) => format!("String Constant: {}", *string_val),
+            Self::Boolean(ref bool_val) => format!("bool Constant: {}", if *bool_val {"true"} else {"false"}),
+            Self::Address(ref address_value) => format!("Register constant: index({}) location({})", address_value.0, match address_value.1 {
                 RegisterLocation::ConstantPool => "Constant Pool",
                 RegisterLocation::Accumulator => "Accumulator",
                 RegisterLocation::Global => "Global",
                 RegisterLocation::Local => "Local"
             }),
-            Constant::Vec(ref vec_val) => {
+            Self::Vec(ref vec_val) => {
                 let mut final_string = String::from("");
                 for obj in vec_val {
                     final_string += &obj.type_as_string();
