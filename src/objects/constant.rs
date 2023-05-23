@@ -189,7 +189,7 @@ impl Constant {
                 }
             },
             (Self::Double(val_1), Self::Double(val_2)) => {
-                if val_2 == 0 {
+                if val_2 == 0.0 {
                     let mut err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Can not divide by 0!");
                     create_new_trace!(err);
                     return Err(err);
@@ -197,7 +197,7 @@ impl Constant {
                 Ok(Self::Double(val_1 / val_2))
             },
             (Self::Int(val_1), Self::Double(val_2)) | (Self::Double(val_2), Self::Int(val_1)) => {
-                if val_2 == 0 {
+                if val_2 == 0.0 {
                     let mut err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Can not divide by 0!");
                     create_new_trace!(err);
                     return Err(err);
@@ -237,7 +237,7 @@ impl Constant {
                 Ok(Self::Int(val_1 % val_2))
             },
             (Self::Double(val_1), Self::Double(val_2)) => {
-                if val_2 == 0 {
+                if val_2 == 0.0 {
                     let mut err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Can not divide by 0!");
                     create_new_trace!(err);
                     return Err(err);
@@ -245,7 +245,7 @@ impl Constant {
                 Ok(Self::Double(val_1 % val_2))
             },
             (Self::Int(val_1), Self::Double(val_2)) | (Self::Double(val_2), Self::Int(val_1)) => {
-                if val_2 == 0 {
+                if val_2 == 0.0 {
                     let mut err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Can not divide by 0!");
                     create_new_trace!(err);
                     return Err(err);
