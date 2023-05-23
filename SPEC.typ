@@ -212,7 +212,7 @@ In the future, `stack_mov` may be merged with `stack_pop`.
 ```
 add dst <REG>, src_1 <REG>, src_2 <REG>
 ```
-Adds `src_1` and `src_2`, storing the value in `dst`. If `src_1` holds an address and `src_2` holds an integer, then pointer arithmethic can be performed.
+Adds `src_1` and `src_2`, storing the result in `dst`. If `src_1` holds an address and `src_2` holds an integer, then pointer arithmethic can be performed.
 
 It is undefined behavior for `src_1` and `src_2` to both hold addresses.
 
@@ -220,7 +220,7 @@ It is undefined behavior for `src_1` and `src_2` to both hold addresses.
 ```
 sub dst <REG>, src_1 <REG>, src_2 <REG>
 ```
-Subtracts `src_1` and `src_2`, storing the value in `dst`. If `src_1` holds an address and `src_2` holds an integer, then pointer arithmethic can be performed.
+Subtracts `src_1` and `src_2`, storing the result in `dst`. If `src_1` holds an address and `src_2` holds an integer, then pointer arithmethic can be performed.
 
 It is undefined behavior for `src_1` and `src_2` to both hold addresses.
 
@@ -228,7 +228,7 @@ It is undefined behavior for `src_1` and `src_2` to both hold addresses.
 ```
 mul dst <REG>, src_1 <REG>, src_2 <REG>
 ```
-Multiplies `src_1` and `src_2`, storing the value in `dst`.
+Multiplies `src_1` and `src_2`, storing the result in `dst`.
 
 It is undefined behavior for the following:
 - To have `src_1` and/or `src_2` hold addresses.
@@ -237,13 +237,22 @@ It is undefined behavior for the following:
 ```
 divides dst <REG>, src_1 <REG>, src_2 <REG>
 ```
-Multiplies `src_1` by `src_2`, storing the value in `dst`.
+Multiplies `src_1` by `src_2`, storing the result in `dst`.
 
 It is undefined behavior for the following:
 - To have `src_1` and/or `src_2` hold addresses.
 - For `src_2` to be 0.
 
 === Mod
+```
+divides dst <REG>, src_1 <REG>, src_2 <REG>
+```
+Multiplies `src_1` by `src_2`, storing the remainder in `dst`.
+
+It is undefined behavior for the following:
+- To have `src_1` and/or `src_2` hold addresses.
+- For `src_2` to be 0.
+
 === Equal
 === NotEqual
 === Greater
