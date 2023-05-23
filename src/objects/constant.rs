@@ -174,6 +174,11 @@ impl Constant {
     pub fn div(&self, constant: &Self) -> Result<Self, ResurgenceError> {
         match (self.clone(), (*constant).clone()) {
             (Self::Int(val_1), Self::Int(val_2)) => {
+                if val_2 == 0 {
+                    let mut err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Can not divide by 0!");
+                    create_new_trace!(err);
+                    return Err(err);
+                }
                 let res = self.check_overflow(val_1.checked_div(val_2));
                 if let Err(mut err) = res {
                     create_new_trace!(err);
@@ -184,9 +189,19 @@ impl Constant {
                 }
             },
             (Self::Double(val_1), Self::Double(val_2)) => {
+                if val_2 == 0 {
+                    let mut err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Can not divide by 0!");
+                    create_new_trace!(err);
+                    return Err(err);
+                }
                 Ok(Self::Double(val_1 / val_2))
             },
             (Self::Int(val_1), Self::Double(val_2)) | (Self::Double(val_2), Self::Int(val_1)) => {
+                if val_2 == 0 {
+                    let mut err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Can not divide by 0!");
+                    create_new_trace!(err);
+                    return Err(err);
+                }
                 Ok(Self::Double(val_1 as f64 / val_2))
             },
             _ => {
@@ -214,12 +229,27 @@ impl Constant {
     pub fn modlo(&self, constant: &Self) -> Result<Self, ResurgenceError> {
         match (self.clone(), (*constant).clone()) {
             (Self::Int(val_1), Self::Int(val_2)) => {
+                if val_2 == 0 {
+                    let mut err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Can not divide by 0!");
+                    create_new_trace!(err);
+                    return Err(err);
+                }
                 Ok(Self::Int(val_1 % val_2))
             },
             (Self::Double(val_1), Self::Double(val_2)) => {
+                if val_2 == 0 {
+                    let mut err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Can not divide by 0!");
+                    create_new_trace!(err);
+                    return Err(err);
+                }
                 Ok(Self::Double(val_1 % val_2))
             },
             (Self::Int(val_1), Self::Double(val_2)) | (Self::Double(val_2), Self::Int(val_1)) => {
+                if val_2 == 0 {
+                    let mut err = ResurgenceError::from(ResurgenceErrorKind::INVALID_OPERATION, "Can not divide by 0!");
+                    create_new_trace!(err);
+                    return Err(err);
+                }
                 Ok(Self::Double(val_1 as f64 % val_2))
             },
             _ => {
