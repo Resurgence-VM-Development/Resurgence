@@ -2,11 +2,11 @@
 #set page(numbering: "1")
 
 #align(center, text(25pt)[
-  *Resurgence Virtual Machine Spec for 0.2.0*
+  *Resurgence Virtual Machine Specification, Version 7.0*
 ])
 
 #align(center, text(12pt)[
-  Last edited: May 22rd, 2023
+  Last edited: May 23rd, 2023
 ])
 
 #grid(
@@ -22,7 +22,7 @@
 = Table of Contents
 #outline(title: none, indent: true)
 
-= Resurgence Virtual Machine Overview
+= Overview
 There are 3 big parts to a _Resurgence Virtual Machine_:
 - Memory layout
   - Global registers
@@ -36,17 +36,23 @@ There are 3 big parts to a _Resurgence Virtual Machine_:
 - Function API
   - ResurgenceState
 
-This spec defines all of these. The reference implementation of Resurgence can be found on *#link("https://github.com/Resurgence-VM-Development/Resurgence", "GitHub")*, although it should be known that the reference implementation also adds a C FFI, forward facing API, and code generation API, all of whihc are not defined in the spec and thus should be considered implementation unique.
+This specification defines all of these. The reference implementation of Resurgence can be found on *#link("https://github.com/Resurgence-VM-Development/Resurgence", "GitHub")*, although it should be known that the reference implementation also adds a C FFI, forward facing API, and code generation API, all of which are not defined in the specification and thus should be considered implementation unique.
+
+== Requirements
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and "OPTIONAL" in this document are to be interpreted as described in *#link("https://www.rfc-editor.org/rfc/rfc2119", "RFC 2119")*.
+
+== Versioning
+TODO
 
 #set heading(numbering: "1.")
 = Memory Layout
-For later
+TODO
 
 = Instructions
-The following defines the spec regardding Resurgence instructions, their behaviors, and their representation in binary.
+The following defines the specification regarding Resurgence instructions, their behaviors, and their representation in binary.
 
 == Instructions and Behaviors
-Resurgence has 25 instructions. This part of the spec defines those instructions. The reference implementation also declares, but does not define, 5 more instructions.
+Resurgence has 25 instructions. This part of the specification defines those instructions. The reference implementation also declares, but does not define, 5 more instructions.
 #footnote[#link("https://github.com/Resurgence-VM-Development/Resurgence/blob/8bfe13f9205b28fcea04e0a527bd05fe451d5a9f/src/objects/instruction.rs#L189", "Additional instructions in the Resurgence reference implementation (link)")]
 Since these are not defined nor formalized, they will not be included in this version of the spec. Developers should simply ignore these instructions.
 
@@ -61,7 +67,7 @@ Some terminology:
   - `AS_IS`: Ignore the address a register holds
 - Instruction Pointer: a unsigned 64-bit integer representing the current index in the execution loop, starting from 0
 
-All instructions in this spec are written as follows:
+All instructions in this specification are written as follows:
 ```
 instruction argument_name <type>,...
 ```
@@ -70,7 +76,7 @@ In addition, all integer overflows for instructions are always undefined behavio
 
 === Alloc
 ```
-alloc <u32>
+alloc n <u32>
 ```
 Creates a new Stackframe on the Call Stack with $n$ amount of registers, $n$ being an unsigned 32-bit integer.
 
@@ -120,9 +126,9 @@ How stashing is implemented is merely an implementation detail. While `call` imp
 ```
 ext_call ID <u64>
 ```
-Calls an external function, where `ID` is the ID of the function the program wishes to call.
+Calls an external function, where `ID` is the unique ID number of the function the program wishes to call.
 
-It is undefined behavior for `ID` to an ID that is not assigned to an external function.
+It is undefined behavior for `ID` to be a value that is not assigned to an external function.
 
 In the reference implementation of Resurgence, external functions are either defined in Rust or C, and assigned using register functions.
 #footnote[#link("https://github.com/Resurgence-VM-Development/Resurgence/blob/8bfe13f9205b28fcea04e0a527bd05fe451d5a9f/src/internal/interpreter/imports.rs#L15", "Resurgence Implementation of register functions (link)")]
@@ -261,4 +267,4 @@ It is undefined behavior for the following:
 === LessEqual
 
 == Representation of Instructions in Binary
-For later
+TODO
