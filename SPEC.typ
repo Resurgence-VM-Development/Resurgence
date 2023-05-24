@@ -312,16 +312,7 @@ It SHALL be undefined behavior for the following:
 - To have `src_1` and/or `src_2` hold addresses.
 - For `src_2` to be 0.
 
-<<<<<<< HEAD
 == Comparison
-||||||| parent of b67958d (Added the rest of the instructiosn to the spec)
-=== Equal
-=== NotEqual
-=== Greater
-=== Less
-=== GreaterEqual
-=== LessEqual
-=======
 === Equal
 ```
 equal src_1 <REG>, src_2 <REG>
@@ -385,25 +376,6 @@ less_equal src_1 <REG>, src_2 <REG>
 Compares checks if `src_1` is less than or equal to `src_2`. If the result is true, then the instruction pointer is incremented by one and the following instruction is skipped.
 
 Both `src_1` and `src_2` MUST be numeric types. It SHALL be undefined behavior otherwise. In addition, if one of the source registers is a float and the other an int, then the int SHALL be interpreted as a float.
->>>>>>> b67958d (Added the rest of the instructiosn to the spec)
-
-=== Equal
-TODO
-
-=== NotEqual
-TODO
-
-=== Greater
-TODO
-
-=== Less
-TODO
-
-=== GreaterEqual
-TODO
-
-=== LessEqual
-TODO
 
 = Portable Bytecode Format
 Resurgence uses a binary data format that is designed to be fast, flexible, and portable.
