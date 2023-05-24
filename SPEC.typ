@@ -74,7 +74,7 @@ All instructions in this specification are written as follows:
 instruction argument_name <type>,...
 ```
 
-In addition, all integer overflows for instructions are always undefined behavior, so that won't be included for each instruction.
+In addition, all integer overflows for instructions SHALL always be undefined behavior.
 
 == Memory Management
 
@@ -96,7 +96,7 @@ free n <u32>
 ```
 Removes $n$ amount of Stackframes from the Call Stack, where $n$ is an unsigned 32-bit integer. This is in contrast to `Alloc`, where $n$ is the amount of registers.
 
-It is undefined behavior for $n$ to be greater than the amount of Stackframes on the Call Stack. For example, if there are 3 Stackframes, then `free 4` is undefined behavior.
+It SHALL be undefined behavior for $n$ to be greater than the amount of Stackframes on the Call Stack. For example, if there are 3 Stackframes, then `free 4` is undefined behavior.
 
 === FrameFree
 ```
@@ -104,7 +104,7 @@ frame_free n <u32>, loc <LOC>
 ```
 Removes $n$ amount of registers from `loc`, where $n$ is an unsigned 32-bit integer and `loc` is either `GLOBAL` or `LOCAL`.
 
-It is undefined behavior for $n$ to be greater than the amount of registers in `loc`. For example, if there are 2 GLOBAL registers, then `frame_free 3, GLOBAL`
+It SHALL be undefined behavior for $n$ to be greater than the amount of registers in `loc`. For example, if there are 2 GLOBAL registers, then `frame_free 3, GLOBAL`
 
 == Execution Control
 
@@ -114,7 +114,7 @@ jump n <i64>
 ```
 Adds $n$ to the Instuction Pointer, where $n$ is a signed 64-bit integer. If $n$ is negative, then `jump` effectively goes backwards.
 
-It is undefined behavior if $n$ makes the Instruction Pointer go beyond bounds, or if $n$ makes the Instruction Pointer become negative. For instance, if the instruction pointer is at 9, then `jump -11` is undefined behavior.
+It SHALL be undefined behavior if $n$ makes the Instruction Pointer go beyond bounds, or if $n$ makes the Instruction Pointer become negative. For instance, if the instruction pointer is at 9, then `jump -11` is undefined behavior.
 
 === Call
 ```
@@ -122,7 +122,7 @@ call n <u64>
 ```
 Stashes the current value of the Instruction Pointer and sets it to $n$, where $n$ is an unsigned 64-bit integer.
 
-It is undefined behavior if $n$ goes beyond bounds. For instance, if the code size is 10 instructions (0 to 9), then `call 10` is undefined behavior.
+It SHALL be undefined behavior if $n$ goes beyond bounds. For instance, if the code size is 10 instructions (0 to 9), then `call 10` is undefined behavior.
 
 In the reference implementation of Resurgence, stashing the value of the Instruction Pointer is done with recursion.
 #footnote[#link("https://github.com/Resurgence-VM-Development/Resurgence/blob/1e3c330ad2878c1cb9d3bef49f599a02df31a787/src/internal/interpreter/execution_engine.rs#L113", "Resurgence Implementation of Call (link)")]
@@ -134,7 +134,7 @@ ext_call ID <u64>
 ```
 Calls an external function, where `ID` is the unique ID number of the function the program wishes to call.
 
-It is undefined behavior for `ID` to be a value that is not assigned to an external function.
+It SHALL be undefined behavior for `ID` to be a value that is not assigned to an external function.
 
 In the reference implementation of Resurgence, external functions are either defined in Rust or C, and assigned using register functions.
 #footnote[#link("https://github.com/Resurgence-VM-Development/Resurgence/blob/8bfe13f9205b28fcea04e0a527bd05fe451d5a9f/src/internal/interpreter/imports.rs#L15", "Resurgence Implementation of register functions (link)")]
@@ -147,7 +147,7 @@ ret
 Resets the Instruction Pointer to a previous value if possible; otherwise, the program exits.
 
 In the reference implementation of Resurgence, this is done by returning from recursive calls done by `call`.
-#footnote[#link("https://github.com/Resurgence-VM-Development/Resurgence/blob/8bfe13f9205b28fcea04e0a527bd05fe451d5a9f/src/internal/interpreter/execution_engine.rs#L134", "Resurgence Implementaion of Ret")]
+#footnote[#link("https://github.com/Resurgence-VM-Development/Resurgence/blob/8bfe13f9205b28fcea04e0a527bd05fe451d5a9f/src/internal/interpreter/execution_engine.rs#L134", "Resurgence Implementaion of Ret (link)")]
 This is merely an implementation detail. While `ret` implies returning, all it really does is set the Instruction Pointer to a previous value when possible, and exits the program otherwise.
 
 == Memory Manipulation
@@ -160,7 +160,7 @@ Moves a value from `src` to `dst`.
 - If `dst` holds an address, then the address will be fully resolved if `dst_ref` is set to `DEREFERENCE`.
 - If `src` holds an address, then the address will be fully resolved if `src_ref` is set to `DEREFERENCE`.
 
-It is undefined behavior for the following:
+It SHALL be undefined behavior for the following:
 - Either `dst` or `src` to be beyond bounds.
 - To set `dst_ref`/`src_ref` to `DEREFERENCE` if `dst`/`src` do not hold addresses.
 - To move a value from/to a register in `CONST`.
@@ -174,7 +174,7 @@ Copies a value from `src` to `dst`.
 - If `dst` holds an address, then the address will be fully resolved if `dst_ref` is set to `DEREFERENCE`.
 - If `src` holds an address, then the address will be fully resolved if `src_ref` is set to `DEREFERENCE`.
 
-It is undefined behavior for the following:
+It SHALL be undefined behavior for the following:
 - Either `dst` or `src` to be beyond bounds.
 - To set `dst_ref`/`src_ref` to `DEREFERENCE` if `dst`/`src` do not hold addresses.
 - To copy a value to a register in `CONST`.
@@ -188,7 +188,7 @@ Takes the address of `src` and sets `dst` to hold said address.
 - If `dst` holds an address, then the address will be fully resolved if `dst_ref` is set to `DEREFERENCE`.
 - If `src` holds an address, then the address will be fully resolved if `src_ref` is set to `DEREFERENCE`.
 
-It is undefined behavior for the following:
+It SHALL be undefined behavior for the following:
 - Either `dst` or `src` to be beyond bounds.
 - To set `dst_ref`/`src_ref` to `DEREFERENCE` if `dst`/`src` do not hold addresses.
 - To set `src` to a register in `CONST` or to set `src` to `ACCU`.
@@ -199,7 +199,7 @@ stack_push src <REG>, src_ref <REG_REF>
 ```
 Moves the value stored in `src` to the top of the Stack. If `src` holds an adress, then the address will be fully resolved if `src_ref` is set to `DEREFERENCE`.
 
-It is undefined behavior for the following:
+It SHALL be undefined behavior for the following:
 - `src` to be beyond bounds.
 - To set `src_ref` to `DEREFERENCE` if `src` does not hold an address.
 
@@ -216,7 +216,7 @@ stack_mov dst <REG>, dst_ref <REG_REF>
 ```
 Moves the top element from the stack to `dst`. If `dst` holds an adress, then the address will be fully resolved if `dst_ref` is set to `DEREFERENCE`.
 
-It is undefined behavior for the following:
+It SHALL be undefined behavior for the following:
 - `dst` to be beyond bounds
 - To set `dst_ref` to `DEREFERENCE` if `dst` does not hold an address.
 
@@ -230,7 +230,17 @@ add dst <REG>, src_1 <REG>, src_2 <REG>
 ```
 Adds `src_1` and `src_2`, storing the result in `dst`. If `src_1` holds an address and `src_2` holds an integer, then pointer arithmethic can be performed.
 
-It is undefined behavior for `src_1` and `src_2` to both hold addresses.
+The type of the result MUST be:
+- A. The type of `src_1` if both `src_1` and `src_2` are integers
+- B. Address if one of the source registers is an address and the other an integer type.
+  - The resulting address shall point to `original address + value of other source register`
+- C. A 64-bit float if either `src_1` or `src_2` are also a 64-bit float
+  - The size of the source register that holds the float (if only one source register holds a float)
+  - The largest float size if both source registers hold floats
+
+It SHALL be undefined behavior for the following:
+- For `src_1` and `src_2` to both hold addresses
+- For `src_1` and/or `src_2` to hold a non-numeric type
 
 === Sub
 ```
@@ -238,7 +248,17 @@ sub dst <REG>, src_1 <REG>, src_2 <REG>
 ```
 Subtracts `src_1` and `src_2`, storing the result in `dst`. If `src_1` holds an address and `src_2` holds an integer, then pointer arithmethic can be performed.
 
-It is undefined behavior for `src_1` and `src_2` to both hold addresses.
+The type of the result MUST be:
+- A. The type of `src_1` if both `src_1` and `src_2` are integers
+- B. Address if one of the source registers is an address and the other an integer type.
+  - The resulting address shall point to `original address - value of other source register`
+- C. A 64-bit float if either `src_1` or `src_2` are also a 64-bit float
+  - The size of the source register that holds the float (if only one source register holds a float)
+  - The largest float size if both source registers hold floats
+
+It SHALL be undefined behavior for the following:
+- For `src_1` and `src_2` to both hold addresses
+- For `src_1` and/or `src_2` to hold a non-numeric type
 
 === Mul
 ```
@@ -246,8 +266,15 @@ mul dst <REG>, src_1 <REG>, src_2 <REG>
 ```
 Multiplies `src_1` and `src_2`, storing the result in `dst`.
 
-It is undefined behavior for the following:
-- To have `src_1` and/or `src_2` hold addresses.
+The type of the result MUST be:
+- A. The type of `src_1` if both `src_1` and `src_2` are integers
+- B. A 64-bit float if either `src_1` or `src_2` are also a 64-bit float
+  - The size of the source register that holds the float (if only one source register holds a float)
+  - The largest float size if both source registers hold floats
+
+It SHALL be undefined behavior for the following:
+- For `src_1` and `src_2` to both hold addresses
+- For `src_1` and/or `src_2` to hold a non-numeric type
 
 === Div
 ```
@@ -255,7 +282,15 @@ divides dst <REG>, src_1 <REG>, src_2 <REG>
 ```
 Multiplies `src_1` by `src_2`, storing the result in `dst`.
 
-It is undefined behavior for the following:
+The type of the result MUST be:
+- A. The type of `src_1` if both `src_1` and `src_2` are integers
+- B. A float if either `src_1` or `src_2` are also a float. The size SHALL be decided by either:
+  - The size of the source register that holds the float (if only one source register holds a float)
+  - The largest float size if both source registers hold floats
+
+It SHALL be undefined behavior for the following:
+- For `src_1` and `src_2` to both hold addresses
+- For `src_1` and/or `src_2` to hold a non-numeric type
 - To have `src_1` and/or `src_2` hold addresses.
 - For `src_2` to be 0.
 
@@ -265,11 +300,92 @@ divides dst <REG>, src_1 <REG>, src_2 <REG>
 ```
 Multiplies `src_1` by `src_2`, storing the remainder in `dst`.
 
-It is undefined behavior for the following:
+The type of the result MUST be:
+- A. The type of `src_1` if both `src_1` and `src_2` are integers
+- B. A float if either `src_1` or `src_2` are also a float. The size SHALL be decided by either:
+  - The size of the source register that holds the float (if only one source register holds a float)
+  - The largest float size if both source registers hold floats
+
+It SHALL be undefined behavior for the following:
+- For `src_1` and `src_2` to both hold addresses
+- For `src_1` and/or `src_2` to hold a non-numeric type
 - To have `src_1` and/or `src_2` hold addresses.
 - For `src_2` to be 0.
 
+<<<<<<< HEAD
 == Comparison
+||||||| parent of b67958d (Added the rest of the instructiosn to the spec)
+=== Equal
+=== NotEqual
+=== Greater
+=== Less
+=== GreaterEqual
+=== LessEqual
+=======
+=== Equal
+```
+equal src_1 <REG>, src_2 <REG>
+```
+
+Compares `src_1` and `src_2` for equality. If the result is true, then the instruction pointer is incremented by one and the following instruction is skipped.
+
+Both `src_1` and `src_2` MUST be compatible with each other in terms of equality. If both `src_1` and `src_2` hold the same type, then they can be compared. Otherwise, the comparison MUST be one of the following:
+- Integer to Float (the integer SHALL be interpreted as a float for the comparison)
+
+In addition, Address to Bool comparison MAY be allowed. In that case, an Address is true if it exists and false if it doesn't.
+
+It SHALL be undefined behavior to compare 2 types that are not compatible for comparison.
+
+=== NotEqual
+```
+not_equal src_1 <REG>, src_2 <REG>
+```
+
+Compares `src_1` and `src_2` for inequality. If the result is true, then the instruction pointer is incremented by one and the following instruction is skipped.
+
+Both `src_1` and `src_2` MUST be compatible with each other in terms of equality. If both `src_1` and `src_2` hold the same type, then they can be compared. Otherwise, the comparison MUST be one of the following:
+- Integer to Float (the integer SHALL be interpreted as a float for the comparison)
+
+In addition, Address to Bool comparison MAY be allowed. In that case, an Address is true if it exists and false if it doesn't.
+
+It SHALL be undefined behavior to compare 2 types that are not compatible for comparison.
+
+=== Greater
+```
+greater src_1 <REG>, src_2 <REG>
+```
+
+Compares checks if `src_1` is greater than `src_2`. If the result is true, then the instruction pointer is incremented by one and the following instruction is skipped.
+
+Both `src_1` and `src_2` MUST be numeric types. It SHALL be undefined behavior otherwise. In addition, if one of the source registers is a float and the other an int, then the int SHALL be interpreted as a float.
+
+=== Less
+```
+less src_1 <REG>, src_2 <REG>
+```
+
+Compares checks if `src_1` is less than `src_2`. If the result is true, then the instruction pointer is incremented by one and the following instruction is skipped.
+
+Both `src_1` and `src_2` MUST be numeric types. It SHALL be undefined behavior otherwise. In addition, if one of the source registers is a float and the other an int, then the int SHALL be interpreted as a float.
+
+=== GreaterEqual
+```
+greater_equal src_1 <REG>, src_2 <REG>
+```
+
+Compares checks if `src_1` is greater than or equal to `src_2`. If the result is true, then the instruction pointer is incremented by one and the following instruction is skipped.
+
+Both `src_1` and `src_2` MUST be numeric types. It SHALL be undefined behavior otherwise. In addition, if one of the source registers is a float and the other an int, then the int SHALL be interpreted as a float.
+
+=== LessEqual
+```
+less_equal src_1 <REG>, src_2 <REG>
+```
+
+Compares checks if `src_1` is less than or equal to `src_2`. If the result is true, then the instruction pointer is incremented by one and the following instruction is skipped.
+
+Both `src_1` and `src_2` MUST be numeric types. It SHALL be undefined behavior otherwise. In addition, if one of the source registers is a float and the other an int, then the int SHALL be interpreted as a float.
+>>>>>>> b67958d (Added the rest of the instructiosn to the spec)
 
 === Equal
 TODO
