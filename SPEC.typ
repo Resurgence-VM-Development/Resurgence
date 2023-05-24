@@ -6,7 +6,7 @@
 ])
 
 #align(center, text(12pt)[
-  Last edited: May 23rd, 2023
+  Last edited: May 24th, 2023
 ])
 
 #grid(
@@ -29,17 +29,21 @@ There are 3 big parts to a _Resurgence Virtual Machine_:
   - Stack
   - Call Stack
   - Stackframes
+  - Constants
 - Instructions
   - Instruction set
   - Instruction behavior
   - Representation in binary files
 - Function API
+  - Calls Table
   - ResurgenceState
 
 This specification defines all of these. The reference implementation of Resurgence can be found on *#link("https://github.com/Resurgence-VM-Development/Resurgence", "GitHub")*, although it should be known that the reference implementation also adds a C FFI, forward facing API, and code generation API, all of which are not defined in the specification and thus should be considered implementation unique.
 
 == Requirements
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and "OPTIONAL" in this document are to be interpreted as described in *#link("https://www.rfc-editor.org/rfc/rfc2119", "RFC 2119")*.
+
+Implementations that do not implement all "MUST" behavior or implement "MUST NOT" behaivor is considered out of compliance with this specification. Implementations MAY implement other features not included in this specification on an as-needed basis, so long as they do not affect compliance with this specification.
 
 == Versioning
 TODO
@@ -49,9 +53,7 @@ TODO
 TODO
 
 = Instructions
-The following defines the specification regarding Resurgence instructions, their behaviors, and their representation in binary.
 
-== Instructions and Behaviors
 Resurgence has 25 instructions. This part of the specification defines those instructions. The reference implementation also declares, but does not define, 5 more instructions.
 #footnote[#link("https://github.com/Resurgence-VM-Development/Resurgence/blob/8bfe13f9205b28fcea04e0a527bd05fe451d5a9f/src/objects/instruction.rs#L189", "Additional instructions in the Resurgence reference implementation (link)")]
 Since these are not defined nor formalized, they will not be included in this version of the spec. Developers should simply ignore these instructions.
@@ -73,6 +75,8 @@ instruction argument_name <type>,...
 ```
 
 In addition, all integer overflows for instructions are always undefined behavior, so that won't be included for each instruction.
+
+== Memory Management
 
 === Alloc
 ```
@@ -101,6 +105,8 @@ frame_free n <u32>, loc <LOC>
 Removes $n$ amount of registers from `loc`, where $n$ is an unsigned 32-bit integer and `loc` is either `GLOBAL` or `LOCAL`.
 
 It is undefined behavior for $n$ to be greater than the amount of registers in `loc`. For example, if there are 2 GLOBAL registers, then `frame_free 3, GLOBAL`
+
+== Execution Control
 
 === Jump
 ```
@@ -143,6 +149,8 @@ Resets the Instruction Pointer to a previous value if possible; otherwise, the p
 In the reference implementation of Resurgence, this is done by returning from recursive calls done by `call`.
 #footnote[#link("https://github.com/Resurgence-VM-Development/Resurgence/blob/8bfe13f9205b28fcea04e0a527bd05fe451d5a9f/src/internal/interpreter/execution_engine.rs#L134", "Resurgence Implementaion of Ret")]
 This is merely an implementation detail. While `ret` implies returning, all it really does is set the Instruction Pointer to a previous value when possible, and exits the program otherwise.
+
+== Memory Manipulation
 
 === Mov
 ```
@@ -214,6 +222,8 @@ It is undefined behavior for the following:
 
 In the future, `stack_mov` may be merged with `stack_pop`.
 
+== Operators
+
 === Add
 ```
 add dst <REG>, src_1 <REG>, src_2 <REG>
@@ -259,12 +269,56 @@ It is undefined behavior for the following:
 - To have `src_1` and/or `src_2` hold addresses.
 - For `src_2` to be 0.
 
-=== Equal
-=== NotEqual
-=== Greater
-=== Less
-=== GreaterEqual
-=== LessEqual
+== Comparison
 
-== Representation of Instructions in Binary
+=== Equal
 TODO
+
+=== NotEqual
+TODO
+
+=== Greater
+TODO
+
+=== Less
+TODO
+
+=== GreaterEqual
+TODO
+
+=== LessEqual
+TODO
+
+= Portable Bytecode Format
+Resurgence uses a binary data format that is designed to be fast, flexible, and portable.
+
+== Data Types
+
+=== Booleans
+Booleans are expressed as a single 8-bit value that is either True or False. True SHOULD be represented as a value of 0x01, and False MUST be represented as a value of 0x00. Implementations MUST treat all non-zero values of boolean fields as True.
+
+=== Integers
+All integers are represented using big endianness. This means that for multi-byte integers, the most significant byte is first, and then in descending order of significance. Signed integers use the most significant bit to store integer polarity, and Unsigned integers do not.
+
+The format uses the following integer formats:
+- `u32` - Unsigned 32-bit integer
+- `u64` - Unsigned 64-bit integer
+- `i64` - Signed 64-bit integer
+
+=== Floating Point Numbers
+All floating point numbers used in the Bytecode format are 64-bit values represented using the "binary64" format from the IEEE 754-2008 standard. Implementations MUST use the IEEE 754-2008 specification when processing floating point numbers with the portable format. However, implementations MAY convert to/from other formats for internal use.
+
+Floating point numbers are represented using big endianness.
+
+=== Strings
+Strings are UTF-8 text whose length is described by a leading `u64` value, followed by the raw bytes of the string. Implementations MUST NOT insert or rely on null terminators (0x00) for delimiting the end of strings when representing them in the portable format.
+
+=== Registers
+TODO
+
+=== Register References
+TODO
+
+=== Register Location
+TODO
+
