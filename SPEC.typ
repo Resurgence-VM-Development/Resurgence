@@ -22,6 +22,8 @@
 = Table of Contents
 #outline(title: none, indent: true)
 
+#pagebreak(weak: true)
+
 = Overview
 There are 3 big parts to a _Resurgence Virtual Machine_:
 - Memory layout
@@ -43,14 +45,28 @@ This specification defines all of these. The reference implementation of Resurge
 == Requirements
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and "OPTIONAL" in this document are to be interpreted as described in *#link("https://www.rfc-editor.org/rfc/rfc2119", "RFC 2119")*.
 
-Implementations that do not implement all "MUST" behavior or implement "MUST NOT" behaivor is considered out of compliance with this specification. Implementations MAY implement other features not included in this specification on an as-needed basis, so long as they do not affect compliance with this specification.
+Implementations that do not implement all "MUST" behavior or implement "MUST NOT" behavior is considered out of compliance with this specification. Implementations MAY implement other features not included in this specification on an as-needed basis, so long as they do not affect compliance with this specification.
 
-== Versioning
-TODO
+== Versioning <versioning>
+The specification is versioned such that non-breaking changes are backwards compatible with previous versions. This is achieved by use of a `MAJOR.MINOR` versioning scheme.
+
+The `MAJOR` version is incremented whenever breaking changes are made to the specification which prevent an implementation from reading older versions.
+
+The `MINOR` version is incremented whenever a change is made that breaks implementations of previous versions, but is backwards compatible with older Bytecode.
+
+For example: The reference implementation of Resurgence using version 5.2 would be able to decode Bytecode generated with version 5.2, 5.1, and 5.0, but would not be able to handle versions 5.3, 6.0 or 4.0.
+
+An implementation MUST validate that it is capable of processing Bytecode of the version(s) it implements. Implementations MUST perform checks to reject any Bytecode generated using newer versions of this specification that it does not explicitly support.
+
+An implementation MAY choose to implement backwards compatibility features to handle multiple specification versions without issue.
+
+#pagebreak(weak: true)
 
 #set heading(numbering: "1.")
 = Memory Layout
 TODO
+
+#pagebreak(weak: true)
 
 = Instructions
 
@@ -377,8 +393,15 @@ Compares checks if `src_1` is less than or equal to `src_2`. If the result is tr
 
 Both `src_1` and `src_2` MUST be numeric types. It SHALL be undefined behavior otherwise. In addition, if one of the source registers is a float and the other an int, then the int SHALL be interpreted as a float.
 
+#pagebreak(weak: true)
+
 = Portable Bytecode Format
-Resurgence uses a binary data format that is designed to be fast, flexible, and portable.
+Resurgence uses a special binary data format, known as Bytecode, to represent instructions and other information required at runtime. The Bytecode format is designed with the following goals:
+- Fast to encode and decode
+- Easy to understand, helping developers write compilers and implementations
+- Flexible design for many use cases
+- Portable across operating systems and architectures
+- Efficient usage of available storage / bandwidth
 
 == Data Types
 
@@ -389,6 +412,8 @@ Booleans are expressed as a single 8-bit value that is either True or False. Tru
 All integers are represented using big endianness. This means that for multi-byte integers, the most significant byte is first, and then in descending order of significance. Signed integers use the most significant bit to store integer polarity, and Unsigned integers do not.
 
 The format uses the following integer formats:
+- `u8` - Unsigned 8-bit integer
+- `u16` - Unsigned 16-bit integer
 - `u32` - Unsigned 32-bit integer
 - `u64` - Unsigned 64-bit integer
 - `i64` - Signed 64-bit integer
@@ -401,12 +426,89 @@ Floating point numbers are represented using big endianness.
 === Strings
 Strings are UTF-8 text whose length is described by a leading `u64` value, followed by the raw bytes of the string. Implementations MUST NOT insert or rely on null terminators (0x00) for delimiting the end of strings when representing them in the portable format.
 
+=== Constants
+TODO
+
 === Registers
 TODO
 
 === Register References
 TODO
 
-=== Register Location
+=== Register Locations
 TODO
 
+== Bytecode Header
+The Bytecode contains a header before instructions are listed. This header contains the following:
+- A magic number, to identify that this is valid Bytecode information
+- Major and minor specification version that the Bytecode is compliant with
+- Constants table, defining all constant values used in the program
+- Imports table, listing runtime features required by the program
+- Exports table, listing functions that the program implements, as well as the position in the instructions that the function starts at
+
+=== Magic Number
+The magic number is a fixed 32-bit value at the beginning of all Bytecode instances. Implementations MUST use the following value: 0x52564D88 (hexadecimal).
+
+=== Version Information
+`major_version <u16>, minor_version <u16>`
+
+The version information is expressed as a `u16` major version, followed by a `u16` minor version. This version number is explained in #link(<versioning>,"the Versioning section").
+
+=== Constants Table
+`length <u32>, constant <Constant>, ...`
+
+The constants table is expressed as `u32` length value indicating the number of entries in the constants table, followed by Constant objects representing the constant values.
+
+Implementations MUST preserve the order of these values, as the index numbers are used to refer to these constant values in the instructions.
+
+=== Imports Table
+`length <u64>, func_name <String>, ...`
+
+The imports table is expressed as a `u64` length value indicating the number of entries in the imports table, followed by String objects which each contain the names of each function which MUST be loaded by the implementation when preparing to execute the code.
+
+Implementations MUST preserve the order of these values, as the index numbers are used in the `ExtCall` instruction.
+
+=== Exports Table
+`length <u64>, (func_name <String>, index <u64>), ...`
+
+The exports table is expressed as a `u64` length value indicating the number of entries in the exports table, followed by the following for each entry:
+- A string, representing the name of the exported function
+- A `u64` value, representing the index of the first instruction of the function. 
+
+*NOTE:* Implementations MUST use the index number in entries as the instruction number, NOT as the position of the instruction in bytes in the Bytecode.
+
+== Instructions Section
+`(inst_type <u8>, args)...`
+
+The instructions section comprises the body of the Bytecode. Each entry consists of the instruction's type, expressed as a `u8`, followed by its parameters.
+
+The instructions type values are listed in the following table. Values are expressed as hexadecimal numbers.
+#table(
+  columns: 2,
+  [*Instruction*], [*Value*],
+  [Alloc], [01],
+  [FrameAlloc], [15],
+  [Free], [02],
+  [FrameFree], [16],
+  [Jump], [03],
+  [Call], [04],
+  [ExtCall], [05],
+  [Ret], [19],
+  [Mov], [06],
+  [Cpy], [07],
+  [Ref], [08],
+  [StackPush], [09],
+  [StackPop], [0A],
+  [StackMov], [17],
+  [Add], [0B],
+  [Sub], [0C],
+  [Mul], [0D],
+  [Div], [0E],
+  [Mod], [18],
+  [Equal], [0F],
+  [NotEqual], [10],
+  [Greater], [11],
+  [Less], [12],
+  [GreaterEqual], [13],
+  [LessEqual], [14],
+)
