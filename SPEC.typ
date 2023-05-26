@@ -63,13 +63,45 @@ An implementation MAY choose to implement backwards compatibility features to ha
 #pagebreak(weak: true)
 
 #set heading(numbering: "1.")
-= Memory Layout
-TODO
+= Interpreter Design
+== Execution Loop
+An _execution loop_ SHALL be defined as the main part of a _Resurgence Virtual Machine_ that executes instructions. An execution loop MUST have an _Instruction Pointer_ (represented by an unsigned 64-bit integer), which SHALL point to the intex of the current instruction. All programs SHALL begin at index 0. The _Instruction Pointer_ MUST NOT be accessible to the program, but certain instructions will change the value of the _Instruction Pointer_.
+
+An implementation MAY choose to only have one execution loop, or have multiple _execution loops_ for multithreading reasons. As of the 0.2.0 specification, there are no instructions for threading, so multithreading instructions SHOULD be considered non-standard for now.
+
+== Memory Layout
+Resurgence defines 2 parts to the memory layout:
+- _Global_
+- _Local_
+
+_Global_ SHALL be defined as all parts of interpreter shared by all execution loop, whereas _Local_ SHALL be defined as all parts of the interpreter unique to each execution loop.
+
+The following are defined as _Global_:
+- Global Registers
+- Functions declared through the Function API
+
+The following meanwhile are defined as _Local_:
+- Stack
+- Call Stack
+- Accumulator
+
+=== Internal Types
+Resurgence defines the following types:
+- Int: a signed, 64-bit integer
+- Float/Double: a signed, 64-bit float
+- String: a UTF-8 string with no null terminator
+- Bool: a simple _true_ or _false_
+
+There SHALL be no integer promotion.
+
+=== Global
+The following defines the specification for the _Global_ memory layout.
+
+==== Global Registers
 
 #pagebreak(weak: true)
 
 = Instructions
-
 Resurgence has 25 instructions. This part of the specification defines those instructions. The reference implementation also declares, but does not define, 5 more instructions.
 #footnote[#link("https://github.com/Resurgence-VM-Development/Resurgence/blob/8bfe13f9205b28fcea04e0a527bd05fe451d5a9f/src/objects/instruction.rs#L189", "Additional instructions in the Resurgence reference implementation (link)")]
 Since these are not defined nor formalized, they will not be included in this version of the spec. Developers should simply ignore these instructions.
