@@ -94,10 +94,48 @@ Resurgence defines the following types:
 
 There SHALL be no integer promotion.
 
-=== Global
-The following defines the specification for the _Global_ memory layout.
 
-==== Global Registers
+=== Global Registers
+Global registers are represented by an array of values. Global registers MUST be accessible to the entire program and all threads of applicible.
+
+=== Function API
+Functions can be defined and registered for use in the Resurgence runtime. All functions registered with the runtime MUST be usable to the entire program.
+
+Functions are to take an object called _ResurgenceState_, which represents a gate to the internal memory. This object SHALL have functions associated with it that would allow taking values off of the stack.
+
+Example:
+```py
+def foo(r: ResurgenceState):
+  bar: int = r.get_i64()
+  x = bar + 1
+  r.push_int(x)
+```
+
+==== ResurgenceState
+  _ResurgenceState_ SHALL define the following functions to retrive passed arguments:
+- `get_i64() -> i64`
+- `get_f64() -> f64`
+- `get_string() -> UTF_8_String`
+- `get_bool() -> bool`
+- `get_value_as_string() -> UTF_8_String`
+Arguments to a function shall be passed through the Stack and retrived in a LIFO fashion. In other words, the first argument shall be the last argument.
+
+In addition
+
+In addition, _ResurgenceState_ shall also define the following functions to push values on the stack:
+- `push_i64(i64)`
+- `push_f64(f64)`
+- `push_string(UTF_8_String)`
+- `push_bool(bool)`
+
+All values passed through these functions SHALL populate the stack in a LIFO fashion. In other words, the first value pushed on the stack shall be the last value taken by the program.
+
+==== Stack
+The Stack SHALL be a stack of values. Each _execution loop_ MUST have their own stack. The Stack is used for the following:
+- Passing arguments to external, registered functions
+- Retriving return values from external, registered functions
+
+In addition, the Stack may also be used by the program for anything that may benefit or be simpler to implement with it. However, operations MUST NOT deal with the Stack directly, only registers. The `stack_mov` operation exists to move values from the top of the stack to a register.
 
 #pagebreak(weak: true)
 
