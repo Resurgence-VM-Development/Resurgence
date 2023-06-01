@@ -137,6 +137,18 @@ The Stack SHALL be a stack of values. Each _execution loop_ MUST have their own 
 
 In addition, the Stack may also be used by the program for anything that may benefit or be simpler to implement with it. However, operations MUST NOT deal with the Stack directly, only registers. The `stack_mov` operation exists to move values from the top of the stack to a register.
 
+If multithreaded, the Stack MUST be unique to each _execution loop_.
+
+==== Call Stack
+The Call Stack SHALL be a stack that holds _Stackframes_. A _Stackframe_ SHALL be a set of registers created with the `alloc` instruction.
+
+`LOCAL` SHALL reference the top most _Stackframe_.
+
+If multithreaded, the Call Stack MUST be unique to each _execution loop_.
+
+==== Accumulator
+The Accumulator SHALL be a 64-bit floating point that can be used in any register argument. The location of the Accumulator in instructions is to be defined as `ACCU`.
+
 #pagebreak(weak: true)
 
 = Instructions
