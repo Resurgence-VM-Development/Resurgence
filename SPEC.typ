@@ -6,7 +6,7 @@
 ])
 
 #align(center, text(12pt)[
-  Last edited: May 24th, 2023
+  DRAFT -- Last edited: June 5th, 2023
 ])
 
 #grid(
@@ -508,17 +508,47 @@ Floating point numbers are represented using big endianness.
 === Strings
 Strings are UTF-8 text whose length is described by a leading `u64` value, followed by the raw bytes of the string. Implementations MUST NOT insert or rely on null terminators (0x00) for delimiting the end of strings when representing them in the portable format.
 
-=== Constants
-TODO
+=== Registers <registers>
+Registers are an enumeration type that describes a location in the Virtual Machine's memory. Registers are described by a `u8` "location" field which describes what section of the memory it is stored in, followed by a `u32` "position" field which describes the position of that value in that section of the Virtual Machine's memory. The "Location" field MUST use the following values to describe memory locations:
+#table(
+  columns: 2,
+  [*Location*], [*Value*],
+  [Constant], [01],
+  [Accumulator], [02],
+  [Global Register], [03],
+  [Local Register], [04],
+)
 
-=== Registers
-TODO
+The exact meaning of the "Position" field varies, depending on the Location value. The following table describes the relationship:
+#table(
+  columns: 2,
+  [*Location*], [*Meaning of Position Field*],
+  [Constant], [Corresponds to the the index number of a constant in the bytecode constants table. See #link(<constants_table>,"Constants Table section") for details.],
+  [Accumulator], [Not used. Position field MUST be set to zero.],
+  [Global Register], [Corresponds to a value in the global registers table, created at runtime.],
+  [Local Register], [Corresponds to a value in the local registers table, created at runtime.],
+)
+
 
 === Register References
-TODO
+Register Reference values are used to indicate whether values should be used as-is or de-referenced before use. These values are useful for replicating the functionality of pointers. They consist of a `u8` value which MUST either be `01` for as-is / verbatim use or `02` to enable de-referencing.
 
 === Register Locations
-TODO
+Register Locations are a simple type that describes the location of a section in the Virtual Machine's memory. The meaning of this type MUST be exactly equivalent to the "Location" field in the Register type, but MUST NOT have the corresponding the "position" field. See the #link(<registers>, "Registers section") for details on the exact meaning of the register location field.
+
+=== Constants
+Constants are an enumeration type that describes a hard-coded value in the bytecode's constants section. Constants are described by a `u8` "type" field, followed by its contents, as described in previous sections of this specification. Constants MUST support Integers, Floating Point Numbers, Strings, Booleans, and Registers as the format of its contents. The following table lists the values (formatted as hexadecimals) that MUST be used to describe the supported types:
+#table(
+  columns: 2,
+  [*Type*], [*Value*],
+  [Integer], [01],
+  [Float], [02],
+  [String], [03],
+  [Boolean], [04],
+  [Register], [05],
+)
+
+To describe a Constant containing a String, for example, the constant type field would be set to `03` and would be followed by the String's `u64` length field and its textual contents.
 
 == Bytecode Header
 The Bytecode contains a header before instructions are listed. This header contains the following:
@@ -529,14 +559,14 @@ The Bytecode contains a header before instructions are listed. This header conta
 - Exports table, listing functions that the program implements, as well as the position in the instructions that the function starts at
 
 === Magic Number
-The magic number is a fixed 32-bit value at the beginning of all Bytecode instances. Implementations MUST use the following value: 0x52564D88 (hexadecimal).
+The magic number is a fixed 32-bit value at the beginning of all Bytecode instances. Implementations MUST use the following value: 0x52564D88 (hexadecimal). To ensure stability, implementations MUST check to ensure  that a bytecode instance begins with this value before beginning processing or execution.
 
 === Version Information
 `major_version <u16>, minor_version <u16>`
 
-The version information is expressed as a `u16` major version, followed by a `u16` minor version. This version number is explained in #link(<versioning>,"the Versioning section").
+The version information is expressed as a `u16` major version, followed by a `u16` minor version. This version number is explained in #link(<versioning>,"the Versioning section"). To ensure stability, implementations MUST also check this value to ensure runtime compatibility and prevent undefined behavior from occurring.
 
-=== Constants Table
+=== Constants Table <constants_table>
 `length <u32>, constant <Constant>, ...`
 
 The constants table is expressed as `u32` length value indicating the number of entries in the constants table, followed by Constant objects representing the constant values.
@@ -594,3 +624,6 @@ The instructions type values are listed in the following table. Values are expre
   [GreaterEqual], [13],
   [LessEqual], [14],
 )
+
+
+*NOTE:* Unlike other sections of the bytecode, this section does NOT specify a length field. Implementations MUST read instructions until the read cursor reaches the end of the bytecode. If a given bytecode instance does not have the appropriate length given its instructions, implementations MUST indicate failure in some way.
